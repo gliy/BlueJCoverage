@@ -1,10 +1,12 @@
 package com.bluej.main;
 
-import static com.bluej.main.TestAttacherUtilities.setup;
+import static com.bluej.main.CoverageUtilities.setup;
 import bluej.extensions.BlueJ;
 import bluej.extensions.Extension;
 
-import com.bluej.extension.AttachMenuBuilder;
+import com.bluej.extension.ui.CoverageMenuBuilder;
+import com.bluej.extension.ui.CoveragePreferences;
+import com.bluej.prefs.CoveragePrefManager;
 
 /**
  * TestAttacherExtension serves as an entrance point for the 
@@ -12,7 +14,7 @@ import com.bluej.extension.AttachMenuBuilder;
  * 
  * @author Ian Kingsbury
  */
-public class TestAttacherExtension extends Extension
+public class CodeCoverageExtension extends Extension
 {
     
     /** The Constant NAME. */
@@ -32,8 +34,9 @@ public class TestAttacherExtension extends Extension
     {
 
         setup(bluej);
-        bluej.setMenuGenerator(new AttachMenuBuilder());
-
+        bluej.setPreferenceGenerator(new CoveragePreferences());
+        bluej.setMenuGenerator(new CoverageMenuBuilder());
+        CoveragePrefManager.getPrefs().init(bluej);
     }
 
     @Override

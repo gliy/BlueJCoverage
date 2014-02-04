@@ -5,14 +5,8 @@ import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
 
-import org.jacoco.core.analysis.Analyzer;
-import org.jacoco.core.analysis.CoverageBuilder;
-import org.jacoco.core.data.ExecutionDataStore;
-
 import bluej.extensions.BProject;
 import bluej.extensions.ExtensionException;
-
-import com.bluej.main.TestAttacherUtilities.BClassInfo;
 
 
 /**
@@ -21,7 +15,7 @@ import com.bluej.main.TestAttacherUtilities.BClassInfo;
  * @author Ian
  * 
  */
-public class ClassAttachAction extends AbstractAction
+public class CoverageAction extends AbstractAction
 {
 
 
@@ -40,7 +34,7 @@ public class ClassAttachAction extends AbstractAction
      * @throws ExtensionException
      *             if there is an error getting the editor throws an ExtensionException
      */
-    public ClassAttachAction(Object project)
+    public CoverageAction(Object project)
     {
         super("run");
 

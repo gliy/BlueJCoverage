@@ -1,18 +1,24 @@
-package com.bluej.extension;
+package com.bluej.extension.ui;
 
-import static com.bluej.main.TestAttacherUtilities.get;
-import static com.bluej.main.TestAttacherUtilities.getValidTargets;
+import static com.bluej.main.CoverageUtilities.get;
+import static com.bluej.main.CoverageUtilities.getValidTargets;
+
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.Arrays;
 
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JRootPane;
 
 import bluej.extensions.BClass;
 import bluej.extensions.ExtensionException;
 import bluej.extensions.MenuGenerator;
 
 import com.bluej.codecoverage.BreakoutClassloader;
-import com.bluej.main.TestAttacherUtilities.BClassInfo;
+import com.bluej.extension.CoverageAction;
+import com.bluej.main.CoverageUtilities.BClassInfo;
 
 /**
  * Generates an item on a Class's popup menu when that class is right clicked.
@@ -20,7 +26,7 @@ import com.bluej.main.TestAttacherUtilities.BClassInfo;
  * @author Ian
  * 
  */
-public class AttachMenuBuilder extends MenuGenerator
+public class CoverageMenuBuilder extends MenuGenerator
 {
 
     /** The Constant EMPTY. */
@@ -40,9 +46,13 @@ public class AttachMenuBuilder extends MenuGenerator
 
         // menu to add to the popup
         JMenu menu = null;
-
+        
         try
         {
+           
+           System.out.println(Arrays.toString(((JRootPane)aClass.getPackage().getFrame().getComponents()[0]).getComponents()));
+          
+           if(1==1)return null;
             ClassLoader loader = new BreakoutClassloader(aClass.getPackage()
                 .getProject());
             Object o = loader.loadClass("com.bluej.extension.CoverageRunner")
@@ -117,7 +127,7 @@ public class AttachMenuBuilder extends MenuGenerator
         {
 
         }
-        menu.add(new JMenuItem(new ClassAttachAction(source.getPackage()
+        menu.add(new JMenuItem(new CoverageAction(source.getPackage()
             .getProject())));
         return menu;
     }

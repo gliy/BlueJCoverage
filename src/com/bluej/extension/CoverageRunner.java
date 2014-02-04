@@ -9,9 +9,9 @@ import java.util.Map;
 import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
-import javax.xml.transform.Result;
 
-import junit.framework.TestCase;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 import org.jacoco.core.analysis.Analyzer;
 import org.jacoco.core.analysis.CoverageBuilder;
@@ -23,7 +23,6 @@ import org.jacoco.core.instr.Instrumenter;
 import org.jacoco.core.runtime.IRuntime;
 import org.jacoco.core.runtime.LoggerRuntime;
 import org.jacoco.core.runtime.RuntimeData;
-import org.junit.runner.JUnitCore;
 
 public class CoverageRunner
 {
@@ -55,8 +54,13 @@ public class CoverageRunner
         
         // Here we execute our test target class through its Runnable interface:
         //final TestCase targetInstance = (TestCase) targetClass.newInstance();
-        JUnitCore junit = new JUnitCore();
-        org.junit.runner.Result result = junit.run(targetClass);
+        if(!Test.class.isAssignableFrom(targetClass)) {
+           System.err.println("Not a test");
+           return;
+        }
+        TestSuite suite = new TestSuite();
+        suite.addTest((Test)targetClass.newInstance());
+       // org.junit.runner.Result result = junit.run(targetClass);
        // targetInstance.run();
 
         // At the end of test execution we collect execution data and shutdown
@@ -134,6 +138,9 @@ public class CoverageRunner
 
         private final Map<String, byte[]> definitions = new HashMap<String, byte[]>();
 
+        public MemoryClassLoader() {
+           super(MemoryClassLoader.class.getClassLoader());
+        }
         /**
          * Add a in-memory representation of a class.
          * 
@@ -153,6 +160,7 @@ public class CoverageRunner
             if (bytes != null) {
                 return defineClass(name, bytes, 0, bytes.length);
             }
+           
             return super.loadClass(name, resolve);
         }
 

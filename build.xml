@@ -9,7 +9,6 @@
 	
 	<property name="build.dir" value="build" />
 	<property name="src.dir" value="src" />
-	      <echo>"${project.loc}"</echo>
 	<path id="class.path">
 
 		<pathelement location="bin"/>
@@ -30,6 +29,7 @@
 
 		<copy todir="${build.dir}">
 			<fileset dir="${src.dir}" />
+			<fileset dir="${lib.dir}" />
 		</copy>
 		<javac debug="true" debuglevel="lines,vars,source" destdir="${build.dir}" srcdir="${src.dir}"
 		    source = "1.6"
@@ -46,8 +46,9 @@
       >
 
       </jar>
-	<java jar="F:\Users\Ian\Documents\BluejTest\BlueJ\lib\bluej.jar"
-		jvm="F:\Program Files\Java\jdk1.7.0_40\bin\java.exe" jvmargs="-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=4000,suspend=n" fork="true" >
+<!--  jvmargs="-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=4000,suspend=n" -->
+      	<java jar="F:\Users\Ian\Documents\BluejTest\BlueJ\lib\bluej.jar"
+		jvm="F:\Program Files\Java\jdk1.7.0_40\bin\java.exe" fork="true" >
 
 	</java>
 	</target>

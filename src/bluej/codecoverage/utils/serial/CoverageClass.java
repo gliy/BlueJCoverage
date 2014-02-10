@@ -2,13 +2,19 @@ package bluej.codecoverage.utils.serial;
 
 import java.io.Serializable;
 import java.util.List;
-
+/**
+ * Serializable representation of 
+ * {@linkplain http://www.eclemma.org/jacoco/trunk/doc/api/org/jacoco/core/analysis/IClassCoverage.html}.
+ * 
+ * Can be used by BlueJ extensions that are using the provided ClassLoader.
+ * 
+ * @author Ian
+ * 
+ */
 public class CoverageClass implements Serializable
 {
 
-    /**
-     * 
-     */
+
     private static final long serialVersionUID = -1459075392091370960L;
     private String packageName;
     private String name;

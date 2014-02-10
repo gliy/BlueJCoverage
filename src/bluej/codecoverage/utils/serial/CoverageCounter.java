@@ -1,13 +1,18 @@
 package bluej.codecoverage.utils.serial;
 
 import java.io.Serializable;
-
+/**
+ * Serializable representation of 
+ * {@linkplain http://www.eclemma.org/jacoco/trunk/doc/api/org/jacoco/core/analysis/ICounter.html}.
+ * 
+ * Can be used by BlueJ extensions that are using the provided ClassLoader.
+ * 
+ * @author Ian
+ * 
+ */
 public class CoverageCounter implements Serializable
 {
 
-    /**
-     * 
-     */
     private static final long serialVersionUID = 8372346998202557372L;
     private int covered;
     private int missed;

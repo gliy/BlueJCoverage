@@ -1,14 +1,17 @@
 package bluej.codecoverage;
 
-import java.awt.Component;
+import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
+import java.lang.reflect.Field;
 import java.util.Vector;
 
 import javax.swing.AbstractAction;
+import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
+import javax.swing.text.Element;
 
 import bluej.codecoverage.utils.CoverageUtilities;
 import bluej.codecoverage.utils.serial.CoverageClass;
@@ -79,17 +82,32 @@ public class CoverageAction extends AbstractAction
                     data.add(display);
                 }
                 JFrame display = new JFrame();
-                
+
                 JList<String> list = new JList<String>(data);
-                display.add(new JScrollPane(list ));
+                display.add(new JScrollPane(list));
                 list.setVisibleRowCount(30);
                 display.pack();
-                
+
                 display.setTitle("Coverage for " + bClass.getName());
-                display.setLocationRelativeTo(bClass.getPackage().getFrame());
+                display.setLocationRelativeTo(bClass.getPackage()
+                    .getFrame());
                 display.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
                 display.setVisible(true);
             }
+            Field editorFrame = bClass.getEditor().getClass().getDeclaredField("bjEditor");
+            editorFrame.setAccessible(true);;
+            JFrame frame = (JFrame)editorFrame.get(bClass.getEditor());
+            BorderLayout border = (BorderLayout)(frame.getContentPane().getLayout());
+            JScrollPane src = (JScrollPane)border.getLayoutComponent(BorderLayout.CENTER);
+            JEditorPane editorPane = (JEditorPane) src.getViewport().getView();
+            System.out.println(editorPane.getComponentCount());
+          //  editorPane.getDocument().
+            for(Element ele:editorPane.getDocument().getRootElements()){
+               // System.out.println(ele.getAttributes().);
+            }
+            
+            frame.setVisible(true);
+            
         }
         catch (Exception ex)
         {

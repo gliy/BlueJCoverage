@@ -22,17 +22,17 @@ import bluej.extensions.event.ExtensionEvent;
 import bluej.extensions.event.ExtensionEventListener;
 
 /**
- * TestAttacherExtension serves as an entrance point for the 
- * Extension, allowing BlueJ to load it.
+ * TestAttacherExtension serves as an entrance point for the Extension, allowing BlueJ to
+ * load it.
  * 
  * @author Ian Kingsbury
  */
 public class CodeCoverageExtension extends Extension
 {
-    
+
     /** The Constant NAME. */
     private static final String NAME = "Test Attacher";
-    
+
     /** The Constant VERSION. */
     private static final String VERSION = "1.0";
 
@@ -46,24 +46,29 @@ public class CodeCoverageExtension extends Extension
     public void startup(BlueJ bluej)
     {
 
-       
-        CoverageUtilities.create(bluej);
-        bluej.setPreferenceGenerator(new CoveragePreferences(bluej));
-        bluej.setMenuGenerator(new CoverageMenuBuilder());
-        CoveragePrefManager.getPrefs().init(bluej);
-        bluej.addExtensionEventListener(new ExtensionEventListener()
+        try
         {
-            
-            @Override
-            public void eventOccurred(ExtensionEvent event)
+            CoverageUtilities.create(bluej);
+            bluej.setPreferenceGenerator(new CoveragePreferences(bluej));
+            bluej.setMenuGenerator(new CoverageMenuBuilder());
+            CoveragePrefManager.getPrefs()
+                .init(bluej);
+            bluej.addExtensionEventListener(new ExtensionEventListener()
             {
-                System.out.println(event.toString());
-            }
-        });
+
+                @Override
+                public void eventOccurred(ExtensionEvent event)
+                {
+                    System.out.println(event.toString());
+                }
+            });
+        }
+        catch (IOException ex)
+        {
+            ex.printStackTrace();
+        }
         // ClassAttachAction(aClass.getPackage().getProject()).actionPerformed(null);
-      
-   
-        
+
     }
 
     @Override
@@ -83,7 +88,6 @@ public class CodeCoverageExtension extends Extension
     {
         return NAME;
     }
-
 
     @Override
     public String getDescription()

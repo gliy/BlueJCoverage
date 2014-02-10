@@ -2,6 +2,15 @@ package bluej.codecoverage.utils.serial;
 
 import java.io.Serializable;
 
+/**
+ * Serializable representation of 
+ * {@linkplain http://www.eclemma.org/jacoco/trunk/doc/api/org/jacoco/core/analysis/ILine.html}.
+ * 
+ * Can be used by BlueJ extensions that are using the provided ClassLoader.
+ * 
+ * @author Ian
+ * 
+ */
 public class CoverageLine implements Serializable
 {
 

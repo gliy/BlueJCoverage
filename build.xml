@@ -48,7 +48,8 @@
       </jar>
 <!--  jvmargs="-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=4000,suspend=n" -->
       	<java jar="F:\Users\Ian\Documents\BluejTest\BlueJ\lib\bluej.jar"
-		jvm="F:\Program Files\Java\jdk1.7.0_40\bin\java.exe" fork="true" >
+		jvm="F:\Program Files\Java\jdk1.7.0_40\bin\java.exe" jvmargs="-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=4000,suspend=n"
+		 fork="true" >
 
 	</java>
 	</target>

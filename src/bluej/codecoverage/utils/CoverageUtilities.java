@@ -102,6 +102,15 @@ public final class CoverageUtilities
         return utils;
     }
 
+    public void clearResults() {
+        try{
+            Method clearMethod = coverageListener.getClass()
+                .getDeclaredMethod("clearResults");
+            clearMethod.invoke(coverageListener);
+        }catch(Exception e) {
+            e.printStackTrace();
+        }
+    }
     public Collection<CoverageClass> getResults(File file)
     {
         ObjectInputStream input = null;
@@ -109,7 +118,7 @@ public final class CoverageUtilities
         try
         {
             Method resultsMethod = coverageListener.getClass()
-                .getMethod("getResults", File.class);
+                .getDeclaredMethod("getResults", File.class);
             input = (ObjectInputStream) resultsMethod.invoke(coverageListener,
                 file);
             Object readIn;

@@ -6,11 +6,12 @@ import java.util.List;
 import org.jacoco.core.analysis.IClassCoverage;
 import org.jacoco.core.analysis.ICounter;
 import org.jacoco.core.analysis.ILine;
+import org.jacoco.core.analysis.ISourceNode;
 
 public class CoverageBridge
 {
 
-    public static CoverageClass toSerializable(IClassCoverage clz) {
+    public static CoverageClass toSerializable(ISourceNode clz) {
         List<CoverageLine> lines = new ArrayList<CoverageLine>();
         int first = clz.getFirstLine();
         int last = clz.getLastLine();
@@ -25,7 +26,7 @@ public class CoverageBridge
         rtn.setFirstLine(first);
         rtn.setLastLine(last);
         rtn.setName(clz.getName());
-        rtn.setPackageName(clz.getPackageName());
+    ///    rtn.setPackageName(clz.getPackageName());
         
         return rtn;
     }
@@ -34,6 +35,7 @@ public class CoverageBridge
     {
         ICounter branch = line.getBranchCounter();
         int status = line.getStatus();
+       
         return new CoverageLine(status, new CoverageCounter(
             branch.getCoveredCount(), branch.getMissedCount(),
             branch.getTotalCount(), branch.getStatus()));

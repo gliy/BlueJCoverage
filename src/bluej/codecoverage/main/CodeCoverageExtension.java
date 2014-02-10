@@ -50,7 +50,7 @@ public class CodeCoverageExtension extends Extension
         {
             CoverageUtilities.create(bluej);
             bluej.setPreferenceGenerator(new CoveragePreferences(bluej));
-            bluej.setMenuGenerator(new CoverageMenuBuilder());
+            bluej.setMenuGenerator(new CoverageMenuBuilder(bluej));
             CoveragePrefManager.getPrefs()
                 .init(bluej);
             bluej.addExtensionEventListener(new ExtensionEventListener()

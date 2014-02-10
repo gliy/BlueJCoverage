@@ -18,6 +18,7 @@ public class CoverageLine implements Serializable
     private static final long serialVersionUID = -3807095603496099416L;
     private int status;
     private CoverageCounter branchCounter;
+ 
     public CoverageLine(int status, CoverageCounter branchCounter)
     {
         this.status = status;

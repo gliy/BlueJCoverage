@@ -1,19 +1,16 @@
 package bluej.codecoverage.ui;
 
-import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.Frame;
 
+import javax.swing.Action;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
+import javax.swing.JSeparator;
 
 import bluej.codecoverage.CoverageAction;
-import bluej.codecoverage.utils.CoverageUtilities;
-import bluej.codecoverage.utils.serial.CoverageClass;
-import bluej.codecoverage.utils.serial.CoverageLine;
+import bluej.codecoverage.CoverageInvokationListener;
 import bluej.extensions.BClass;
-import bluej.extensions.ExtensionException;
+import bluej.extensions.BlueJ;
 import bluej.extensions.MenuGenerator;
 
 /**
@@ -24,6 +21,13 @@ import bluej.extensions.MenuGenerator;
  */
 public class CoverageMenuBuilder extends MenuGenerator
 {
+
+    private BlueJ bluej;
+
+    public CoverageMenuBuilder(BlueJ bluej)
+    {
+        this.bluej = bluej;
+    }
 
     /**
      * Generates the menu for attachment if there are valid targets.
@@ -36,8 +40,43 @@ public class CoverageMenuBuilder extends MenuGenerator
     @Override
     public JMenuItem getClassMenuItem(final BClass aClass)
     {
+        return new JMenu("Run Coverage");// new CoverageAction(aClass)
+    }
 
-       return new JMenuItem(new CoverageAction(aClass));
+    @Override
+    public void notifyPostClassMenu(BClass bc, JMenuItem jmi)
+    {
+        JMenu menu = (JMenu) jmi;
+        int count = 0;
+        int seperatorCount = 0;
+        Component[] comps = jmi.getParent()
+            .getComponents();
+        while (count < comps.length && seperatorCount < 2)
+        {
+            Component cur = comps[count++];
+            if (cur instanceof JSeparator)
+            {
+                seperatorCount++;
+            }
+            else if (cur instanceof JMenuItem)
+            {
+                menu.add(clone(bc, (JMenuItem) cur));
+            }
+        }
+        
+        super.notifyPostClassMenu(bc, jmi);
+    }
+
+    private JMenuItem clone(BClass clz, JMenuItem toClone)
+    {
+        JMenuItem item = new JMenuItem();
+        CoverageAction action = new CoverageAction(toClone.getAction(),
+            toClone.getText(), clz, bluej);
+        item.setAction(action);
+        item.setActionCommand(toClone.getActionCommand());
+        item.setActionMap(toClone.getActionMap());
+       
+        return item;
     }
 
 }

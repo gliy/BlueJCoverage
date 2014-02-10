@@ -14,6 +14,7 @@ import java.net.Socket;
 import org.jacoco.core.analysis.Analyzer;
 import org.jacoco.core.analysis.CoverageBuilder;
 import org.jacoco.core.analysis.IClassCoverage;
+import org.jacoco.core.analysis.ISourceFileCoverage;
 import org.jacoco.core.data.ExecutionData;
 import org.jacoco.core.data.ExecutionDataStore;
 import org.jacoco.core.data.SessionInfoStore;
@@ -67,6 +68,9 @@ public class CoverageListener
     public ObjectInputStream getResults(File file) {
         return current.getResults(file);
     }
+    public void clearResults() {
+        current.clearResults();
+    }
 
     private static class Handler implements Runnable {
 
@@ -103,6 +107,20 @@ public class CoverageListener
             }
         }
 
+        public void clearResults() {
+            if(socket.isConnected()) {
+                System.out.println("Dump requested");
+                try
+                {
+                    trigger.visitDumpCommand(false, true);
+                }
+                catch (IOException e)
+                {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+        }
         public ObjectInputStream getResults(File file) {
             try
             {
@@ -135,7 +153,8 @@ public class CoverageListener
                             try {
                                 ObjectOutputStream outputStream = new ObjectOutputStream(outPipe);
                                 System.out.println(coverageBuilder.getClasses().size());
-                                for(IClassCoverage coverage : coverageBuilder.getClasses()) {
+                                
+                                for(ISourceFileCoverage coverage : coverageBuilder.getSourceFiles()) {
                                     System.out.println("sending " + coverage.getName() + "," + coverage.getFirstLine());
                                     outputStream.writeObject(CoverageBridge.toSerializable(coverage));
                                 }

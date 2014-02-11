@@ -15,6 +15,12 @@ import javax.swing.ImageIcon;
 import bluej.codecoverage.utils.CoverageUtilities.ClassLocation;
 import bluej.extensions.BlueJ;
 
+/**
+ * Manages any external resources used when displaying the coverage report,
+ *  or determining what to coverage information to collect.
+ * @author ikingsbu
+ *
+ */
 public class CoveragePrefManager
 {
     private static CoveragePrefManager prefs;

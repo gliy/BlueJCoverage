@@ -34,12 +34,11 @@ public class CoverageMenuBuilder extends MenuGenerator
     }
 
     /**
-     * Generates the menu for attachment if there are valid targets.
+     * Generates a base menu for the coverage plugin, the option list
+     * is populated when the context menu is shown.
      * 
-     * @param aClass
-     *            the class the popupmenu is for
-     * @return the generated menu or null if there are no targets
-     * @see bluej.extensions.MenuGenerator#getClassMenuItem(bluej.extensions.BClass)
+     * @param aClass class that the menu is for.
+     * @return skeleton menu
      */
     @Override
     public JMenuItem getClassMenuItem(final BClass aClass)

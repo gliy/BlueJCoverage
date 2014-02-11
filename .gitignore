@@ -1,6 +1,9 @@
+.classpath
+.checkstyle
 bin/*
 *.class
 .project
 .settings/*
 build/*
 *.html
+/bin

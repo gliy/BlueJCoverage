@@ -27,9 +27,9 @@ import bluej.extensions.PackageNotFoundException;
 import bluej.extensions.ProjectNotOpenException;
 
 /**
- * Utiltiy Class that controls all interaction with the properties file. This handles
- * what classes are valid targets, setting targets, reloading, and saving of the
- * properties.
+ * Utiltiy Class that controls all interactions that might be needed by multiple classes.
+ * This includes setting up the jacocoagent, reading the properties file,
+ * and gathering the results from the agent.
  * 
  * @author Ian
  */

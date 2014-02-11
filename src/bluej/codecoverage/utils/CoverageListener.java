@@ -28,6 +28,16 @@ import org.objectweb.asm.ClassReader;
 
 import bluej.codecoverage.utils.serial.CoverageBridge;
 
+/**
+ * Backend for collecting coverage information from the java agent.
+ * This class triggers a dump of all collected coverage information when requested,
+ * serializes it, then returns an objectinputstream to the caller to deserialize the data.
+ * 
+ * @see CoverageBridge
+ * 
+ * @author ikingsbu
+ *
+ */
 public class CoverageListener
 {
 

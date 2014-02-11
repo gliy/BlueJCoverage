@@ -44,6 +44,10 @@ import bluej.extensions.ProjectNotOpenException;
 import bluej.extensions.editor.Editor;
 import bluej.extensions.editor.TextLocation;
 
+/**
+ * Main display for the results of the code coverage.
+ * @author Ian
+ */
 public class CoverageReportFrame extends JFrame
 {
     private List<BCoveragePackage> coverage;

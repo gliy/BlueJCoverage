@@ -1,22 +1,39 @@
 package bluej.codecoverage.ui;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Point;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextPane;
+import javax.swing.JTree;
+import javax.swing.UIManager;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.TreeSelectionModel;
 
+import bluej.codecoverage.utils.join.BCoverageClass;
+import bluej.codecoverage.utils.join.BCoverageInformation;
+import bluej.codecoverage.utils.join.BCoveragePackage;
 import bluej.codecoverage.utils.serial.CoverageClass;
+import bluej.codecoverage.utils.serial.CoverageCounter;
 import bluej.codecoverage.utils.serial.CoverageCounterValue;
 import bluej.extensions.BClass;
 import bluej.extensions.PackageNotFoundException;
@@ -26,58 +43,198 @@ import bluej.extensions.editor.TextLocation;
 
 public class CoverageReportFrame extends JFrame
 {
+    private List<BCoveragePackage> coverage;
+    private JTabbedPane tabs;
+    private CoverageOverviewPane overview;
+    private JTree tree;
+    private Map<Class<?>, JScrollPane> classToDisplay;
 
-    public CoverageReportFrame(Map<BClass, CoverageClass> classesCovered) throws ProjectNotOpenException, PackageNotFoundException, BadLocationException {
+    public CoverageReportFrame(List<BCoveragePackage> classesCovered)
+        throws ProjectNotOpenException, PackageNotFoundException,
+        BadLocationException
+    {
 
-
-
-        generateDisplay(classesCovered);
-        pack();
+        this.coverage = classesCovered;
+        generateTabs();
+        // generateDisplay(classesCovered);
+        // pack();
+        setSize(700, 500);
         setTitle("Coverage Report");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     }
-    private void generateDisplay(Map<BClass, CoverageClass> classesCovered) throws BadLocationException, ProjectNotOpenException, PackageNotFoundException {
-        JTabbedPane allCoverageClasses = new JTabbedPane();
-        
-        for (Entry<BClass, CoverageClass> coverageInfo : classesCovered.entrySet())
+
+    private void generateTabs()
+    {
+        classToDisplay = new HashMap<Class<?>, JScrollPane>();
+        tabs = new JTabbedPane();
+        add(tabs, BorderLayout.CENTER);
+        overview = new CoverageOverviewPane();
+        tree = overview.getTree();
+        JScrollPane pane = new JScrollPane(tree);
+        pane.setPreferredSize(new Dimension(getWidth(), 100));
+        add(pane, BorderLayout.SOUTH);
+        tree.addTreeSelectionListener(new TreeListener());
+    }
+
+    private void bringUpTab(BCoverageClass clz)
+    {
+        try
         {
-            CoverageClass clz =coverageInfo.getValue();
-            BClass bclz = coverageInfo.getKey();
-            System.out.println(clz.getName());
-            System.out.println("\t" + clz.getFirstLine() + ","
-                + clz.getLastLine());
-            
-            JTextPane textPane = new JTextPane();
-            StyledDocument doc = textPane.getStyledDocument();
-            Editor editor = bclz.getEditor();
-            Map<Integer, AttributeSet> lineToStyle = createStyleMap(clz);
-
-            for (int line = 0; line < editor.getLineCount(); line++)
-            {
-
-
-                String sourceCode = editor.getText(
-                    new TextLocation(line, 0), new TextLocation(line,
-                        editor.getLineLength(line) - 1));
-                AttributeSet style = lineToStyle.get(line);
-                doc.insertString(doc.getLength(), line  + ": "+ sourceCode + "\n",
-                    style);
-
+            BClass bclass = clz.getBclass();
+            JScrollPane existingDisplay = classToDisplay.get(bclass.getJavaClass());
+            if(existingDisplay == null) {
+                existingDisplay = new JScrollPane(new CoverageClassDisplay(clz));
+                classToDisplay.put(bclass.getJavaClass(), existingDisplay);
+                
+                tabs.add(existingDisplay, bclass.getName());
             }
-            allCoverageClasses.add(bclz.getName(), new JScrollPane(textPane));
-            textPane.setEditable(false);
-            /*
-             * //testing Field editorFrame =
-             * bClass.getEditor().getClass().getDeclaredField("bjEditor");
-             * editorFrame.setAccessible(true); JFrame frame =
-             * (JFrame)editorFrame.get(bClass.getEditor()); BorderLayout border =
-             * (BorderLayout)(frame.getContentPane().getLayout()); JScrollPane src =
-             * (JScrollPane)border.getLayoutComponent(BorderLayout.CENTER);
-             * JEditorPane editorPane = (JEditorPane) src.getViewport().getView();
-             * Document moeDoc = editorPane.getDocument();
-             */
+            tabs.setSelectedComponent(existingDisplay);
         }
-        add(allCoverageClasses);
+        catch (Exception e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+       
+    }
+
+    class TreeListener implements TreeSelectionListener
+    {
+
+        @Override
+        public void valueChanged(TreeSelectionEvent e)
+        {
+            DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
+            if (selectedNode.getUserObject() instanceof BCoverageClass)
+            {
+                BCoverageClass bClassInfo = (BCoverageClass) selectedNode.getUserObject();
+                bringUpTab(bClassInfo);
+            }
+        }
+    }
+
+    class CoverageOverviewPane
+    {
+        private JTree tree;
+
+        public CoverageOverviewPane()
+        {
+            super();
+            UIManager.put("ProgressBar.foreground", new Color(58, 242, 70)); // green
+            UIManager.put("ProgressBar.selectionForeground", Color.BLACK);
+
+            DefaultMutableTreeNode root = new DefaultMutableTreeNode("All");
+            for (BCoveragePackage pack : coverage)
+            {
+                root.add(createNode(pack));
+            }
+
+            tree = new JTree(root);
+            tree.setRootVisible(false);
+            tree.setRowHeight(tree.getRowHeight() + 10);
+            DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer()
+            {
+                @Override
+                public Component getTreeCellRendererComponent(JTree tree,
+                    Object value, boolean selected, boolean expanded,
+                    boolean leaf, int row, boolean hasFocus)
+                {
+                    Component defaultDisplay = super.getTreeCellRendererComponent(
+                        tree, value, selected, expanded, leaf, row, hasFocus);
+                    Object treeNode = ((DefaultMutableTreeNode) value).getUserObject();
+
+                    if (treeNode instanceof BCoverageInformation)
+                    {
+
+                        JPanel rtn = new JPanel();
+                        BCoverageInformation info = (BCoverageInformation) treeNode;
+                        setText(info.getName());
+
+                        CoverageCounter counter = info.getObjectCoverage();
+                        JProgressBar progress = new JProgressBar(0,
+                            counter.getTotal());
+                        progress.setValue(counter.getCovered());
+
+                        progress.setStringPainted(true);
+                        rtn.add(this);
+                        rtn.add(progress);
+                        rtn.setBackground(Color.WHITE);
+                        return rtn;
+                    }
+                    else
+                    {
+                        return defaultDisplay;
+                    }
+
+                }
+            };
+            tree.getSelectionModel()
+                .setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+            tree.setToggleClickCount(1);
+
+            tree.setCellRenderer(renderer);
+        }
+
+        public JTree getTree()
+        {
+
+            return tree;
+        }
+
+        private DefaultMutableTreeNode createNode(BCoverageInformation pack)
+        {
+            DefaultMutableTreeNode packNode = new DefaultMutableTreeNode(pack);
+            if (pack instanceof BCoveragePackage)
+            {
+                for (BCoverageClass clz : ((BCoveragePackage) pack).getChildren())
+                {
+                    packNode.add(createNode(clz));
+                }
+            }
+            return packNode;
+        }
+    }
+}
+
+class CoverageClassDisplay extends JTextPane
+{
+    private BCoverageClass coverage;
+
+    public CoverageClassDisplay(BCoverageClass coverage)
+        throws ProjectNotOpenException, PackageNotFoundException,
+        BadLocationException
+    {
+        super();
+        this.coverage = coverage;
+        generateDisplay();
+    }
+
+    private void generateDisplay() throws BadLocationException,
+        ProjectNotOpenException, PackageNotFoundException
+    {
+
+        CoverageClass clz = coverage.getClassCoverage();
+        BClass bclz = coverage.getBclass();
+        System.out.println(clz.getName());
+        System.out.println("\t" + clz.getFirstLine() + "," + clz.getLastLine());
+
+        StyledDocument doc = getStyledDocument();
+        Editor editor = bclz.getEditor();
+        Map<Integer, AttributeSet> lineToStyle = createStyleMap(clz);
+
+        for (int line = 0; line < editor.getLineCount(); line++)
+        {
+
+            String sourceCode = editor.getText(new TextLocation(line, 0),
+                new TextLocation(line, editor.getLineLength(line) - 1));
+            AttributeSet style = lineToStyle.get(line);
+            doc.insertString(doc.getLength(), line + ": " + sourceCode + "\n",
+                style);
+
+        }
+        setCaretPosition(0);
+        setEditable(false);
+
     }
 
     private Map<Integer, AttributeSet> createStyleMap(CoverageClass clz)
@@ -102,7 +259,8 @@ public class CoverageReportFrame extends JFrame
         return lineToStyle;
     }
 
-    private static void getStyle(MutableAttributeSet style, CoverageCounterValue value)
+    private static void getStyle(MutableAttributeSet style,
+        CoverageCounterValue value)
     {
         switch (value) {
             case FULLY_COVERED:
@@ -120,4 +278,5 @@ public class CoverageReportFrame extends JFrame
                 break;
         }
     }
+
 }

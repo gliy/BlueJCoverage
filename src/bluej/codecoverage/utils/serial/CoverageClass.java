@@ -20,12 +20,23 @@ public class CoverageClass implements Serializable
     private String name;
 
     private List<CoverageLine> lineCounter;
+    private CoverageCounter totalCoverage;
     private int firstLine;
     private int lastLine;
 
     public CoverageClass()
     {
         
+    }
+
+    public CoverageCounter getTotalCoverage()
+    {
+        return totalCoverage;
+    }
+
+    public void setTotalCoverage(CoverageCounter totalCoverage)
+    {
+        this.totalCoverage = totalCoverage;
     }
 
     public List<CoverageLine> getLineCounter()

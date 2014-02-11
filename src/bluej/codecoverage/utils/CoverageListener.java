@@ -13,8 +13,10 @@ import java.net.Socket;
 
 import org.jacoco.core.analysis.Analyzer;
 import org.jacoco.core.analysis.CoverageBuilder;
+import org.jacoco.core.analysis.IBundleCoverage;
 import org.jacoco.core.analysis.IClassCoverage;
 import org.jacoco.core.analysis.ICounter;
+import org.jacoco.core.analysis.IPackageCoverage;
 import org.jacoco.core.analysis.ISourceFileCoverage;
 import org.jacoco.core.data.ExecutionData;
 import org.jacoco.core.data.ExecutionDataStore;
@@ -148,8 +150,9 @@ public class CoverageListener
                             try {
                                 ObjectOutputStream outputStream = new ObjectOutputStream(outPipe);
                                 System.out.println(coverageBuilder.getClasses().size());
-                                
-                                for(IClassCoverage coverage : coverageBuilder.getClasses()) {
+                                IBundleCoverage bundle = coverageBuilder.getBundle("Run");
+                                for (IPackageCoverage coverage : bundle.getPackages())
+                                {
                                     outputStream.writeObject(CoverageBridge.toSerializable(coverage));
                                 }
                                 outputStream.writeObject(null);

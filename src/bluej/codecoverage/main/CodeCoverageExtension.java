@@ -7,6 +7,7 @@ import java.awt.Frame;
 import java.io.IOException;
 
 import javax.swing.JButton;
+import javax.swing.UIManager;
 
 import bluej.codecoverage.pref.CoveragePrefManager;
 import bluej.codecoverage.ui.CoverageMenuBuilder;
@@ -48,6 +49,7 @@ public class CodeCoverageExtension extends Extension
 
         try
         {
+           
             CoverageUtilities.create(bluej);
             bluej.setPreferenceGenerator(new CoveragePreferences(bluej));
             bluej.setMenuGenerator(new CoverageMenuBuilder(bluej));

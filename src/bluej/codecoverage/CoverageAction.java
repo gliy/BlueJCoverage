@@ -1,9 +1,8 @@
 package bluej.codecoverage;
 
 import java.awt.event.ActionEvent;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -13,7 +12,10 @@ import javax.swing.JFrame;
 
 import bluej.codecoverage.ui.CoverageReportFrame;
 import bluej.codecoverage.utils.CoverageUtilities;
+import bluej.codecoverage.utils.join.BCoverageClass;
+import bluej.codecoverage.utils.join.BCoveragePackage;
 import bluej.codecoverage.utils.serial.CoverageClass;
+import bluej.codecoverage.utils.serial.CoveragePackage;
 import bluej.extensions.BClass;
 import bluej.extensions.BPackage;
 import bluej.extensions.BProject;
@@ -66,36 +68,51 @@ public class CoverageAction extends AbstractAction implements Observer
         CoverageUtilities utils = CoverageUtilities.get();
         utils.clearResults();
         wrap.actionPerformed(anEvent);
-        CoverageInvokationListener.setup(bClass, bluej)
-            .addObserver(this);
+        CoverageInvokationListener listener = CoverageInvokationListener.setup(
+            bClass, bluej);
+        listener.deleteObservers();
+        listener.addObserver(this);
 
     }
 
     @Override
     public void update(Observable o, Object arg)
     {
-        try{
-        @SuppressWarnings("unchecked")
-        List<CoverageClass> coverage = (List<CoverageClass>) arg;
-        Map<BClass, CoverageClass> bclassToCoverage = new HashMap<BClass, CoverageClass>();
-        BProject[] allProjects = bluej.getOpenProjects();
-        for(BProject project : allProjects) {
-            for (CoverageClass coverageClass : coverage)
+        try
+        {
+            @SuppressWarnings("unchecked")
+            List<CoveragePackage> coverage = (List<CoveragePackage>) arg;
+            List<BCoveragePackage> bcoverage = new ArrayList<BCoveragePackage>();
+
+            BProject[] allProjects = bluej.getOpenProjects();
+            for (CoveragePackage coveragePkg : coverage)
             {
-                BPackage bpack = project.getPackage(coverageClass.getPackageName());
-                if(bpack != null) {
-                    BClass foundClass = bpack.getBClass(coverageClass.getName());
-                    if(foundClass != null) {
-                        bclassToCoverage.put(foundClass, coverageClass);
+                BCoveragePackage found = null;
+                for (BProject project : allProjects)
+                {
+
+                    BPackage bpack = project.getPackage(coveragePkg.getName());
+                    if (bpack != null)
+                    {
+                        found = new BCoveragePackage(bpack, coveragePkg);
+                        for (CoverageClass coverageClz : coveragePkg.getClassCoverageInfo())
+                        {
+                            new BCoverageClass(
+                                bpack.getBClass(coverageClz.getName()),
+                                coverageClz, found);
+                        }
+                        bcoverage.add(found);
+                        break;
                     }
                 }
             }
+            JFrame report = new CoverageReportFrame(bcoverage);
+            report.setLocationRelativeTo(bluej.getCurrentFrame());
+
+            report.setVisible(true);
         }
-        JFrame report = new CoverageReportFrame(bclassToCoverage);
-        report.setLocationRelativeTo(bluej.getCurrentFrame());
-        
-        report.setVisible(true);
-        }catch(Exception e) {
+        catch (Exception e)
+        {
             e.printStackTrace();
         }
     }

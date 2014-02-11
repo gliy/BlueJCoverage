@@ -5,7 +5,6 @@ package bluej.codecoverage.utils;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,6 +20,7 @@ import java.util.Properties;
 import javax.swing.JOptionPane;
 
 import bluej.codecoverage.utils.serial.CoverageClass;
+import bluej.codecoverage.utils.serial.CoveragePackage;
 import bluej.extensions.BlueJ;
 import bluej.extensions.ExtensionUnloadedException;
 import bluej.extensions.PackageNotFoundException;
@@ -111,10 +111,10 @@ public final class CoverageUtilities
             e.printStackTrace();
         }
     }
-    public Collection<CoverageClass> getResults(File file)
+    public Collection<CoveragePackage> getResults(File file)
     {
         ObjectInputStream input = null;
-        List<CoverageClass> rtn = new ArrayList<CoverageClass>();
+        List<CoveragePackage> rtn = new ArrayList<CoveragePackage>();
         try
         {
             Method resultsMethod = coverageListener.getClass()
@@ -124,7 +124,7 @@ public final class CoverageUtilities
             Object readIn;
             while ((readIn = input.readObject()) != null)
             {
-                rtn.add((CoverageClass)readIn);
+                rtn.add((CoveragePackage)readIn);
             }
         }
         catch (Exception e)

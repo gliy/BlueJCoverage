@@ -14,6 +14,7 @@ import java.net.Socket;
 import org.jacoco.core.analysis.Analyzer;
 import org.jacoco.core.analysis.CoverageBuilder;
 import org.jacoco.core.analysis.IClassCoverage;
+import org.jacoco.core.analysis.ICounter;
 import org.jacoco.core.analysis.ISourceFileCoverage;
 import org.jacoco.core.data.ExecutionData;
 import org.jacoco.core.data.ExecutionDataStore;
@@ -136,15 +137,9 @@ public class CoverageListener
                     final PipedOutputStream outPipe = new PipedOutputStream(inPipe);
                     final CoverageBuilder coverageBuilder = new CoverageBuilder();
                     final Analyzer analyzer = new Analyzer(executionData, coverageBuilder);
-                    System.out.println(new File("").getAbsolutePath());
-                   
-                    for (ExecutionData exeData : executionData.getContents())
-                    {
-                       
-                    }
-                    System.out.println("!");
                     analyzer.analyzeAll(file);
                     new Thread(new Runnable()
+                    
                     {
                         
                         @Override
@@ -154,8 +149,7 @@ public class CoverageListener
                                 ObjectOutputStream outputStream = new ObjectOutputStream(outPipe);
                                 System.out.println(coverageBuilder.getClasses().size());
                                 
-                                for(ISourceFileCoverage coverage : coverageBuilder.getSourceFiles()) {
-                                    System.out.println("sending " + coverage.getName() + "," + coverage.getFirstLine());
+                                for(IClassCoverage coverage : coverageBuilder.getClasses()) {
                                     outputStream.writeObject(CoverageBridge.toSerializable(coverage));
                                 }
                                 outputStream.writeObject(null);

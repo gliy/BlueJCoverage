@@ -1,28 +1,24 @@
 package bluej.codecoverage;
 
-import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
-import java.lang.reflect.Field;
-import java.util.Vector;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Observable;
+import java.util.Observer;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.JEditorPane;
 import javax.swing.JFrame;
-import javax.swing.JList;
-import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
-import javax.swing.text.Element;
 
+import bluej.codecoverage.ui.CoverageReportFrame;
 import bluej.codecoverage.utils.CoverageUtilities;
 import bluej.codecoverage.utils.serial.CoverageClass;
-import bluej.codecoverage.utils.serial.CoverageCounterValue;
-import bluej.codecoverage.utils.serial.CoverageLine;
 import bluej.extensions.BClass;
+import bluej.extensions.BPackage;
+import bluej.extensions.BProject;
 import bluej.extensions.BlueJ;
 import bluej.extensions.ExtensionException;
-import bluej.extensions.event.InvocationEvent;
-import bluej.extensions.event.InvocationListener;
 
 /**
  * Performs the attach action when a choice is selected.
@@ -30,13 +26,13 @@ import bluej.extensions.event.InvocationListener;
  * @author Ian
  * 
  */
-public class CoverageAction extends AbstractAction 
+public class CoverageAction extends AbstractAction implements Observer
 {
 
-  
     private Action wrap;
     private BClass bClass;
     private BlueJ bluej;
+
     /**
      * Constructs the action to be executed when the menu item is pressed. Sets the text
      * for the action in the menu to be the class name of the unit test provided.
@@ -70,12 +66,38 @@ public class CoverageAction extends AbstractAction
         CoverageUtilities utils = CoverageUtilities.get();
         utils.clearResults();
         wrap.actionPerformed(anEvent);
-        CoverageInvokationListener.setup(bClass, bluej);
-       
+        CoverageInvokationListener.setup(bClass, bluej)
+            .addObserver(this);
+
     }
 
-   
-
-   
+    @Override
+    public void update(Observable o, Object arg)
+    {
+        try{
+        @SuppressWarnings("unchecked")
+        List<CoverageClass> coverage = (List<CoverageClass>) arg;
+        Map<BClass, CoverageClass> bclassToCoverage = new HashMap<BClass, CoverageClass>();
+        BProject[] allProjects = bluej.getOpenProjects();
+        for(BProject project : allProjects) {
+            for (CoverageClass coverageClass : coverage)
+            {
+                BPackage bpack = project.getPackage(coverageClass.getPackageName());
+                if(bpack != null) {
+                    BClass foundClass = bpack.getBClass(coverageClass.getName());
+                    if(foundClass != null) {
+                        bclassToCoverage.put(foundClass, coverageClass);
+                    }
+                }
+            }
+        }
+        JFrame report = new CoverageReportFrame(bclassToCoverage);
+        report.setLocationRelativeTo(bluej.getCurrentFrame());
+        
+        report.setVisible(true);
+        }catch(Exception e) {
+            e.printStackTrace();
+        }
+    }
 
 }

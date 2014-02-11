@@ -127,6 +127,13 @@ public class CoverageReportFrame extends JFrame
         }
     }
 
+    /**
+     * Displays an overview of the code coverage for a class in
+     *  a tree structure. Allows the user to click on an item in the tree to open
+     *  an editor with the source code.
+     * @author ikingsbu
+     *
+     */
     class CoverageOverviewPane
     {
         private JTree tree;
@@ -226,7 +233,11 @@ public class CoverageReportFrame extends JFrame
         
     }
 }
-
+/**
+ * Displays the source code for a file with the coverage information overlayed.
+ * @author ikingsbu
+ *
+ */
 class CoverageClassDisplay extends JTextPane
 {
     private BCoverageClass coverage;

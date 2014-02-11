@@ -5,10 +5,15 @@ import java.util.List;
 
 import org.jacoco.core.analysis.IClassCoverage;
 import org.jacoco.core.analysis.ICounter;
-import org.jacoco.core.analysis.ICounter.CounterValue;
 import org.jacoco.core.analysis.ILine;
 import org.jacoco.core.analysis.IPackageCoverage;
 
+/**
+ * Extracts needed information from Jacoco's coverage, and turns it into 
+ * a serializable representation.
+ * @author ikingsbu
+ *
+ */
 public class CoverageBridge
 {
 

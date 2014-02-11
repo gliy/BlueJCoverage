@@ -124,6 +124,7 @@ public class CoverageListener
                 System.out.println("Clear requested");
                 try
                 {
+                    // resets the coverage information to prepare for a new collection
                     trigger.visitDumpCommand(false, true);
                 }
                 catch (Exception e)
@@ -137,12 +138,14 @@ public class CoverageListener
             {
                 if(socket.isConnected()) {
                     System.out.println("Dump requested");
+                    // dumps the information and resets all collected coverage information
                     trigger.visitDumpCommand(true, true);
                     ExecutionDataStore storage = new ExecutionDataStore(); 
                     
                     RuntimeData data = new RuntimeData();
                     data.collect(executionData, sesionInfo, true);
                     
+                    // creates an input/output pipe to send the coverage information
                     PipedInputStream inPipe = new PipedInputStream();
                     final PipedOutputStream outPipe = new PipedOutputStream(inPipe);
                     final CoverageBuilder coverageBuilder = new CoverageBuilder();
@@ -160,6 +163,7 @@ public class CoverageListener
                                 ObjectOutputStream outputStream = new ObjectOutputStream(outPipe);
                                 
                                 IBundleCoverage bundle = coverageBuilder.getBundle("Run");
+                                // send all gathered coverage information
                                 for (IPackageCoverage coverage : bundle.getPackages())
                                 {
                                     outputStream.writeObject(CoverageBridge.toSerializable(coverage));

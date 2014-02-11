@@ -3,6 +3,14 @@ package bluej.codecoverage.utils.serial;
 import java.io.Serializable;
 import java.util.List;
 
+/**
+ * Represents coverage information for an entire package, with an individual
+ * {@link CoverageClass} for each class in the package. Also includes the sum coverage of
+ * all classes in the package.
+ * 
+ * @author ikingsbu
+ * 
+ */
 public class CoveragePackage implements Serializable
 {
 
@@ -10,6 +18,7 @@ public class CoveragePackage implements Serializable
     private CoverageCounter classCoverage;
     private List<CoverageClass> classCoverageInfo;
     private String name;
+
     public CoveragePackage(CoverageCounter classCoverage,
         List<CoverageClass> classCoverageInfo, String name)
     {
@@ -17,20 +26,20 @@ public class CoveragePackage implements Serializable
         this.classCoverage = classCoverage;
         this.classCoverageInfo = classCoverageInfo;
     }
+
     public CoverageCounter getClassCoverage()
     {
         return classCoverage;
     }
+
     public List<CoverageClass> getClassCoverageInfo()
     {
         return classCoverageInfo;
     }
+
     public String getName()
     {
         return name;
     }
 
-    
-    
-    
 }

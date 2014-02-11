@@ -27,8 +27,7 @@ public class BreakoutClassloader extends URLClassLoader
     public BreakoutClassloader(File userLib) throws Exception
     {
         super(loadJars(userLib), BreakoutClassloader.class.getClassLoader().getParent());
-
-    }
+        }
 
     private static URL[] loadJars(File userLib) throws Exception
     {

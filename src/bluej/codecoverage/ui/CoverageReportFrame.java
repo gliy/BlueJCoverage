@@ -4,15 +4,16 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Point;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextPane;
 import javax.swing.JTree;
@@ -29,6 +30,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeSelectionModel;
 
+import bluej.codecoverage.pref.CoveragePrefManager;
+import bluej.codecoverage.pref.CoveragePrefManager.CurrentPreferences;
 import bluej.codecoverage.utils.join.BCoverageClass;
 import bluej.codecoverage.utils.join.BCoverageInformation;
 import bluej.codecoverage.utils.join.BCoveragePackage;
@@ -48,17 +51,19 @@ public class CoverageReportFrame extends JFrame
     private CoverageOverviewPane overview;
     private JTree tree;
     private Map<Class<?>, JScrollPane> classToDisplay;
-
+    private CurrentPreferences prefs = CoveragePrefManager.getPrefs().load();
+    
     public CoverageReportFrame(List<BCoveragePackage> classesCovered)
         throws ProjectNotOpenException, PackageNotFoundException,
         BadLocationException
     {
 
         this.coverage = classesCovered;
+        setSize(700, 500);
         generateTabs();
         // generateDisplay(classesCovered);
         // pack();
-        setSize(700, 500);
+        
         setTitle("Coverage Report");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     }
@@ -67,12 +72,17 @@ public class CoverageReportFrame extends JFrame
     {
         classToDisplay = new HashMap<Class<?>, JScrollPane>();
         tabs = new JTabbedPane();
-        add(tabs, BorderLayout.CENTER);
+        //add(tabs, BorderLayout.CENTER);
         overview = new CoverageOverviewPane();
         tree = overview.getTree();
         JScrollPane pane = new JScrollPane(tree);
         pane.setPreferredSize(new Dimension(getWidth(), 100));
-        add(pane, BorderLayout.SOUTH);
+        
+        JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, tabs, tree);
+       
+        add(split);
+        split.setDividerLocation(getWidth()/2);
+        split.setOneTouchExpandable(true);
         tree.addTreeSelectionListener(new TreeListener());
     }
 
@@ -131,7 +141,7 @@ public class CoverageReportFrame extends JFrame
 
             tree = new JTree(root);
             tree.setRootVisible(false);
-            tree.setRowHeight(tree.getRowHeight() + 10);
+            tree.setRowHeight(0);
             DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer()
             {
                 @Override
@@ -142,17 +152,23 @@ public class CoverageReportFrame extends JFrame
                     Component defaultDisplay = super.getTreeCellRendererComponent(
                         tree, value, selected, expanded, leaf, row, hasFocus);
                     Object treeNode = ((DefaultMutableTreeNode) value).getUserObject();
-
+                    
                     if (treeNode instanceof BCoverageInformation)
                     {
-
+                       
                         JPanel rtn = new JPanel();
                         BCoverageInformation info = (BCoverageInformation) treeNode;
+                        ImageIcon iconToUse = getDisplayIcon(info);
+                        if(iconToUse != null) {
+                            setIcon(iconToUse);
+                            
+                        }
                         setText(info.getName());
 
                         CoverageCounter counter = info.getObjectCoverage();
-                        JProgressBar progress = new JProgressBar(0,
-                            counter.getTotal());
+                        JProgressBar progress = new JProgressBar(0, counter.getTotal());
+                        progress.setPreferredSize(new Dimension((int) progress
+                            .getPreferredSize().getWidth(), this.getHeight()));
                         progress.setValue(counter.getCovered());
 
                         progress.setStringPainted(true);
@@ -193,6 +209,17 @@ public class CoverageReportFrame extends JFrame
             }
             return packNode;
         }
+        
+        private ImageIcon getDisplayIcon(BCoverageInformation coverage) {
+            ImageIcon rtn = null;
+            if(coverage instanceof BCoveragePackage) {
+                rtn = prefs.getPackageIcon();
+            } else if(coverage instanceof BCoverageClass) {
+                rtn = prefs.getSourceIcon();
+            }
+            return rtn;
+        }
+        
     }
 }
 

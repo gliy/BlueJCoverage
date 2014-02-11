@@ -5,9 +5,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+
+import javax.swing.ImageIcon;
 
 import bluej.codecoverage.utils.CoverageUtilities.ClassLocation;
 import bluej.extensions.BlueJ;
@@ -96,7 +99,23 @@ public class CoveragePrefManager
         return loadedPrefs;
     }
 
-    public static class CurrentPreferences
+    private static class StaticPreferences {
+        public ImageIcon getPackageIcon() {
+            return getImage("package.png");
+        }
+        public ImageIcon getSourceIcon() {
+            return getImage("source.png");
+        }
+        private ImageIcon getImage(String name) {
+            URL imageLoc = getClass().getClassLoader().getResource(name);
+            ImageIcon image = null;
+            if(imageLoc != null) {
+                image = new ImageIcon(imageLoc);
+            }
+            return image;
+        }
+    }
+    public static class CurrentPreferences extends StaticPreferences
     {
         private Color notCovered;
         private Color paritallyCovered;

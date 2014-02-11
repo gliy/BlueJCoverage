@@ -102,8 +102,7 @@ public class CoverageListener
      
                 while (reader.read()) {
                  
-                }
-                
+                }             
                 socket.close();
             } catch (final Exception e) {
                 e.printStackTrace();
@@ -112,14 +111,13 @@ public class CoverageListener
 
         public void clearResults() {
             if(socket.isConnected()) {
-                System.out.println("Dump requested");
+                System.out.println("Clear requested");
                 try
                 {
                     trigger.visitDumpCommand(false, true);
                 }
-                catch (IOException e)
+                catch (Exception e)
                 {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
             }
@@ -139,7 +137,8 @@ public class CoverageListener
                     final PipedOutputStream outPipe = new PipedOutputStream(inPipe);
                     final CoverageBuilder coverageBuilder = new CoverageBuilder();
                     final Analyzer analyzer = new Analyzer(executionData, coverageBuilder);
-                    analyzer.analyzeAll(file);
+                   // analyzer.analyzeAll(file);
+                    analyzer.analyzeAll(file.getParentFile().getAbsolutePath(), null);
                     new Thread(new Runnable()
                     
                     {
@@ -149,7 +148,7 @@ public class CoverageListener
                         {
                             try {
                                 ObjectOutputStream outputStream = new ObjectOutputStream(outPipe);
-                                System.out.println(coverageBuilder.getClasses().size());
+                                
                                 IBundleCoverage bundle = coverageBuilder.getBundle("Run");
                                 for (IPackageCoverage coverage : bundle.getPackages())
                                 {

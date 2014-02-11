@@ -1,14 +1,18 @@
 package bluej.codecoverage.ui;
 
+import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 
-import javax.swing.Action;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JSeparator;
 
 import bluej.codecoverage.CoverageAction;
-import bluej.codecoverage.CoverageInvokationListener;
 import bluej.extensions.BClass;
 import bluej.extensions.BlueJ;
 import bluej.extensions.MenuGenerator;
@@ -63,7 +67,7 @@ public class CoverageMenuBuilder extends MenuGenerator
                 menu.add(clone(bc, (JMenuItem) cur));
             }
         }
-        
+       
         super.notifyPostClassMenu(bc, jmi);
     }
 

@@ -1,16 +1,16 @@
 <project name="Example Build Script" basedir="." default="build-jar">
 	<!--  Load properties  -->
 	<property file="build.properties" />
-	<property name="bluej.path" value="F:\Users\Ian\Documents\BluejTest\BlueJ"/>
-    <property name="bluej.lib" value="${bluej.path}\lib"/>
+	<property name="bluej.path" value="/usr/local/bluej"/>
+    <property name="bluej.lib" value="${bluej.path}/lib"/>
 
-    <property name="blue.extension.dest" value="${bluej.lib}\extensions"/>
+    <property name="blue.extension.dest" value="/home/ikingsbu/.bluej/extensions"/>
 
 	
 	<property name="build.dir" value="build" />
 	<property name="src.dir" value="src" />
 	<path id="class.path">
-
+	   
 		<pathelement location="bin"/>
 		<fileset dir="lib" includes="*.jar"/>
 		<pathelement location="${bluej.lib}/bluejext.jar"/>
@@ -30,6 +30,7 @@
 		<copy todir="${build.dir}">
 			<fileset dir="${src.dir}" />
 			<fileset dir="${lib.dir}" />
+			<fileset dir="resources" />
 		</copy>
 		<javac debug="true" debuglevel="lines,vars,source" destdir="${build.dir}" srcdir="${src.dir}"
 		    source = "1.6"
@@ -46,10 +47,9 @@
       >
 
       </jar>
-      <copy file="${blue.extension.dest}/CoverageExtension.jar"  todir="${basedir}"> </copy>
 <!--  jvmargs="-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=4000,suspend=n" -->
-      	<java jar="F:\Users\Ian\Documents\BluejTest\BlueJ\lib\bluej.jar"
-		jvm="F:\Program Files\Java\jdk1.7.0_40\bin\java.exe" jvmargs="-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=4000,suspend=n"
+      	<java jar="${bluej.lib}/bluej.jar"
+      		jvmargs="-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=4000,suspend=n"
 		 fork="true" >
 
 	</java>

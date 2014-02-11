@@ -12,6 +12,7 @@ import javax.swing.JFrame;
 
 import bluej.codecoverage.ui.CoverageReportFrame;
 import bluej.codecoverage.utils.CoverageUtilities;
+import bluej.codecoverage.utils.join.BCoverageBridge;
 import bluej.codecoverage.utils.join.BCoverageClass;
 import bluej.codecoverage.utils.join.BCoveragePackage;
 import bluej.codecoverage.utils.serial.CoverageClass;
@@ -82,30 +83,7 @@ public class CoverageAction extends AbstractAction implements Observer
         {
             @SuppressWarnings("unchecked")
             List<CoveragePackage> coverage = (List<CoveragePackage>) arg;
-            List<BCoveragePackage> bcoverage = new ArrayList<BCoveragePackage>();
-
-            BProject[] allProjects = bluej.getOpenProjects();
-            for (CoveragePackage coveragePkg : coverage)
-            {
-                BCoveragePackage found = null;
-                for (BProject project : allProjects)
-                {
-
-                    BPackage bpack = project.getPackage(coveragePkg.getName());
-                    if (bpack != null)
-                    {
-                        found = new BCoveragePackage(bpack, coveragePkg);
-                        for (CoverageClass coverageClz : coveragePkg.getClassCoverageInfo())
-                        {
-                            new BCoverageClass(
-                                bpack.getBClass(coverageClz.getName()),
-                                coverageClz, found);
-                        }
-                        bcoverage.add(found);
-                        break;
-                    }
-                }
-            }
+            List<BCoveragePackage> bcoverage = BCoverageBridge.toBCoverage(coverage, bluej);
             JFrame report = new CoverageReportFrame(bcoverage);
             report.setLocationRelativeTo(bluej.getCurrentFrame());
 

@@ -5,33 +5,38 @@ import java.util.List;
 
 import org.jacoco.core.analysis.IClassCoverage;
 import org.jacoco.core.analysis.ICounter;
-import org.jacoco.core.analysis.ICoverageNode;
+import org.jacoco.core.analysis.ICounter.CounterValue;
 import org.jacoco.core.analysis.ILine;
 import org.jacoco.core.analysis.IPackageCoverage;
 
 public class CoverageBridge
 {
-    
-    public static CoveragePackage toSerializable(IPackageCoverage pkg) {
+
+    public static CoveragePackage toSerializable(IPackageCoverage pkg)
+    {
         List<CoverageClass> classes = new ArrayList<CoverageClass>();
-        for(IClassCoverage coverage : pkg.getClasses()) {
+        for (IClassCoverage coverage : pkg.getClasses())
+        {
             classes.add(toSerializable(coverage));
         }
-        
-        CoveragePackage pkgCoverage = new CoveragePackage(toCounter(pkg.getClassCounter()), classes, pkg.getName());
+
+        CoveragePackage pkgCoverage = new CoveragePackage(
+            toCounter(pkg.getLineCounter()), classes, pkg.getName());
         return pkgCoverage;
     }
 
-    private static CoverageClass toSerializable(IClassCoverage clz) {
+    private static CoverageClass toSerializable(IClassCoverage clz)
+    {
         List<CoverageLine> lines = new ArrayList<CoverageLine>();
         int first = clz.getFirstLine();
         int last = clz.getLastLine();
-        for(int lineNum = first; lineNum < last; lineNum++) {
+        for (int lineNum = first; lineNum < last; lineNum++)
+        {
             ILine iline = clz.getLine(lineNum);
-            
             lines.add(toLine(iline));
+            System.out.println(lineNum + ": " + CoverageCounterValue.from(iline.getStatus()));
         }
-        
+
         CoverageClass rtn = new CoverageClass();
         rtn.setLineCounter(lines);
         rtn.setFirstLine(first);
@@ -46,12 +51,13 @@ public class CoverageBridge
     {
         ICounter branch = line.getBranchCounter();
         int status = line.getStatus();
-       
-        return new CoverageLine(status,toCounter(line.getBranchCounter()));
+
+        return new CoverageLine(status, toCounter(line.getBranchCounter()));
     }
-    private static CoverageCounter toCounter(ICounter line) {
-        return new CoverageCounter(
-            line.getCoveredCount(), line.getMissedCount(),
+
+    private static CoverageCounter toCounter(ICounter line)
+    {
+        return new CoverageCounter(line.getCoveredCount(), line.getMissedCount(),
             line.getTotalCount(), line.getStatus());
     }
 }

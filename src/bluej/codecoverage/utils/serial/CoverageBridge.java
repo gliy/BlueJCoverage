@@ -39,13 +39,14 @@ public class CoverageBridge
         {
             ILine iline = clz.getLine(lineNum);
             lines.add(toLine(iline));
-            System.out.println(lineNum + ": " + CoverageCounterValue.from(iline.getStatus()));
+            //System.out.println(lineNum + ": " + CoverageCounterValue.from(iline.getStatus()));
         }
 
         CoverageClass rtn = new CoverageClass();
         rtn.setLineCounter(lines);
         rtn.setFirstLine(first);
         rtn.setLastLine(last);
+       // System.out.println("--> " + clz.getSourceFileName() + " "  + clz.getName());
         rtn.setName(clz.getName());
         rtn.setPackageName(clz.getPackageName());
         rtn.setTotalCoverage(toCounter(clz.getLineCounter()));

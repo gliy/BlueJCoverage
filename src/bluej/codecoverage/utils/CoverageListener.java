@@ -166,6 +166,7 @@ public class CoverageListener
                                 // send all gathered coverage information
                                 for (IPackageCoverage coverage : bundle.getPackages())
                                 {
+                                    System.out.println("Sending package: " + coverage.getName());
                                     outputStream.writeObject(CoverageBridge.toSerializable(coverage));
                                 }
                                 outputStream.writeObject(null);

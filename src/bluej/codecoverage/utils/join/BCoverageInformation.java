@@ -12,4 +12,5 @@ public interface BCoverageInformation
 {
     public CoverageCounter getObjectCoverage();
     public String getName();
+    public String getId();
 }

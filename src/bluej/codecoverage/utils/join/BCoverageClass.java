@@ -1,27 +1,32 @@
 package bluej.codecoverage.utils.join;
 
+import java.util.UUID;
+
 import bluej.codecoverage.utils.serial.CoverageClass;
 import bluej.codecoverage.utils.serial.CoverageCounter;
 import bluej.extensions.BClass;
 
 public class BCoverageClass implements BCoverageInformation
 {
-    private BClass bclass;
+    private ClassInfo classinfo;
     private CoverageClass classCoverage;
     private BCoveragePackage parent;
-    public BCoverageClass(BClass bclass, CoverageClass classCoverage, BCoveragePackage parent)
+    private String id;
+    public BCoverageClass(ClassInfo bclass, CoverageClass classCoverage, BCoveragePackage parent)
     {
-        this.bclass = bclass;
+        
+        this.classinfo = bclass;
         this.parent = parent;
         this.classCoverage = classCoverage;
         parent.addChild(this);
+        id = UUID.randomUUID().toString();
     }
     public BCoveragePackage getParent() {
         return parent;
     }
-    public BClass getBclass()
+    public ClassInfo getClassInfo()
     {
-        return bclass;
+        return classinfo;
     }
 
     public CoverageClass getClassCoverage()
@@ -36,7 +41,12 @@ public class BCoverageClass implements BCoverageInformation
     @Override
     public String getName()
     {
-        return bclass.getName();
+        return classinfo.getName();
+    }
+    @Override
+    public String getId()
+    {
+        return id;
     }
 
     

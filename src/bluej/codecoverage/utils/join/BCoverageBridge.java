@@ -1,5 +1,6 @@
 package bluej.codecoverage.utils.join;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,11 +51,16 @@ public class BCoverageBridge
                     found = new BCoveragePackage(bpack, coveragePkg);
                     for (CoverageClass coverageClz : coveragePkg.getClassCoverageInfo())
                     {
-                        BClass bclz = bpack.getBClass(coverageClz.getName());
+                        String name = coverageClz.getName();
+                        if(name.contains("/")) {
+                            name = name.substring(name.lastIndexOf("/"));
+                        }
+                        System.out.println("looking for " + name);
+                        BClass bclz = bpack.getBClass(name);
                         if (bclz != null)
                         {
                             // creates the mapping class, which adds itself to its parent.
-                            new BCoverageClass(bclz, coverageClz, found);
+                            new BCoverageClass(new BClassInfo(bclz), coverageClz, found);
                         }
                         else
                         {
@@ -64,9 +70,38 @@ public class BCoverageBridge
                     }
                     bcoverage.add(found);
                     break;
+                } else {
+                    for (CoverageClass coverageClz : coveragePkg.getClassCoverageInfo())
+                    {
+                        File sourceFile = findFile(project, coverageClz.getName());
+                        System.out.println(sourceFile.getAbsolutePath());
+                        if(sourceFile != null) {
+                            if(found == null) {
+                                found = new BCoveragePackage(null, coveragePkg);
+                                bcoverage.add(found);
+                            }
+                            System.out.println("FOUND");
+
+                            new BCoverageClass(
+                                new FileClassInfo(sourceFile, sourceFile.getName()), coverageClz, 
+                               found);
+                            
+                        }
+                    }
+                   
+                  
+                   
                 }
             }
         }
         return bcoverage;
+    }
+    
+    private static File findFile(BProject base, String name) throws Exception {
+        File toGet = new File(base.getDir().getAbsolutePath() +"/"+ name + ".java");
+        if(!toGet.exists()) {
+            return null;
+        }
+        return toGet;
     }
 }

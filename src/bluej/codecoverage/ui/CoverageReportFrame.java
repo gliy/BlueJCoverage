@@ -1,6 +1,5 @@
 package bluej.codecoverage.ui;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -35,10 +34,10 @@ import bluej.codecoverage.pref.CoveragePrefManager.CurrentPreferences;
 import bluej.codecoverage.utils.join.BCoverageClass;
 import bluej.codecoverage.utils.join.BCoverageInformation;
 import bluej.codecoverage.utils.join.BCoveragePackage;
+import bluej.codecoverage.utils.join.ClassInfo;
 import bluej.codecoverage.utils.serial.CoverageClass;
 import bluej.codecoverage.utils.serial.CoverageCounter;
 import bluej.codecoverage.utils.serial.CoverageCounterValue;
-import bluej.extensions.BClass;
 import bluej.extensions.PackageNotFoundException;
 import bluej.extensions.ProjectNotOpenException;
 import bluej.extensions.editor.Editor;
@@ -54,7 +53,7 @@ public class CoverageReportFrame extends JFrame
     private JTabbedPane tabs;
     private CoverageOverviewPane overview;
     private JTree tree;
-    private Map<Class<?>, JScrollPane> classToDisplay;
+    private Map<String, JScrollPane> classToDisplay;
     private CurrentPreferences prefs = CoveragePrefManager.getPrefs().load();
     
     public CoverageReportFrame(List<BCoveragePackage> classesCovered)
@@ -74,7 +73,7 @@ public class CoverageReportFrame extends JFrame
 
     private void generateTabs()
     {
-        classToDisplay = new HashMap<Class<?>, JScrollPane>();
+        classToDisplay = new HashMap<String, JScrollPane>();
         tabs = new JTabbedPane();
         //add(tabs, BorderLayout.CENTER);
         overview = new CoverageOverviewPane();
@@ -94,11 +93,11 @@ public class CoverageReportFrame extends JFrame
     {
         try
         {
-            BClass bclass = clz.getBclass();
-            JScrollPane existingDisplay = classToDisplay.get(bclass.getJavaClass());
+            ClassInfo bclass = clz.getClassInfo();
+            JScrollPane existingDisplay = classToDisplay.get(bclass.getName());
             if(existingDisplay == null) {
                 existingDisplay = new JScrollPane(new CoverageClassDisplay(clz));
-                classToDisplay.put(bclass.getJavaClass(), existingDisplay);
+                classToDisplay.put(clz.getId(), existingDisplay);
                 
                 tabs.add(existingDisplay, bclass.getName());
             }
@@ -256,19 +255,17 @@ class CoverageClassDisplay extends JTextPane
     {
 
         CoverageClass clz = coverage.getClassCoverage();
-        BClass bclz = coverage.getBclass();
+        ClassInfo bclz = coverage.getClassInfo();
         System.out.println(clz.getName());
         System.out.println("\t" + clz.getFirstLine() + "," + clz.getLastLine());
 
         StyledDocument doc = getStyledDocument();
-        Editor editor = bclz.getEditor();
         Map<Integer, AttributeSet> lineToStyle = createStyleMap(clz);
 
-        for (int line = 0; line < editor.getLineCount(); line++)
+        for (int line = 0; line < bclz.getNumberOfLines(); line++)
         {
 
-            String sourceCode = editor.getText(new TextLocation(line, 0),
-                new TextLocation(line, editor.getLineLength(line) - 1));
+            String sourceCode = bclz.getLine(line);
             AttributeSet style = lineToStyle.get(line);
             doc.insertString(doc.getLength(), line + ": " + sourceCode + "\n",
                 style);

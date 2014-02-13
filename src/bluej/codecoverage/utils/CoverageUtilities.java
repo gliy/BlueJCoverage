@@ -10,7 +10,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.lang.reflect.Method;
-import java.net.BindException;
+import java.net.ConnectException;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -19,7 +20,8 @@ import java.util.Properties;
 
 import javax.swing.JOptionPane;
 
-import bluej.codecoverage.utils.serial.CoverageClass;
+import bluej.codecoverage.pref.CoveragePrefManager;
+import bluej.codecoverage.pref.CoveragePrefManager.CurrentPreferences;
 import bluej.codecoverage.utils.serial.CoveragePackage;
 import bluej.extensions.BlueJ;
 import bluej.extensions.ExtensionUnloadedException;
@@ -53,6 +55,7 @@ public final class CoverageUtilities
     private int port = 6300;
 
     private static CoverageUtilities utils;
+    private static CurrentPreferences prefs;
     private Object coverageListener;
 
     /**
@@ -61,10 +64,11 @@ public final class CoverageUtilities
      */
     private CoverageUtilities(BlueJ bluej) throws IOException
     {
-        vmArgsToAdd = "-javaagent:";
         this.bluej = bluej;
+        prefs = CoveragePrefManager.getPrefs().loadDefault();
         setupListener();
         setup();
+       
 
     }
 
@@ -74,7 +78,7 @@ public final class CoverageUtilities
         {
             coverageListener = new BreakoutClassloader(bluej.getUserConfigDir()).loadClass(
                 CoverageListener.class.getName())
-                .newInstance();
+                .getConstructor(Integer.TYPE).newInstance(port);
         }
         catch (Exception e)
         {
@@ -168,12 +172,13 @@ public final class CoverageUtilities
 
     private void checkHooks(File propsFile) throws IOException
     {
+        System.out.println(System.getProperty("java.class.path"));
         Properties props = new Properties();
 
         props.load(new FileInputStream(propsFile));
 
         Object current = props.get(VM_ARG_KEY);
-
+        vmArgsToAdd = buildVMArgs();
         if (current == null || !current.toString()
             .contains(vmArgsToAdd))
         {
@@ -182,33 +187,72 @@ public final class CoverageUtilities
                 "This looks like it is your first time running"
                     + "\nthe code coverage extension. Please restart bluej for it to take effect.");
             addShutdownHook();
+           
             throw new ExtensionUnloadedException();
         }
 
     }
+    private String buildVMArgs() {
+        final File agent = new File(bluej.getUserConfigDir() + File.separator + "jacocoagent.jar");
+        int newPort = 6300;
+        String arg= "-javaagent:" + agent.getAbsolutePath()
+            + "=output=tcpclient,port=" + newPort + getExcludes();
+        port = newPort;
+        return arg;
+    }
+    private String getExcludes() {
+        StringBuilder buildExcludes = new StringBuilder();
+        for(String ex : prefs.getExcluded()) {
+            buildExcludes.append(":" + ex);
+        }
+        String rtn = buildExcludes.toString();
+        if(!rtn.isEmpty()) {
+            rtn = ",excludes=" + rtn.substring(1);
+            System.out.println("excludes: " + rtn);
+        }
+        return rtn;
+    }
 
-    private void findOpenPort() throws Exception
+    private int findOpenPort() 
     {
         int tried = 0;
-
+        int newPort = port;
         boolean notFound = true;
+        ServerSocket server = null;
         while (tried < 10 && notFound)
         {
             try
             {
                 tried++;
-                notFound = new Socket("localhost", port).isBound();
+                server = new ServerSocket(newPort);
+                notFound = server.isBound();
+            }catch(ConnectException ex) {
+                break;
             }
-            catch (BindException ex)
+            catch (Exception ex)
             {
-                port++;
-                System.out.println("Trying to connect to port " + port);
+                newPort++;
+                ex.printStackTrace();
+                System.out.println("Trying to connect to port " + newPort);
+            } finally {
+                try
+                {
+                    if(server != null) {
+                        server.close();
+                    }
+                }
+                catch (IOException e)
+                {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
             }
         }
         if (!notFound)
         {
             throw new RuntimeException("No port found");
         }
+        return newPort;
 
     }
 
@@ -236,10 +280,10 @@ public final class CoverageUtilities
                             String toAdd = "";
                             if (current != null)
                             {
-                                toAdd = current + " ";
+                               // toAdd = current + " ";
                             }
                             toAdd += "-javaagent:" + agent.getAbsolutePath()
-                                + "=output=tcpclient,port=" + port + "";// "=dumponexit=false"
+                                + "=output=tcpclient,port=" + port + getExcludes();
                             props.put(VM_ARG_KEY, toAdd);
                             props.store(new FileOutputStream(propsFile),
                                 "");

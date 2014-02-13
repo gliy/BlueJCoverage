@@ -9,7 +9,7 @@
 	<classpathentry kind="lib" path="F:/Users/Ian/Documents/BluejTest/BlueJ/lib/bluej.jar"/>
 	<classpathentry kind="lib" path="F:/eclipse/plugins/org.junit_4.11.0.v201303080030/junit.jar" sourcepath="F:/Users/Ian/.m2/repository/junit/junit/4.11/junit-4.11-sources.jar"/>
 	<classpathentry kind="lib" path="F:/Program Files/Java/jdk1.7.0_51/lib/tools.jar"/>
-	<classpathentry kind="lib" path="F:/Users/Ian/Documents/BluejTest/BlueJ/lib/jacocoagent.jar"/>
+	<classpathentry kind="lib" path="F:/Users/Ian/Documents/BluejTest/BlueJ/lib/jacocoagent.jar" sourcepath="F:/Users/Ian/.m2/repository/org/jacoco/org.jacoco.agent/0.6.4.201312101107/org.jacoco.agent-0.6.4.201312101107-sources.jar"/>
 	<classpathentry kind="lib" path="lib/org.jacoco.core-0.6.5.20140123-0205.jar"/>
 	<classpathentry kind="lib" path="build/org.jacoco.report-0.6.5.20140123-0205.jar"/>
 	<classpathentry kind="output" path="bin"/>

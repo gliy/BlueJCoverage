@@ -43,7 +43,7 @@ public class CoverageListener
 
     private static final String ADDRESS = "localhost";
 
-    private static final int PORT = 6300;
+    private final int port;
     private Handler current;
     /**
      * Start the server as a standalone program.
@@ -51,7 +51,8 @@ public class CoverageListener
      * @param args
      * @throws IOException
      */
-    public CoverageListener() throws IOException {
+    public CoverageListener(int port) throws IOException {
+        this.port= port;
         if(!listenerThread.isAlive()) {
             listenerThread.start();
         }
@@ -65,7 +66,7 @@ public class CoverageListener
         {
             try {
                 System.out.println("connecting...");
-                final ServerSocket server = new ServerSocket(PORT, 0,
+                final ServerSocket server = new ServerSocket(port, 0,
                         InetAddress.getByName(ADDRESS));
                 
                 while (true) {
@@ -140,6 +141,7 @@ public class CoverageListener
                     System.out.println("Dump requested");
                     // dumps the information and resets all collected coverage information
                     trigger.visitDumpCommand(true, true);
+                  
                     ExecutionDataStore storage = new ExecutionDataStore(); 
                     
                     RuntimeData data = new RuntimeData();
@@ -151,7 +153,7 @@ public class CoverageListener
                     final CoverageBuilder coverageBuilder = new CoverageBuilder();
                     final Analyzer analyzer = new Analyzer(executionData, coverageBuilder);
                    // analyzer.analyzeAll(file);
-                    analyzer.analyzeAll(file.getParentFile().getAbsolutePath(), null);
+                    analyzer.analyzeAll(file.getAbsolutePath(), null);
                     new Thread(new Runnable()
                     
                     {

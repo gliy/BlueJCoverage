@@ -21,6 +21,8 @@ import bluej.extensions.PackageNotFoundException;
 import bluej.extensions.ProjectNotOpenException;
 import bluej.extensions.event.ExtensionEvent;
 import bluej.extensions.event.ExtensionEventListener;
+import bluej.extensions.event.PackageEvent;
+import bluej.extensions.event.PackageListener;
 
 /**
  * TestAttacherExtension serves as an entrance point for the Extension, allowing BlueJ to
@@ -44,7 +46,7 @@ public class CodeCoverageExtension extends Extension
      *            the bluej application
      */
     @Override
-    public void startup(BlueJ bluej)
+    public void startup(final BlueJ bluej)
     {
 
         try
@@ -52,7 +54,30 @@ public class CodeCoverageExtension extends Extension
             
             CoverageUtilities.create(bluej);
             bluej.setPreferenceGenerator(new CoveragePreferences(bluej));
-            bluej.setMenuGenerator(new CoverageMenuBuilder(bluej));
+            bluej.addPackageListener(new PackageListener()
+            {
+                
+                @Override
+                public void packageOpened(PackageEvent event)
+                {
+                    try
+                    {
+                        new CoverageMenuBuilder(bluej, event.getPackage());
+                    }
+                    catch (Exception e)
+                    {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                }
+                
+                @Override
+                public void packageClosing(PackageEvent event)
+                {
+                    // TODO Auto-generated method stub
+                    
+                }
+            });
             CoveragePrefManager.getPrefs()
                 .init(bluej);
             bluej.addExtensionEventListener(new ExtensionEventListener()
@@ -65,7 +90,7 @@ public class CodeCoverageExtension extends Extension
                 }
             });
         }
-        catch (IOException ex)
+        catch (Exception ex)
         {
             ex.printStackTrace();
         }

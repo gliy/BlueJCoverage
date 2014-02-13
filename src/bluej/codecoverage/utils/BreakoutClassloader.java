@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 
 import javax.swing.JOptionPane;
 
@@ -24,11 +26,36 @@ public class BreakoutClassloader extends URLClassLoader
     
     private static final String JAR_EXT = ".jar";
     private static final String[] REQUIRED_JARS = new String[]{"asm-all", "org.jacoco.core","org.jacoco.report"};
+
     public BreakoutClassloader(File userLib) throws Exception
     {
-        super(loadJars(userLib), BreakoutClassloader.class.getClassLoader().getParent());
-        }
+        super(loadJars(userLib), BreakoutClassloader.class.getClassLoader()
+            .getParent());
+     
+    }
 
+    private static URL[] loadJars2(File userLib) throws Exception
+    {
+        URL base = BreakoutClassloader.class.getProtectionDomain()
+            .getCodeSource()
+            .getLocation();
+        Manifest con = new JarFile(base.getFile()).getManifest();
+        String[] all = con.getMainAttributes()
+            .getValue("Class-Path")
+            .split(" ");
+        URL u = new URL("jar", "", base + "!/");
+        List<URL> rtn = new ArrayList<URL>();
+        rtn.add(u);
+        for (String s : all)
+        {
+            File file = new File(new URL("jar", "", base + "!/" + s).getFile());
+            System.out.println("?? " + file.exists());
+            rtn.add(new URL("jar", "", base + "!/" + s));
+        }
+        System.out.println("<>> " + rtn.toString());
+        return rtn.toArray(new URL[0]);
+
+    }
     private static URL[] loadJars(File userLib) throws Exception
     {
         List<URL> jarsToLoad = new ArrayList<URL>();

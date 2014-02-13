@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
@@ -47,9 +48,9 @@ public class CoveragePrefManager
         this.bluej = bluej;
     }
 
-    public CurrentPreferences load()
+    public CurrentPreferences loadDefault()
     {
-        File configDir = bluej.getUserConfigDir();
+        /*File configDir = bluej.getUserConfigDir();
         for (File inDir : configDir.listFiles())
         {
             if (inDir.getName()
@@ -57,7 +58,7 @@ public class CoveragePrefManager
             {
                 return loadFromFile(inDir);
             }
-        }
+        }*/
         return new DefaultPreferences();
     }
 
@@ -126,13 +127,14 @@ public class CoveragePrefManager
         private Color notCovered;
         private Color paritallyCovered;
         private Color totallyCovered;
-
+        protected List<String> excluded;
         private CurrentPreferences(Color notCovered, Color paritallyCovered,
             Color totallyCovered)
         {
             this.notCovered = notCovered;
             this.paritallyCovered = paritallyCovered;
             this.totallyCovered = totallyCovered;
+            this.excluded = new ArrayList<String>();
         }
 
         private Color getNotCovered()
@@ -149,13 +151,34 @@ public class CoveragePrefManager
         {
             return totallyCovered;
         }
+        public List<String> getExcluded() {
+            return excluded;
+        }
     }
 
     private static class DefaultPreferences extends CurrentPreferences
     {
+        
         private DefaultPreferences()
         {
             super(Color.RED, Color.YELLOW, Color.GREEN);
+            loadDefaults();
+        }
+        
+        private void loadDefaults()
+        {
+            Properties props = new Properties();
+            try {
+                props.load(getClass().getClassLoader().getResourceAsStream("defaultprefs.properties"));
+                String[] excludes = props.get("excludes").toString().split(":");
+                excluded.addAll(Arrays.asList(excludes));
+            }catch(Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        public void addExclude(String name) {
+            excluded.add(name);
         }
     }
 

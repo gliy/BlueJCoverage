@@ -3,6 +3,8 @@ package bluej.codecoverage.ui;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Point;
+import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,11 +18,13 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextPane;
 import javax.swing.JTree;
+import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.Element;
 import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
@@ -29,8 +33,10 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeSelectionModel;
 
+import bluej.codecoverage.pref.CoverageConfigManager;
 import bluej.codecoverage.pref.CoveragePrefManager;
 import bluej.codecoverage.pref.CoveragePrefManager.CurrentPreferences;
+import bluej.codecoverage.ui.ext.LineAttributes;
 import bluej.codecoverage.utils.join.BCoverageClass;
 import bluej.codecoverage.utils.join.BCoverageInformation;
 import bluej.codecoverage.utils.join.BCoveragePackage;
@@ -38,10 +44,9 @@ import bluej.codecoverage.utils.join.ClassInfo;
 import bluej.codecoverage.utils.serial.CoverageClass;
 import bluej.codecoverage.utils.serial.CoverageCounter;
 import bluej.codecoverage.utils.serial.CoverageCounterValue;
+import bluej.codecoverage.utils.serial.CoverageLine;
 import bluej.extensions.PackageNotFoundException;
 import bluej.extensions.ProjectNotOpenException;
-import bluej.extensions.editor.Editor;
-import bluej.extensions.editor.TextLocation;
 
 /**
  * Main display for the results of the code coverage.
@@ -54,7 +59,7 @@ public class CoverageReportFrame extends JFrame
     private CoverageOverviewPane overview;
     private JTree tree;
     private Map<String, JScrollPane> classToDisplay;
-    private CurrentPreferences prefs = CoveragePrefManager.getPrefs().load();
+    private CurrentPreferences prefs = CoveragePrefManager.getPrefs().loadDefault();
     
     public CoverageReportFrame(List<BCoveragePackage> classesCovered)
         throws ProjectNotOpenException, PackageNotFoundException,
@@ -94,7 +99,7 @@ public class CoverageReportFrame extends JFrame
         try
         {
             ClassInfo bclass = clz.getClassInfo();
-            JScrollPane existingDisplay = classToDisplay.get(bclass.getName());
+            JScrollPane existingDisplay = classToDisplay.get(clz.getId());
             if(existingDisplay == null) {
                 existingDisplay = new JScrollPane(new CoverageClassDisplay(clz));
                 classToDisplay.put(clz.getId(), existingDisplay);
@@ -240,13 +245,14 @@ public class CoverageReportFrame extends JFrame
 class CoverageClassDisplay extends JTextPane
 {
     private BCoverageClass coverage;
-
+    private List<LineAttributes> lineAttributes;
     public CoverageClassDisplay(BCoverageClass coverage)
         throws ProjectNotOpenException, PackageNotFoundException,
         BadLocationException
     {
         super();
         this.coverage = coverage;
+        this.lineAttributes = CoverageConfigManager.getConfig().getAllAttributes();
         generateDisplay();
     }
 
@@ -269,28 +275,54 @@ class CoverageClassDisplay extends JTextPane
             AttributeSet style = lineToStyle.get(line);
             doc.insertString(doc.getLength(), line + ": " + sourceCode + "\n",
                 style);
-
+            
         }
+        
         setCaretPosition(0);
+        ToolTipManager.sharedInstance().registerComponent(this);
         setEditable(false);
 
     }
+    private Map<Integer , CoverageLine> lineStat;
+
+	@Override
+	public String getToolTipText(MouseEvent arg0) {
+		
+		int modelPoint = viewToModel(new Point(arg0.getX(), arg0.getY()));
+		Element map = getDocument().getDefaultRootElement();
+        modelPoint= map.getElementIndex(modelPoint);
+		System.out.println(lineStat.containsKey(modelPoint) + "," + lineStat.size());
+		String rtn = null;
+		if (lineStat.containsKey(modelPoint)) {
+			CoverageLine li = lineStat.get(modelPoint);
+			rtn = li.getBranchCounter().getCovered() + "/"
+					+ li.getBranchCounter().getTotal();
+		}
+		return rtn;
+	}
 
     private Map<Integer, AttributeSet> createStyleMap(CoverageClass clz)
     {
         int base = clz.getFirstLine();
+        lineStat = new HashMap<Integer, CoverageLine>();
         Map<CoverageCounterValue, MutableAttributeSet> cache = new HashMap<CoverageCounterValue, MutableAttributeSet>();
         Map<Integer, AttributeSet> lineToStyle = new HashMap<Integer, AttributeSet>();
         for (int i = 0; i < (clz.getLastLine() - base); i++)
         {
-            CoverageCounterValue lineStatus = CoverageCounterValue.from(clz.getLine(
-                i)
+			CoverageLine covLine = clz.getLine(i);
+            CoverageCounterValue lineStatus = CoverageCounterValue.from(covLine
                 .getStatus());
             MutableAttributeSet styleToUse = cache.get(lineStatus);
+            if(lineStatus != CoverageCounterValue.EMPTY) {
+            	lineStat.put(i, clz.getLine(i));
+            }
             if (styleToUse == null)
             {
+            	
                 styleToUse = new SimpleAttributeSet();
-                getStyle(styleToUse, lineStatus);
+                for(LineAttributes attr : lineAttributes) {
+                	attr.setStyle(styleToUse, covLine);
+                }
                 cache.put(lineStatus, styleToUse);
             }
             lineToStyle.put(base + i - 1, styleToUse);
@@ -298,24 +330,5 @@ class CoverageClassDisplay extends JTextPane
         return lineToStyle;
     }
 
-    private static void getStyle(MutableAttributeSet style,
-        CoverageCounterValue value)
-    {
-        switch (value) {
-            case FULLY_COVERED:
-                StyleConstants.setBackground(style, Color.green);
-                break;
-            case NOT_COVERED:
-                StyleConstants.setBackground(style, Color.RED);
-                break;
-            case EMPTY:
-                break;
-            case PARTLY_COVERED:
-                StyleConstants.setBackground(style, Color.YELLOW);
-                break;
-            case UNKNOWN:
-                break;
-        }
-    }
-
 }
+

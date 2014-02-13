@@ -1,10 +1,10 @@
 <project name="Example Build Script" basedir="." default="build-jar">
 	<!--  Load properties  -->
 	<property file="build.properties" />
-	<property name="bluej.path" value="/usr/local/bluej"/>
+	<property name="bluej.path" value="F:\Users\Ian\Documents\BlueJTest\Bluej"/>
     <property name="bluej.lib" value="${bluej.path}/lib"/>
 
-    <property name="blue.extension.dest" value="/home/ikingsbu/.bluej/extensions"/>
+    <property name="blue.extension.dest" value="${bluej.lib}/extensions"/>
 
 	
 	<property name="build.dir" value="build" />
@@ -28,10 +28,12 @@
 	<target name="build" depends="-init" description="Build project">
 
 		<copy todir="${build.dir}">
-			<fileset dir="${src.dir}" />
-			<fileset dir="${lib.dir}" />
-			<fileset dir="resources" />
-		</copy>
+         <fileset dir="${src.dir}" />
+         <fileset dir="resources" />
+      </copy>
+      <copy todir="${build.dir}/lib">
+         <fileset dir="${lib.dir}" />
+      </copy>
 		<javac debug="true" debuglevel="lines,vars,source" destdir="${build.dir}" srcdir="${src.dir}"
 		    source = "1.6"
 		    target = "1.6">
@@ -49,6 +51,7 @@
       </jar>
 <!--  jvmargs="-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=4000,suspend=n" -->
       	<java jar="${bluej.lib}/bluej.jar"
+      	    jvm="F:\Program Files\Java\jdk1.7.0_51\bin\java.exe"
       		jvmargs="-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=4000,suspend=n"
 		 fork="true" >
 

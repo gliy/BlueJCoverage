@@ -1,21 +1,28 @@
 package bluej.codecoverage.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
-import javax.swing.JSeparator;
+import javax.swing.JPanel;
+import javax.swing.JSplitPane;
 
-import bluej.codecoverage.CoverageAction;
-import bluej.extensions.BClass;
+import bluej.codecoverage.utils.CoverageUtilities;
+import bluej.codecoverage.utils.join.BCoverageBridge;
+import bluej.codecoverage.utils.join.BCoveragePackage;
+import bluej.codecoverage.utils.serial.CoveragePackage;
+import bluej.extensions.BPackage;
 import bluej.extensions.BlueJ;
-import bluej.extensions.MenuGenerator;
 
 /**
  * Generates an item on a Class's popup menu when that class is right clicked.
@@ -23,63 +30,78 @@ import bluej.extensions.MenuGenerator;
  * @author Ian
  * 
  */
-public class CoverageMenuBuilder extends MenuGenerator
+public class CoverageMenuBuilder
 {
 
     private BlueJ bluej;
-
-    public CoverageMenuBuilder(BlueJ bluej)
+    JButton startCoverage;
+    JButton endCoverage;
+    private BPackage pack;
+    
+    public CoverageMenuBuilder(BlueJ bluej, BPackage pack) throws Exception
     {
         this.bluej = bluej;
+        this.pack = pack;
+        JFrame frame = (JFrame) pack.getFrame();
+        Container content = frame.getContentPane();
+        BorderLayout layout = (BorderLayout) content.getLayout();
+        JSplitPane comp = (JSplitPane) layout.getLayoutComponent(BorderLayout.CENTER);
+        JComponent leftBar = (JComponent) ((BorderLayout) ((JComponent) comp.getLeftComponent()).getLayout()).getLayoutComponent(BorderLayout.WEST);
+
+        JPanel coverage = new JPanel();
+        coverage.setLayout(new GridLayout(3,1));
+        coverage.setPreferredSize(new Dimension(leftBar.getWidth(), 50));
+        startCoverage = new JButton("Start Coverage");
+        startCoverage.addActionListener(ON_START);
+
+        endCoverage = new JButton("End Coverage");
+        endCoverage.addActionListener(ON_END);
+        endCoverage.setEnabled(false);
+        coverage.add(startCoverage);
+        coverage.add(endCoverage);
+        leftBar.setPreferredSize(new Dimension(startCoverage.getPreferredSize().width, leftBar.getHeight()));
+        leftBar.add(coverage, 1);
     }
 
-    /**
-     * Generates a base menu for the coverage plugin, the option list
-     * is populated when the context menu is shown.
-     * 
-     * @param aClass class that the menu is for.
-     * @return skeleton menu
-     */
-    @Override
-    public JMenuItem getClassMenuItem(final BClass aClass)
+    private final ActionListener ON_START = new ActionListener()
     {
-        return new JMenu("Run Coverage");// new CoverageAction(aClass)
-    }
 
-    @Override
-    public void notifyPostClassMenu(BClass bc, JMenuItem jmi)
-    {
-        JMenu menu = (JMenu) jmi;
-        int count = 0;
-        int seperatorCount = 0;
-        Component[] comps = jmi.getParent()
-            .getComponents();
-        while (count < comps.length && seperatorCount < 2)
+        @Override
+        public void actionPerformed(ActionEvent e)
         {
-            Component cur = comps[count++];
-            if (cur instanceof JSeparator)
-            {
-                seperatorCount++;
-            }
-            else if (cur instanceof JMenuItem)
-            {
-                menu.add(clone(bc, (JMenuItem) cur));
-            }
-        }
-       
-        super.notifyPostClassMenu(bc, jmi);
-    }
+            startCoverage.setEnabled(false);
+            endCoverage.setEnabled(true);
+            CoverageUtilities utils = CoverageUtilities.get();
+            utils.clearResults();
 
-    private JMenuItem clone(BClass clz, JMenuItem toClone)
+        }
+    };
+    private final ActionListener ON_END = new ActionListener()
     {
-        JMenuItem item = new JMenuItem();
-        CoverageAction action = new CoverageAction(toClone.getAction(),
-            toClone.getText(), clz, bluej);
-        item.setAction(action);
-        item.setActionCommand(toClone.getActionCommand());
-        item.setActionMap(toClone.getActionMap());
-       
-        return item;
-    }
+
+        @Override
+        public void actionPerformed(ActionEvent e)
+        {
+            startCoverage.setEnabled(true);
+            endCoverage.setEnabled(false);
+            try
+            {
+                List<CoveragePackage> coverage = new ArrayList<CoveragePackage>(
+                    CoverageUtilities.get()
+                        .getResults(pack.getProject().getDir()));
+                List<BCoveragePackage> bcoverage = BCoverageBridge.toBCoverage(
+                    coverage, bluej);
+                JFrame report = new CoverageReportFrame(bcoverage);
+                report.setLocationRelativeTo(bluej.getCurrentFrame());
+
+                report.setVisible(true);
+            }
+            catch (Exception ex)
+            {
+                ex.printStackTrace();
+            }
+
+        }
+    };
 
 }

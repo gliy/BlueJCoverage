@@ -1,4 +1,4 @@
 Manifest-Version: 1.0
 Created-By: 11.0-b15 (Sun Microsystems Inc.)
 Main-Class: bluej.codecoverage.main.CodeCoverageExtension
-
+Class-Path: lib/asm-all-4.1.jar lib/org.jacoco.core-0.6.5.20140123-0205.jar lib/org.jacoco.report-0.6.5.20140123-0205.jar

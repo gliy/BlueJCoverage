@@ -1,5 +1,7 @@
 package bluej.codecoverage.utils.join;
 
+import java.util.List;
+
 import bluej.codecoverage.utils.serial.CoverageCounter;
 
 /**
@@ -13,4 +15,5 @@ public interface BCoverageInformation
     public CoverageCounter getObjectCoverage();
     public String getName();
     public String getId();
+    public List<? extends BCoverageInformation> getNodes();
 }

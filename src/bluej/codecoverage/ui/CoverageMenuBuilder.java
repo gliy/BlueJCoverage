@@ -17,6 +17,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 
+import bluej.codecoverage.CoverageAction;
 import bluej.codecoverage.utils.CoverageUtilities;
 import bluej.codecoverage.utils.join.BCoverageBridge;
 import bluej.codecoverage.utils.join.BCoveragePackage;
@@ -51,16 +52,25 @@ public class CoverageMenuBuilder
         JPanel coverage = new JPanel();
         coverage.setLayout(new GridLayout(3,1));
         coverage.setPreferredSize(new Dimension(leftBar.getWidth(), 50));
-        startCoverage = new JButton("Start Coverage");
-        startCoverage.addActionListener(ON_START);
-
-        endCoverage = new JButton("End Coverage");
-        endCoverage.addActionListener(ON_END);
-        endCoverage.setEnabled(false);
+        
+        setupButtons();
+        
         coverage.add(startCoverage);
         coverage.add(endCoverage);
         leftBar.setPreferredSize(new Dimension(startCoverage.getPreferredSize().width, leftBar.getHeight()));
         leftBar.add(coverage, 1);
+    }
+    private void setupButtons() throws Exception {
+        CoverageAction action = new CoverageAction(pack.getProject(), pack.getFrame());
+        startCoverage = new JButton("Start Coverage");
+        startCoverage.addActionListener(ON_START);
+        startCoverage.setActionCommand(CoverageAction.START);
+        startCoverage.addActionListener(action);
+        endCoverage = new JButton("End Coverage");
+        endCoverage.addActionListener(ON_END);
+        endCoverage.addActionListener(action);
+        endCoverage.setActionCommand(CoverageAction.STOP);
+        endCoverage.setEnabled(false);
     }
 
     private final ActionListener ON_START = new ActionListener()
@@ -71,9 +81,6 @@ public class CoverageMenuBuilder
         {
             startCoverage.setEnabled(false);
             endCoverage.setEnabled(true);
-            CoverageUtilities utils = CoverageUtilities.get();
-            utils.clearResults();
-
         }
     };
     private final ActionListener ON_END = new ActionListener()
@@ -84,23 +91,6 @@ public class CoverageMenuBuilder
         {
             startCoverage.setEnabled(true);
             endCoverage.setEnabled(false);
-            try
-            {
-                List<CoveragePackage> coverage = new ArrayList<CoveragePackage>(
-                    CoverageUtilities.get()
-                        .getResults(pack.getProject().getDir()));
-                List<BCoveragePackage> bcoverage = BCoverageBridge.toBCoverage(
-                    coverage, bluej);
-                JFrame report = new CoverageReportFrame(bcoverage);
-                report.setLocationRelativeTo(bluej.getCurrentFrame());
-
-                report.setVisible(true);
-            }
-            catch (Exception ex)
-            {
-                ex.printStackTrace();
-            }
-
         }
     };
 

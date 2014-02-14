@@ -2,6 +2,8 @@ package bluej.codecoverage.utils.join;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import bluej.codecoverage.utils.serial.CoverageClass;
@@ -29,79 +31,60 @@ public class BCoverageBridge
      * 
      * If the Filestystem search is unable to locate the file, then the coverage information is excluded.
      * @param packages all collected coverage information.
-     * @param bluej the current bluej application
+     * @param baseDir the base directory to search from
      * @return the mapped coverage information
      * @throws Exception
      */
     public static List<BCoveragePackage> toBCoverage(List<CoveragePackage> packages,
-        BlueJ bluej) throws Exception
+        File baseDir) throws Exception
     {
         List<BCoveragePackage> bcoverage = new ArrayList<BCoveragePackage>();
-
-        BProject[] allProjects = bluej.getOpenProjects();
         for (CoveragePackage coveragePkg : packages)
         {
-            BCoveragePackage found = null;
-            for (BProject project : allProjects)
-            {
-
-                BPackage bpack = project.getPackage(coveragePkg.getName());
-                if (bpack != null)
-                {
-                    found = new BCoveragePackage(bpack, coveragePkg);
-                    for (CoverageClass coverageClz : coveragePkg.getClassCoverageInfo())
-                    {
-                        String name = coverageClz.getName();
-                        if(name.contains("/")) {
-                            name = name.substring(name.lastIndexOf("/"));
-                        }
-                        System.out.println("looking for " + name);
-                        BClass bclz = bpack.getBClass(name);
-                        if (bclz != null)
-                        {
-                            // creates the mapping class, which adds itself to its parent.
-                            new BCoverageClass(new BClassInfo(bclz), coverageClz, found);
-                        }
-                        else
-                        {
-                            System.err.println("No BClass found for "
-                                + coverageClz.getName());
-                        }
-                    }
-                    bcoverage.add(found);
-                    break;
-                } else {
-                    for (CoverageClass coverageClz : coveragePkg.getClassCoverageInfo())
-                    {
-                        File sourceFile = findFile(project, coverageClz.getName());
-                        System.out.println(sourceFile.getAbsolutePath());
-                        if(sourceFile != null) {
-                            if(found == null) {
-                                found = new BCoveragePackage(null, coveragePkg);
-                                bcoverage.add(found);
-                            }
-                            System.out.println("FOUND");
-
-                            new BCoverageClass(
-                                new FileClassInfo(sourceFile, sourceFile.getName()), coverageClz, 
-                               found);
-                            
-                        }
-                    }
-                   
-                  
-                   
+            List<BCoverageClass> foundClasses = new ArrayList<BCoverageClass>();
+         
+            for(CoverageClass coverageClass : coveragePkg.getClassCoverageInfo()) {
+                File src = findFile(baseDir, coverageClass);
+                if(src != null) {
+                    ClassInfo classInfo = new FileClassInfo(src, coverageClass.getName());
+                    foundClasses.add(new BCoverageClass(classInfo, coverageClass));
                 }
             }
+            if(!foundClasses.isEmpty()) {
+                BCoveragePackage bpkg = new BCoveragePackage(coveragePkg, foundClasses);
+                bcoverage.add(bpkg);
+            }
         }
+      
         return bcoverage;
     }
     
-    private static File findFile(BProject base, String name) throws Exception {
-        File toGet = new File(base.getDir().getAbsolutePath() +"/"+ name + ".java");
+    private static File findFile(File base, CoverageClass clz) throws Exception {
+        String sep = "";
+        if(clz.getPackageName() != null || !clz.getPackageName().isEmpty()) {
+            sep = File.separator;
+        }
+        File toGet = new File(base + File.separator + clz.getPackageName() + sep + clz.getSourceFileName());
+        
         if(!toGet.exists()) {
             return null;
         }
+        System.out.println("found" );
         return toGet;
     }
+
+    public static final Comparator<? super BCoverageInformation> SORT_BY_COVERAGE =
+        new Comparator<BCoverageInformation>()
+    {
+
+        @Override
+        public int compare(BCoverageInformation o1, BCoverageInformation o2)
+        {
+            int order = o1.getObjectCoverage().getMissed() - o2.getObjectCoverage().getMissed();
+            if(!o1.getNodes().isEmpty()) {
+                Collections.sort(o1.getNodes(), SORT_BY_COVERAGE);
+            }
+            return order;
+        }
+    };
 }

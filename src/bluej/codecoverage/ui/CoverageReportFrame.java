@@ -5,6 +5,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +28,6 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Element;
 import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
@@ -37,6 +37,7 @@ import bluej.codecoverage.pref.CoverageConfigManager;
 import bluej.codecoverage.pref.CoveragePrefManager;
 import bluej.codecoverage.pref.CoveragePrefManager.CurrentPreferences;
 import bluej.codecoverage.ui.ext.LineAttributes;
+import bluej.codecoverage.utils.join.BCoverageBridge;
 import bluej.codecoverage.utils.join.BCoverageClass;
 import bluej.codecoverage.utils.join.BCoverageInformation;
 import bluej.codecoverage.utils.join.BCoveragePackage;
@@ -59,7 +60,7 @@ public class CoverageReportFrame extends JFrame
     private CoverageOverviewPane overview;
     private JTree tree;
     private Map<String, JScrollPane> classToDisplay;
-    private CurrentPreferences prefs = CoveragePrefManager.getPrefs().loadDefault();
+    private CurrentPreferences prefs = CoveragePrefManager.getPrefs().get();
     
     public CoverageReportFrame(List<BCoveragePackage> classesCovered)
         throws ProjectNotOpenException, PackageNotFoundException,
@@ -149,6 +150,7 @@ public class CoverageReportFrame extends JFrame
             UIManager.put("ProgressBar.selectionForeground", Color.BLACK);
 
             DefaultMutableTreeNode root = new DefaultMutableTreeNode("All");
+            Collections.sort(coverage, BCoverageBridge.SORT_BY_COVERAGE);
             for (BCoveragePackage pack : coverage)
             {
                 root.add(createNode(pack));
@@ -175,8 +177,7 @@ public class CoverageReportFrame extends JFrame
                         BCoverageInformation info = (BCoverageInformation) treeNode;
                         ImageIcon iconToUse = getDisplayIcon(info);
                         if(iconToUse != null) {
-                            setIcon(iconToUse);
-                            
+                            setIcon(iconToUse);                          
                         }
                         setText(info.getName());
 
@@ -215,13 +216,12 @@ public class CoverageReportFrame extends JFrame
         private DefaultMutableTreeNode createNode(BCoverageInformation pack)
         {
             DefaultMutableTreeNode packNode = new DefaultMutableTreeNode(pack);
-            if (pack instanceof BCoveragePackage)
+
+            for (BCoverageInformation clz : pack.getNodes())
             {
-                for (BCoverageClass clz : ((BCoveragePackage) pack).getChildren())
-                {
-                    packNode.add(createNode(clz));
-                }
+                packNode.add(createNode(clz));
             }
+
             return packNode;
         }
         

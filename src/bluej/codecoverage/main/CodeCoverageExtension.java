@@ -34,7 +34,7 @@ public class CodeCoverageExtension extends Extension
 {
 
     /** The Constant NAME. */
-    private static final String NAME = "Test Attacher";
+    private static final String NAME = "BCoverage";
 
     /** The Constant VERSION. */
     private static final String VERSION = "1.0";
@@ -78,8 +78,7 @@ public class CodeCoverageExtension extends Extension
                     
                 }
             });
-            CoveragePrefManager.getPrefs()
-                .init(bluej);
+
             bluej.addExtensionEventListener(new ExtensionEventListener()
             {
 
@@ -119,7 +118,7 @@ public class CodeCoverageExtension extends Extension
     @Override
     public String getDescription()
     {
-        return ("Attaches tests to classes");
+        return ("Adds Jacoco Code Coverage to BlueJ");
     }
 
 }

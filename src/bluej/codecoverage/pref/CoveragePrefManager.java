@@ -2,19 +2,20 @@ package bluej.codecoverage.pref;
 
 import java.awt.Color;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.swing.ImageIcon;
 
-import bluej.codecoverage.utils.CoverageUtilities.ClassLocation;
-import bluej.extensions.BlueJ;
+import bluej.codecoverage.utils.CoverageUtilities;
 
 /**
  * Manages any external resources used when displaying the coverage report,
@@ -25,12 +26,11 @@ import bluej.extensions.BlueJ;
 public class CoveragePrefManager
 {
     private static CoveragePrefManager prefs;
-    private BlueJ bluej;
     private static final String FILE_NAME = "coverageprefs.properties";
-
+    private CurrentPreferences currentPrefs;
     private CoveragePrefManager()
     {
-
+        currentPrefs = new DefaultPreferences();
     }
 
     public static CoveragePrefManager getPrefs()
@@ -42,43 +42,41 @@ public class CoveragePrefManager
         return prefs;
     }
 
-    public void init(BlueJ bluej)
-    {
-        
-        this.bluej = bluej;
-    }
 
-    public CurrentPreferences loadDefault()
+    public CurrentPreferences load()
     {
-        /*File configDir = bluej.getUserConfigDir();
-        for (File inDir : configDir.listFiles())
+        InputStream in = null;
+        try{
+            Properties currentPrefsFile = new Properties();
+            in = getClass().getClassLoader().getResourceAsStream("current.properties");
+            currentPrefsFile.load(in);
+        for (PrefKey key : PrefKey.values())
         {
-            if (inDir.getName()
-                .equals(FILE_NAME))
-            {
-                return loadFromFile(inDir);
-            }
-        }*/
-        return new DefaultPreferences();
+            currentPrefs.addPref(key,
+                currentPrefsFile.get(key.toString()));
+        }
+        }catch(Exception e) {
+            e.printStackTrace();
+        } finally {
+            CoverageUtilities.close(in);
+        }
+        return currentPrefs;
     }
 
-    private CurrentPreferences loadFromFile(File file)
+    public void save()
     {
-        Properties props = new Properties();
-
-        List<ClassLocation> locs = new ArrayList<ClassLocation>();
-        InputStream fis = null;
-        CurrentPreferences loadedPrefs = null;
+        OutputStream out = null;
         try
         {
-            fis = new FileInputStream(file);
-            props.load(fis);
+            Properties currentPrefsFile = new Properties();
 
-           // String name = props.getProperty(PrefKey.NAME.make(index));
-         //   Integer x = Integer.parseInt(props.getProperty(PrefKey.X.make(index)));
-         //   Integer y = Integer.parseInt(props.getProperty(PrefKey.Y.make(index)));
-          //  locs.add(new ClassLocation(name, x, y));
-
+            for (PrefKey key : PrefKey.values())
+            {
+                currentPrefsFile.put(key.toString(), currentPrefs.getPref(key));
+            }
+            out = new FileOutputStream(new File(getClass().getClassLoader()
+                .getResource("current.properties").getFile()));
+            currentPrefsFile.store(out, "");
         }
         catch (Exception e)
         {
@@ -86,24 +84,16 @@ public class CoveragePrefManager
         }
         finally
         {
-            if (fis != null)
-            {
-                try
-                {
-                    fis.close();
-                }
-                catch (IOException e)
-                {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            }
+            CoverageUtilities.close(out);
         }
-        if (loadedPrefs == null)
-        {
-            return new DefaultPreferences();
-        }
-        return loadedPrefs;
+    }
+    public CurrentPreferences get()
+    {
+        return currentPrefs;
+    }
+
+    public void setPref(PrefKey key) {
+        
     }
 
     private static class StaticPreferences {
@@ -124,32 +114,24 @@ public class CoveragePrefManager
     }
     public static class CurrentPreferences extends StaticPreferences
     {
-        private Color notCovered;
-        private Color paritallyCovered;
-        private Color totallyCovered;
+        private Map<PrefKey, Object> prefs = new EnumMap<PrefKey, Object>(PrefKey.class);
         protected List<String> excluded;
-        private CurrentPreferences(Color notCovered, Color paritallyCovered,
-            Color totallyCovered)
+        private CurrentPreferences(Map<PrefKey, Object> defaults)
         {
-            this.notCovered = notCovered;
-            this.paritallyCovered = paritallyCovered;
-            this.totallyCovered = totallyCovered;
             this.excluded = new ArrayList<String>();
+            this.prefs = defaults;
         }
 
-        private Color getNotCovered()
+        public void addPref(PrefKey key, Object val)
         {
-            return notCovered;
+            if (val != null)
+            {
+                prefs.put(key, val);
+            }
         }
-
-        private Color getParitallyCovered()
-        {
-            return paritallyCovered;
-        }
-
-        private Color getTotallyCovered()
-        {
-            return totallyCovered;
+        @SuppressWarnings("unchecked")
+        public <E> E getPref(PrefKey key) {
+            return (E) prefs.get(key);
         }
         public List<String> getExcluded() {
             return excluded;
@@ -161,8 +143,15 @@ public class CoveragePrefManager
         
         private DefaultPreferences()
         {
-            super(Color.RED, Color.YELLOW, Color.GREEN);
+            super(loadDefaultPrefs());
             loadDefaults();
+        }
+        private static Map<PrefKey, Object> loadDefaultPrefs() {
+            Map<PrefKey, Object> prefs = new EnumMap<PrefKey, Object>(PrefKey.class);
+            prefs.put(PrefKey.NOT_COVERED_COLOR, Color.RED);
+            prefs.put(PrefKey.PARTIALLY_COVERED_COLOR, Color.YELLOW);
+            prefs.put(PrefKey.TOTALLY_COVERED_COLOR, Color.GREEN);
+            return prefs;
         }
         
         private void loadDefaults()
@@ -182,8 +171,20 @@ public class CoveragePrefManager
         }
     }
 
-    private enum PrefKey
+    public enum PrefKey
     {
-        NOT_COVERED, PARTIALLY_COVERED, TOTALLY_COVERED;
+        NOT_COVERED_COLOR("Not Covered"), PARTIALLY_COVERED_COLOR("Partially Covered"), TOTALLY_COVERED_COLOR(
+            "Fully Covered");
+        private String display;
+
+        private PrefKey(String display)
+        {
+            this.display = display;
+        }
+
+        public String getDisplay()
+        {
+            return display;
+        }
     }
 }

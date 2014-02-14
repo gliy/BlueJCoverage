@@ -18,7 +18,7 @@ public class CoverageClass implements Serializable
     private static final long serialVersionUID = -1459075392091370960L;
     private String packageName;
     private String name;
-
+    private String sourceFileName;
     private List<CoverageLine> lineCounter;
     private CoverageCounter totalCoverage;
     private int firstLine;
@@ -102,6 +102,16 @@ public class CoverageClass implements Serializable
     public int getLastLine()
     {
         return lastLine;
+    }
+
+    public String getSourceFileName()
+    {
+        return sourceFileName;
+    }
+
+    public void setSourceFileName(String sourceFileName)
+    {
+        this.sourceFileName = sourceFileName;
     }
 
 }

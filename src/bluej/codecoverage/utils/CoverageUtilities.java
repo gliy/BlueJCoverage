@@ -3,6 +3,7 @@
  */
 package bluej.codecoverage.utils;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -65,7 +66,7 @@ public final class CoverageUtilities
     private CoverageUtilities(BlueJ bluej) throws IOException
     {
         this.bluej = bluej;
-        prefs = CoveragePrefManager.getPrefs().loadDefault();
+        prefs = CoveragePrefManager.getPrefs().get();
         setupListener();
         setup();
        
@@ -115,7 +116,7 @@ public final class CoverageUtilities
             e.printStackTrace();
         }
     }
-    public Collection<CoveragePackage> getResults(File file)
+    public List<CoveragePackage> getResults(File file)
     {
         ObjectInputStream input = null;
         List<CoveragePackage> rtn = new ArrayList<CoveragePackage>();
@@ -235,17 +236,7 @@ public final class CoverageUtilities
                 ex.printStackTrace();
                 System.out.println("Trying to connect to port " + newPort);
             } finally {
-                try
-                {
-                    if(server != null) {
-                        server.close();
-                    }
-                }
-                catch (IOException e)
-                {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
+                close(server);
             }
         }
         if (!notFound)
@@ -354,23 +345,25 @@ public final class CoverageUtilities
         }
         finally
         {
-            if (fis != null)
-            {
-                try
-                {
-                    fis.close();
-                }
-                catch (IOException e)
-                {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            }
+            close(fis);
         }
         return locs;
 
     }
 
+    public static void close(Closeable stream)
+    {
+        try
+        {
+            if(stream != null){
+            stream.close();
+            }
+        }
+        catch (IOException ex)
+        {
+
+        }
+    }
     /**
      * Keys that represent the information we care about for classes'
      */

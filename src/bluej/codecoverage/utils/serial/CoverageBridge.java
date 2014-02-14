@@ -22,7 +22,7 @@ public class CoverageBridge
         List<CoverageClass> classes = new ArrayList<CoverageClass>();
         for (IClassCoverage coverage : pkg.getClasses())
         {
-            System.out.println(coverage.getPackageName() + " " + coverage.getSourceFileName() + "," + coverage.isNoMatch());
+          //  System.out.println(coverage.getPackageName() + " " + coverage.getSourceFileName() + "," + coverage.isNoMatch());
             classes.add(toSerializable(coverage));
         }
 
@@ -47,7 +47,7 @@ public class CoverageBridge
         rtn.setLineCounter(lines);
         rtn.setFirstLine(first);
         rtn.setLastLine(last);
-
+        rtn.setSourceFileName(clz.getSourceFileName());
         rtn.setName(clz.getName());
         rtn.setPackageName(clz.getPackageName());
         rtn.setTotalCoverage(toCounter(clz.getLineCounter()));

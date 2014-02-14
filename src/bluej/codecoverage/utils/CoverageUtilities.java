@@ -66,7 +66,7 @@ public final class CoverageUtilities
     private CoverageUtilities(BlueJ bluej) throws IOException
     {
         this.bluej = bluej;
-        prefs = CoveragePrefManager.getPrefs().get();
+        prefs = CoveragePrefManager.getPrefs(bluej).get();
         setupListener();
         setup();
        
@@ -173,7 +173,7 @@ public final class CoverageUtilities
 
     private void checkHooks(File propsFile) throws IOException
     {
-        System.out.println(System.getProperty("java.class.path"));
+
         Properties props = new Properties();
 
         props.load(new FileInputStream(propsFile));
@@ -264,7 +264,7 @@ public final class CoverageUtilities
                     {
                         props.load(new FileInputStream(propsFile));
                         Object current = props.get(VM_ARG_KEY);
-                        System.out.println(agent.exists());
+
                         if (current == null || !current.toString()
                             .contains(vmArgsToAdd))
                         {

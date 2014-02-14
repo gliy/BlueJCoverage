@@ -11,6 +11,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -50,15 +51,16 @@ public class CoverageMenuBuilder
         JComponent leftBar = (JComponent) ((BorderLayout) ((JComponent) comp.getLeftComponent()).getLayout()).getLayoutComponent(BorderLayout.WEST);
 
         JPanel coverage = new JPanel();
-        coverage.setLayout(new GridLayout(3,1));
-        coverage.setPreferredSize(new Dimension(leftBar.getWidth(), 50));
+        coverage.setLayout(new BoxLayout(coverage, BoxLayout.Y_AXIS));
+       // coverage.setPreferredSize(new Dimension(leftBar.getWidth(), 50));
         
         setupButtons();
-        
+        coverage.setAlignmentX(0.5f);
         coverage.add(startCoverage);
         coverage.add(endCoverage);
-        leftBar.setPreferredSize(new Dimension(startCoverage.getPreferredSize().width, leftBar.getHeight()));
+        //leftBar.setPreferredSize(new Dimension(startCoverage.getPreferredSize().width, leftBar.getHeight()));
         leftBar.add(coverage, 1);
+        
     }
     private void setupButtons() throws Exception {
         CoverageAction action = new CoverageAction(pack.getProject(), pack.getFrame());
@@ -66,11 +68,14 @@ public class CoverageMenuBuilder
         startCoverage.addActionListener(ON_START);
         startCoverage.setActionCommand(CoverageAction.START);
         startCoverage.addActionListener(action);
-        endCoverage = new JButton("End Coverage");
+        endCoverage = new JButton("End Coverage  ");
         endCoverage.addActionListener(ON_END);
         endCoverage.addActionListener(action);
         endCoverage.setActionCommand(CoverageAction.STOP);
         endCoverage.setEnabled(false);
+        
+       // startCoverage.setAlignmentX(Component.CENTER_ALIGNMENT);
+       // endCoverage.setAlignmentX(Component.LEFT_ALIGNMENT);
     }
 
     private final ActionListener ON_START = new ActionListener()

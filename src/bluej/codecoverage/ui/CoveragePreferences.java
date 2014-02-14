@@ -6,6 +6,8 @@ import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,11 +15,15 @@ import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JColorChooser;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+
+import com.sun.tools.javac.api.JavacScope;
 
 import bluej.codecoverage.pref.CoveragePrefManager;
 import bluej.codecoverage.pref.CoveragePrefManager.CurrentPreferences;
@@ -45,20 +51,22 @@ public class CoveragePreferences implements PreferenceGenerator
     {
         JButton addIgnore = new JButton("Add package to ignore");
         ignore.addElement("test");
-        JPanel rtn = new JPanel(new BorderLayout());
+        final JPanel rtn = new JPanel(new BorderLayout());
         JPanel buttons = new JPanel();
         buttons.setLayout(new BoxLayout(buttons, BoxLayout.Y_AXIS));
-        
+
         buttons.add(addIgnore);
         JButton guiButton = new JButton("GUI Settings");
         buttons.add(guiButton);
         guiButton.addActionListener(new ActionListener()
         {
-            
+
             @Override
             public void actionPerformed(ActionEvent e)
             {
-                new GUIDialog(bluej.getCurrentFrame()).setVisible(true);
+                JOptionPane.showConfirmDialog(rtn, getGUIOptions(),
+                    "GUI Settings", JOptionPane.OK_CANCEL_OPTION,
+                    JOptionPane.PLAIN_MESSAGE);
             }
         });
         rtn.add(buttons, BorderLayout.EAST);
@@ -74,41 +82,51 @@ public class CoveragePreferences implements PreferenceGenerator
     @Override
     public void loadValues()
     {
-        prefs = CoveragePrefManager.getPrefs().load();
+        prefs = CoveragePrefManager.getPrefs()
+            .load();
     }
 
     @Override
     public void saveValues()
     {
-        CoveragePrefManager.getPrefs().save();
+        CoveragePrefManager.getPrefs()
+            .save();
 
     }
 
-    
-    private class GUIDialog extends JDialog {
-        private GUIDialog(Frame fr)
+    public JPanel getGUIOptions()
+    {
+        final JPanel main = new JPanel();
+        main.setLayout(new BoxLayout(main, BoxLayout.Y_AXIS));
+
+        for (final PrefKey key : PrefKey.values())
         {
-            super(fr, true);
-            init();
-            setTitle("GUI Settings");
-            pack();
+            JPanel opt = new JPanel(new GridLayout(1, 2));
+            opt.add(new JLabel(key.getDisplay()));
+            final JPanel color = new JPanel();
+            color.setBackground((Color) prefs.getPref(key));
+            color.addMouseListener(new MouseAdapter()
+            {
+                @Override
+                public void mousePressed(MouseEvent e)
+                {
+                    if (e.getButton() == MouseEvent.BUTTON1)
+                    {
+                        Color choice = JColorChooser.showDialog(main,
+                            "Choose color for " + key.getDisplay(),
+                            color.getBackground());
+                        if(choice != null) {
+                            prefs.setPref(key, choice);
+                            color.setBackground(choice);
+                        }
+                    }
+                }
+            });
+            opt.add(color);
+            opt.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+            main.add(opt);
         }
-        public void init() {
-            JPanel main = new JPanel();
-            main.setLayout(new BoxLayout(main, BoxLayout.Y_AXIS));
-            
-            for(PrefKey key : PrefKey.values()) {
-                JPanel opt = new JPanel(new GridLayout(1, 2));
-                opt.add(new JLabel(key.getDisplay()));
-                JPanel color = new JPanel();
-                color.setBackground((Color)prefs.getPref(key));
-                opt.add(color);
-                opt.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-                main.add(opt);
-            }
-            setContentPane(main);
-        }
-        
+        return main;
     }
 
 }

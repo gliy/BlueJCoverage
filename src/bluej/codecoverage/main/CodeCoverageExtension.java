@@ -51,7 +51,7 @@ public class CodeCoverageExtension extends Extension
 
         try
         {
-            
+            CoveragePrefManager.getPrefs(bluej);
             CoverageUtilities.create(bluej);
             bluej.setPreferenceGenerator(new CoveragePreferences(bluej));
             bluej.addPackageListener(new PackageListener()
@@ -79,15 +79,6 @@ public class CodeCoverageExtension extends Extension
                 }
             });
 
-            bluej.addExtensionEventListener(new ExtensionEventListener()
-            {
-
-                @Override
-                public void eventOccurred(ExtensionEvent event)
-                {
-                    System.out.println(event.toString());
-                }
-            });
         }
         catch (Exception ex)
         {

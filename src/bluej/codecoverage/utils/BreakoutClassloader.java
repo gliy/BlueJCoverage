@@ -49,10 +49,10 @@ public class BreakoutClassloader extends URLClassLoader
         for (String s : all)
         {
             File file = new File(new URL("jar", "", base + "!/" + s).getFile());
-            System.out.println("?? " + file.exists());
+
             rtn.add(new URL("jar", "", base + "!/" + s));
         }
-        System.out.println("<>> " + rtn.toString());
+  
         return rtn.toArray(new URL[0]);
 
     }

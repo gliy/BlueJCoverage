@@ -69,7 +69,7 @@ public class BCoverageBridge
         if(!toGet.exists()) {
             return null;
         }
-        System.out.println("found" );
+
         return toGet;
     }
 

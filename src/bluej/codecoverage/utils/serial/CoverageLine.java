@@ -43,7 +43,11 @@ public class CoverageLine implements Serializable
     {
         this.branchCounter = branchCounter;
     }
-    
+    @Override
+    public String toString()
+    {
+       return "CoverageLine[status="+CoverageCounterValue.from(status) + "]";
+    }
     
     
 }

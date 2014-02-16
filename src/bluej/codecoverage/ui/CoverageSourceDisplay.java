@@ -1,7 +1,9 @@
 package bluej.codecoverage.ui;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Point;
+import java.awt.event.KeyAdapter;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.List;
@@ -67,15 +69,21 @@ class CoverageSourceDisplay extends JScrollPane
         this.coverage = coverage;
         this.lineAttributes = lineAttributes;
         this.tooltip = tooltip;
-        this.lineStats = mapLineToCoverage(coverage.getClassCoverage());
+        this.lineStats = mapLineToCoverage(coverage.getSource());
         generateDisplay();
     }
 
+    public JTextPane getSource() {
+        return source;
+    }
+    public String getId() {
+        return coverage.getId();
+    }
     private void generateDisplay() throws BadLocationException,
         ProjectNotOpenException, PackageNotFoundException
     {
 
-        CoverageClass clz = coverage.getClassCoverage();
+        CoverageClass clz = coverage.getSource();
         ClassInfo bclz = coverage.getClassInfo();
 
         StyledDocument doc = source.getStyledDocument();
@@ -111,24 +119,12 @@ class CoverageSourceDisplay extends JScrollPane
         setRowHeader(viewPort);
         source.setCaretPosition(0);
         ToolTipManager.sharedInstance()
-            .registerComponent(this);
+            .registerComponent(source);
         source.setEditable(false);
         setViewportView(source);
 
     }
 
-    private JViewport buildRowNumbers()
-    {
-        JPanel counter = new JPanel();
-        counter.setLayout(new BoxLayout(counter, BoxLayout.Y_AXIS));
-        for (int i = 0; i < 100; i++)
-        {
-            counter.add(new JLabel("" + i));
-
-        }
-
-        return new JScrollPane(counter).getViewport();
-    }
 
     private Map<Integer, CoverageLine> mapLineToCoverage(CoverageClass clz)
     {
@@ -172,6 +168,10 @@ class CoverageSourceDisplay extends JScrollPane
 
     private class CustomJTextPane extends JTextPane
     {
+
+        public CustomJTextPane() {
+            setFont(new Font("Monospaced", 0, 11));
+        }
         @Override
         public String getToolTipText(MouseEvent arg0)
         {
@@ -188,5 +188,16 @@ class CoverageSourceDisplay extends JScrollPane
             }
             return rtn;
         }
+    }
+
+    public void moveCaret(int firstLine)
+    {
+
+        StyledDocument document = source.getStyledDocument();
+
+        int location = document.getDefaultRootElement().getElement(firstLine)
+            .getStartOffset() - 1;
+        source.setCaretPosition(location);
+        source.moveCaretPosition(location);
     }
 }

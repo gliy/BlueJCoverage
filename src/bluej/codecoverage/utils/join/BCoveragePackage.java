@@ -5,30 +5,26 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
+import bluej.codecoverage.utils.serial.CoverageClass;
 import bluej.codecoverage.utils.serial.CoverageCounter;
 import bluej.codecoverage.utils.serial.CoveragePackage;
 
-public class BCoveragePackage implements BCoverageInformation
+public class BCoveragePackage extends BCoverage<CoveragePackage>
 {
 
 
-    private CoveragePackage packageCoverage;
     private List<BCoverageClass> children;
-    private String id;
     public BCoveragePackage(CoveragePackage packageCoverage, Collection<BCoverageClass> childrenToAdd)
     {
+        super(packageCoverage);
         this.children = new ArrayList<BCoverageClass>();
-        this.packageCoverage = packageCoverage;
-        id = UUID.randomUUID().toString();
+
         addChildren(childrenToAdd);
     }
 
-    public CoveragePackage getPackageCoverage()
-    {
-        return packageCoverage;
-    }
+
     @Override
-    public List<? extends BCoverageInformation> getNodes()
+    public List<? extends BCoverage<CoverageClass>> getNodes()
     {
         return children;
     }
@@ -43,15 +39,11 @@ public class BCoveragePackage implements BCoverageInformation
             addChild(child);
         }
     }
-    @Override
-    public CoverageCounter getObjectCoverage()
-    {
-        return packageCoverage.getClassCoverage();
-    }
+   
     @Override
     public String getName()
     {
-        String name = packageCoverage.getName();
+        String name = super.getName();
         if(name.isEmpty()) {
             name = "<default>";
         }

@@ -1,10 +1,11 @@
 package bluej.codecoverage;
 
 import java.awt.Frame;
-import java.awt.event.ActionEvent;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.io.File;
 import java.util.List;
 
-import javax.swing.AbstractAction;
 import javax.swing.JFrame;
 
 import bluej.codecoverage.ui.CoverageReportFrame;
@@ -12,7 +13,7 @@ import bluej.codecoverage.utils.CoverageUtilities;
 import bluej.codecoverage.utils.join.BCoverageBridge;
 import bluej.codecoverage.utils.join.BCoveragePackage;
 import bluej.codecoverage.utils.serial.CoveragePackage;
-import bluej.extensions.BProject;
+import bluej.extensions.BlueJ;
 
 /**
  * Performs the attach action when a choice is selected.
@@ -20,47 +21,27 @@ import bluej.extensions.BProject;
  * @author Ian
  * 
  */
-public class CoverageAction extends AbstractAction
+public class CoverageAction implements ItemListener
 {
-    private BProject base;
-    private Frame location;
-    public static final String START = "START";
 
-    public static final String STOP = "END";
-  
-    public CoverageAction(BProject base, Frame location)
+    private BlueJ bluej;
+    private static CoverageAction action;
+    private CoverageAction(BlueJ bluej)
     {
         super();
-        this.location = location;
-        this.base = base;
+        this.bluej = bluej;
+        
     }
-
-    /**
-     * When a class is selected for attachment, attempts to attach the class prompting
-     * the user if the class is already attached.
-     * 
-     * @param anEvent
-     *            the trigger event
-     */
-    @Override
-    public void actionPerformed(ActionEvent anEvent)
-    {
-        if(START.equals(anEvent.getActionCommand())) {
-            startCoverage();
-        } else if(STOP.equals(anEvent.getActionCommand())) {
-            endCoverage();
-        }
-    }
-
     
 
     private void endCoverage()
     {
         try
         {
-            @SuppressWarnings("unchecked")
-            List<CoveragePackage> coverage = CoverageUtilities.get().getResults(base.getDir());
-            List<BCoveragePackage> bcoverage = BCoverageBridge.toBCoverage(coverage, base.getDir());
+            Frame location = bluej.getCurrentFrame();
+            File dir = bluej.getCurrentPackage().getProject().getDir();
+            List<CoveragePackage> coverage = CoverageUtilities.get().getResults(dir);
+            List<BCoveragePackage> bcoverage = BCoverageBridge.toBCoverage(coverage, dir);
             JFrame report = new CoverageReportFrame(bcoverage);
             report.setLocationRelativeTo(location);
             report.setVisible(true);
@@ -76,6 +57,27 @@ public class CoverageAction extends AbstractAction
     {
         CoverageUtilities utils = CoverageUtilities.get();
         utils.clearResults(); 
+    }
+
+    @Override
+    public void itemStateChanged(ItemEvent e)
+    {
+        boolean selected = e.getStateChange() == ItemEvent.SELECTED;
+        if(selected ) {
+            startCoverage();
+        } else  {
+            endCoverage();
+        }
+        
+    }
+
+
+    public static void init(BlueJ bluej) {
+        action = new CoverageAction(bluej);
+    }
+    public static ItemListener get()
+    {
+        return action;
     }
 
 }

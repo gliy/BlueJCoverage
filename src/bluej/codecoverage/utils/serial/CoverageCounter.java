@@ -19,17 +19,21 @@ public class CoverageCounter implements Serializable
     private int total;
     private int status;
     
+    private double coveredRatio;
+    private double missedRatio;
     
     public CoverageCounter()
     {
 
     }
-    public CoverageCounter(int covered, int missed, int total, int status)
+    public CoverageCounter(int covered, int missed, int total, int status, double coveredRatio, double missedRation)
     {
         this.covered = covered;
         this.missed = missed;
         this.total = total;
         this.status = status;
+        this.coveredRatio = coveredRatio;
+        coveredRatio = missedRation;
     }
     public int getCovered()
     {
@@ -46,6 +50,22 @@ public class CoverageCounter implements Serializable
     public int getStatus()
     {
         return status;
+    }
+    public double getCoveredRatio()
+    {
+        return coveredRatio;
+    }
+    public void setCoveredRatio(double coveredRatio)
+    {
+        this.coveredRatio = coveredRatio;
+    }
+    public double getMissedRatio()
+    {
+        return missedRatio;
+    }
+    public void setMissedRatio(double missedRatio)
+    {
+        this.missedRatio = missedRatio;
     }
     public void setCovered(int covered)
     {

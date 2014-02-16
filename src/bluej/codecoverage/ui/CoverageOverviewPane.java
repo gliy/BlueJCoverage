@@ -1,16 +1,22 @@
 package bluej.codecoverage.ui;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.util.Collections;
 import java.util.List;
 
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JTree;
 import javax.swing.UIManager;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
@@ -18,38 +24,44 @@ import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeSelectionModel;
 
 import bluej.codecoverage.pref.CoveragePrefManager.CurrentPreferences;
+import bluej.codecoverage.utils.join.BCoverage;
 import bluej.codecoverage.utils.join.BCoverageBridge;
 import bluej.codecoverage.utils.join.BCoverageClass;
-import bluej.codecoverage.utils.join.BCoverageInformation;
+import bluej.codecoverage.utils.join.BCoverageClass.BCoverageMethod;
 import bluej.codecoverage.utils.join.BCoveragePackage;
 import bluej.codecoverage.utils.serial.CoverageCounter;
 
 /**
- * Displays an overview of the code coverage for a class in a tree structure. Allows
- * the user to click on an item in the tree to open an editor with the source code.
+ * Displays an overview of the code coverage for a class in a tree structure. Allows the
+ * user to click on an item in the tree to open an editor with the source code.
  * 
  * @author ikingsbu
  * 
  */
-class CoverageOverviewPane extends JTree
+class CoverageOverviewPane extends JPanel
 {
 
     private CurrentPreferences prefs;
     private List<BCoveragePackage> coverage;
     private DefaultTreeModel model;
+    private JTree tree;
+    private JPanel summary;
+
     public CoverageOverviewPane(List<BCoveragePackage> coverage, CurrentPreferences prefs)
     {
         super();
         this.coverage = coverage;
         this.prefs = prefs;
+        this.summary = new JPanel();
+        summary.setBorder(BorderFactory.createEtchedBorder());
+        summary.setLayout(new BoxLayout(summary, BoxLayout.Y_AXIS));
         model = new DefaultTreeModel(createRootNode(coverage));
-        setModel(model);
+        tree = new JTree(model);
         UIManager.put("ProgressBar.foreground", new Color(58, 242, 70)); // green
         UIManager.put("ProgressBar.selectionForeground", Color.BLACK);
 
-
-        setRootVisible(false);
-        setRowHeight(0);
+        tree.setRootVisible(false);
+        tree.setRowHeight(0);
         DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer()
         {
             @Override
@@ -61,11 +73,12 @@ class CoverageOverviewPane extends JTree
                     tree, value, selected, expanded, leaf, row, hasFocus);
                 Object treeNode = ((DefaultMutableTreeNode) value).getUserObject();
 
-                if (treeNode instanceof BCoverageInformation)
+                if (treeNode instanceof BCoverage)
                 {
 
                     JPanel rtn = new JPanel();
-                    BCoverageInformation info = (BCoverageInformation) treeNode;
+                    BCoverage<?> info = (BCoverage<?>) treeNode;
+
                     ImageIcon iconToUse = getDisplayIcon(info);
                     if (iconToUse != null)
                     {
@@ -73,13 +86,13 @@ class CoverageOverviewPane extends JTree
                     }
                     setText(info.getName());
 
-                    CoverageCounter counter = info.getObjectCoverage();
-                    JProgressBar progress = new JProgressBar(0,
-                        counter.getTotal());
+                    CoverageCounter counter = info.getLineCoverage();
+                    JProgressBar progress = new JProgressBar();
+                    progress.setBorderPainted(true);
                     progress.setPreferredSize(new Dimension(
                         (int) progress.getPreferredSize()
                             .getWidth(), this.getHeight()));
-                    progress.setValue(counter.getCovered());
+                    progress.setValue((int) (counter.getCoveredRatio() * 100));
 
                     progress.setStringPainted(true);
                     rtn.add(this);
@@ -94,11 +107,40 @@ class CoverageOverviewPane extends JTree
 
             }
         };
-        getSelectionModel()
+        tree.getSelectionModel()
             .setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-        setToggleClickCount(1);
+        tree.setToggleClickCount(1);
 
-        setCellRenderer(renderer);
+        tree.setCellRenderer(renderer);
+        setLayout(new BorderLayout());
+        add(tree, BorderLayout.CENTER);
+
+        add(summary, BorderLayout.SOUTH);
+    }
+
+    private void buildSummary(BCoverage<?> selected)
+    {
+        JLabel[] summaryLabels = new JLabel[3];
+        summaryLabels[0] = new JLabel(printCoverage("Class Coverage: ",
+            selected.getClassCoverage()));
+        summaryLabels[1] = new JLabel(printCoverage("Branch Coverage: ",
+            selected.getBranchCoverage()));
+        summaryLabels[2] = new JLabel(printCoverage("Line Coverage: ",
+            selected.getLineCoverage()));
+        summary.removeAll();
+        for(JLabel summaryLabel : summaryLabels) {
+            summaryLabel.setFont(summaryLabel.getFont().deriveFont(13f));
+            summary.add(summaryLabel);
+            summary.add(Box.createVerticalStrut(10));
+        }
+        summary.repaint();
+    }
+
+    private String printCoverage(String base, CoverageCounter counter)
+    {
+
+        return base + counter.getCovered() + "/"
+            + (counter.getCovered() + counter.getMissed());
     }
 
     private static MutableTreeNode createRootNode(List<BCoveragePackage> coverage)
@@ -112,11 +154,11 @@ class CoverageOverviewPane extends JTree
         return root;
     }
 
-    private static DefaultMutableTreeNode createNode(BCoverageInformation pack)
+    private static DefaultMutableTreeNode createNode(BCoverage<?> pack)
     {
         DefaultMutableTreeNode packNode = new DefaultMutableTreeNode(pack);
 
-        for (BCoverageInformation clz : pack.getNodes())
+        for (BCoverage<?> clz : pack.getNodes())
         {
             packNode.add(createNode(clz));
         }
@@ -124,7 +166,7 @@ class CoverageOverviewPane extends JTree
         return packNode;
     }
 
-    private ImageIcon getDisplayIcon(BCoverageInformation coverage)
+    private ImageIcon getDisplayIcon(BCoverage<?> coverage)
     {
         ImageIcon rtn = null;
         if (coverage instanceof BCoveragePackage)
@@ -134,8 +176,28 @@ class CoverageOverviewPane extends JTree
         else if (coverage instanceof BCoverageClass)
         {
             rtn = prefs.getSourceIcon();
+        } else if(coverage instanceof BCoverageMethod) {
+            rtn = prefs.getMethodIcon();
         }
         return rtn;
+    }
+
+    public void addListener(TreeSelectionListener listen)
+    {
+        tree.addTreeSelectionListener(listen);
+    }
+
+
+    public DefaultMutableTreeNode getSelectedNode()
+    {
+        DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) tree
+            .getLastSelectedPathComponent();
+        BCoverage<?> info = (BCoverage<?>) selectedNode
+            .getUserObject();
+
+        buildSummary(info);
+
+        return selectedNode;
     }
 
 }

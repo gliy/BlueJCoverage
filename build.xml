@@ -1,19 +1,19 @@
-<project name="Example Build Script" basedir="." default="build-jar">
-	<!--  Load properties  -->
+<project name="Example Build Script" basedir="." default="run">
+	<!-- Load properties -->
 	<property file="build.properties" />
-	<property name="bluej.path" value="F:\Users\Ian\Documents\BlueJTest\Bluej"/>
-    <property name="bluej.lib" value="${bluej.path}/lib"/>
+	<property name="bluej.path" value="F:\Users\Ian\Documents\BlueJTest\Bluej" />
+	<property name="bluej.lib" value="${bluej.path}/lib" />
 
-    <property name="blue.extension.dest" value="${bluej.lib}/extensions"/>
+	<property name="blue.extension.dest" value="${bluej.lib}/extensions" />
 
-	
+
 	<property name="build.dir" value="build" />
 	<property name="src.dir" value="src" />
 	<path id="class.path">
-	   
-		<pathelement location="bin"/>
-		<fileset dir="lib" includes="*.jar"/>
-		<pathelement location="${bluej.lib}/bluejext.jar"/>
+
+		<pathelement location="bin" />
+		<fileset dir="lib" includes="*.jar" />
+		<pathelement location="${bluej.lib}/bluejext.jar" />
 	</path>
 
 	<property name="lib.dir" value="lib" />
@@ -28,33 +28,37 @@
 	<target name="build" depends="-init" description="Build project">
 
 		<copy todir="${build.dir}">
-         <fileset dir="${src.dir}" />
-         <fileset dir="resources" />
-      </copy>
-      <copy todir="${build.dir}/lib">
-         <fileset dir="${lib.dir}" />
-      </copy>
-		<javac debug="true" debuglevel="lines,vars,source" destdir="${build.dir}" srcdir="${src.dir}"
-		    source = "1.6"
-		    target = "1.6">
-			<classpath refid="class.path"/>
+			<fileset dir="${src.dir}" />
+			<fileset dir="resources" />
+		</copy>
+
+		<unzip dest="${build.dir}/lib">
+			<fileset dir="${lib.dir}">
+				<include name="**/*.jar" />
+			</fileset>
+		</unzip>
+
+		<javac debug="true" debuglevel="lines,vars,source" destdir="${build.dir}"
+			srcdir="${src.dir}" source="1.6" target="1.6">
+			<classpath refid="class.path" />
 		</javac>
 	</target>
+
 	<target name="build-jar" depends="build">
-      <jar destfile="${blue.extension.dest}/CoverageExtension.jar"
-        basedir="${build.dir}"
-        includes="**"
-      manifest="MANIFEST.MF"
-      
-      >
+		<jar destfile="${blue.extension.dest}/CoverageExtension.jar"
+			basedir="${build.dir}" includes="**" manifest="MANIFEST.MF">
+			
+			
+		</jar>
 
-      </jar>
-<!--  jvmargs="-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=4000,suspend=n" -->
-      	<java jar="${bluej.lib}/bluej.jar"
-      	    jvm="F:\Program Files\Java\jdk1.7.0_51\bin\java.exe"
-      		jvmargs="-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=4000,suspend=n"
-		 fork="true" >
 
-	</java>
+	</target>
+	<target name="run" depends="build-jar">
+		<!-- jvmargs="-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=4000,suspend=n" -->
+		<java jar="${bluej.lib}/bluej.jar" jvm="F:\Program Files\Java\jdk1.7.0_51\bin\java.exe"
+			jvmargs="-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=4000,suspend=n"
+			fork="true">
+
+		</java>
 	</target>
 </project>

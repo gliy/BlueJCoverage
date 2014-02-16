@@ -33,7 +33,7 @@ import bluej.extensions.PreferenceGenerator;
 
 public class CoveragePreferences implements PreferenceGenerator
 {
-    private DefaultListModel<String> ignore;
+  
     private BlueJ bluej;
     private List<String> ignoredPackages;
     private CurrentPreferences prefs;
@@ -42,15 +42,16 @@ public class CoveragePreferences implements PreferenceGenerator
     {
         this.bluej = bluej;
         ignoredPackages = new ArrayList<String>();
-        ignore = new DefaultListModel<String>();
 
     }
 
     @Override
     public JPanel getPanel()
     {
-        JButton addIgnore = new JButton("Add package to ignore");
-        ignore.addElement("test");
+        loadValues();
+        JButton addIgnore = new JButton(
+            "<html>Add package to ignore</br><font color=red> (Requires BlueJ restart)</font></html>");
+
         final JPanel rtn = new JPanel(new BorderLayout());
         JPanel buttons = new JPanel();
         buttons.setLayout(new BoxLayout(buttons, BoxLayout.Y_AXIS));
@@ -70,12 +71,9 @@ public class CoveragePreferences implements PreferenceGenerator
             }
         });
         rtn.add(buttons, BorderLayout.EAST);
-        JList<String> ignoreList = new JList<String>(ignore);
 
-        JScrollPane ignoreScrollPane = new JScrollPane(ignoreList);
-        ignoreScrollPane.setBorder(BorderFactory.createTitledBorder("Ignored"));
-        rtn.add(ignoreScrollPane, BorderLayout.CENTER);
-        loadValues();
+        rtn.add(getExcluded(), BorderLayout.CENTER);
+       
         return rtn;
     }
 
@@ -93,38 +91,72 @@ public class CoveragePreferences implements PreferenceGenerator
             .save();
 
     }
+    private JPanel getExcluded() {
+        
+        DefaultListModel<String> ignore = new DefaultListModel<String>(){
+            {
+                for(String excluded : prefs.getExcluded()) {
+                    super.addElement(excluded);
+                }
+            }
+            @Override
+            public void addElement(String element)
+            {
+                prefs.addExcluded(element);
+            }
+            @Override
+            public boolean removeElement(Object obj)
+            {
+               
+               prefs.removeExcluded(obj.toString());
+               return super.removeElement(obj);
+            }
+        };
+      
+        JPanel rtn = new JPanel(new BorderLayout());
+        JList<String> ignoreList = new JList<String>(ignore);
 
-    public JPanel getGUIOptions()
+        JScrollPane ignoreScrollPane = new JScrollPane(ignoreList);
+        ignoreScrollPane.setBorder(BorderFactory.createTitledBorder("Ignored"));
+        rtn.add(ignoreScrollPane, BorderLayout.CENTER);
+        return rtn;
+    }
+    private JPanel getGUIOptions()
     {
         final JPanel main = new JPanel();
         main.setLayout(new BoxLayout(main, BoxLayout.Y_AXIS));
 
         for (final PrefKey key : PrefKey.values())
         {
-            JPanel opt = new JPanel(new GridLayout(1, 2));
-            opt.add(new JLabel(key.getDisplay()));
-            final JPanel color = new JPanel();
-            color.setBackground((Color) prefs.getPref(key));
-            color.addMouseListener(new MouseAdapter()
+            if (key.getDisplay() != null)
             {
-                @Override
-                public void mousePressed(MouseEvent e)
+                JPanel opt = new JPanel(new GridLayout(1, 2));
+                
+                opt.add(new JLabel(key.getDisplay()));
+                final JPanel color = new JPanel();
+                color.setBackground((Color) prefs.getPref(key));
+                color.addMouseListener(new MouseAdapter()
                 {
-                    if (e.getButton() == MouseEvent.BUTTON1)
+                    @Override
+                    public void mousePressed(MouseEvent e)
                     {
-                        Color choice = JColorChooser.showDialog(main,
-                            "Choose color for " + key.getDisplay(),
-                            color.getBackground());
-                        if(choice != null) {
-                            prefs.setPref(key, choice);
-                            color.setBackground(choice);
+                        if (e.getButton() == MouseEvent.BUTTON1)
+                        {
+                            Color choice = JColorChooser.showDialog(main,
+                                "Choose color for " + key.getDisplay(),
+                                color.getBackground());
+                            if (choice != null)
+                            {
+                                prefs.setPref(key, choice);
+                                color.setBackground(choice);
+                            }
                         }
                     }
-                }
-            });
-            opt.add(color);
-            opt.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-            main.add(opt);
+                });
+                opt.add(color);
+                opt.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
+                main.add(opt);
+            }
         }
         return main;
     }

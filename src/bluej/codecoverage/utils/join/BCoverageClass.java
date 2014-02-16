@@ -2,23 +2,31 @@ package bluej.codecoverage.utils.join;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import bluej.codecoverage.utils.serial.CoverageClass;
-import bluej.codecoverage.utils.serial.CoverageCounter;
+import bluej.codecoverage.utils.serial.CoverageMethod;
 
-public class BCoverageClass implements BCoverageInformation
+public class BCoverageClass extends BCoverage<CoverageClass>
 {
     private ClassInfo classinfo;
-    private CoverageClass classCoverage;
     private BCoveragePackage parent;
-    private String id;
+    
+    private List<BCoverageMethod> methods;
+    private List<BCoverageClass> classes;
     public BCoverageClass(ClassInfo bclass, CoverageClass classCoverage)
     {
-        
+        super(classCoverage);
         this.classinfo = bclass;
-        this.classCoverage = classCoverage;
-        id = UUID.randomUUID().toString();
+        this.methods = new ArrayList<BCoverageMethod>();
+        this.classes = new ArrayList<BCoverageClass>();
+        for (CoverageMethod method : classCoverage.getMethodCounter())
+        {
+            methods.add(new BCoverageMethod(method));
+        }
+        for (CoverageClass clz : classCoverage.getclassCounter())
+        {
+            classes.add(new BCoverageClass(bclass, clz));
+        }
     }
     public void setParent(BCoveragePackage parent) {
         this.parent = parent;
@@ -31,15 +39,7 @@ public class BCoverageClass implements BCoverageInformation
         return classinfo;
     }
 
-    public CoverageClass getClassCoverage()
-    {
-        return classCoverage;
-    }
-    @Override
-    public CoverageCounter getObjectCoverage()
-    {
-       return classCoverage.getTotalCoverage();
-    }
+
     @Override
     public String getName()
     {
@@ -49,19 +49,33 @@ public class BCoverageClass implements BCoverageInformation
         }
         return name;
     }
-    @Override
-    public String getId()
-    {
-        return id;
-    }
-    @Override
-    public List<? extends BCoverageInformation> getNodes()
-    {
-        return new ArrayList<BCoverageInformation>();
-    }
 
+    @Override
+    public List<? extends BCoverage<?>> getNodes()
+    {
+        List<BCoverage<?>> allNodes = new ArrayList<BCoverage<?>>();
+        allNodes.addAll(methods);
+        allNodes.addAll(classes);
+        return allNodes;
+    }
+ 
     
-    
-    
-    
+    public class BCoverageMethod extends BCoverage<CoverageMethod>{
+
+        protected BCoverageMethod(CoverageMethod src)
+        {
+            super(src);
+        }
+
+        @Override
+        public List<? extends BCoverage<?>> getNodes()
+        {
+            return new ArrayList<BCoverage<?>>();
+        }
+        
+        public int getFirstLine() {
+            return src.getStartLine();
+        }
+        
+    }
 }

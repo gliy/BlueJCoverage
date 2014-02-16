@@ -1,6 +1,9 @@
 package bluej.codecoverage.ui;
 
+import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +15,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextPane;
 import javax.swing.JTree;
 import javax.swing.JViewport;
 import javax.swing.event.TreeSelectionEvent;
@@ -22,8 +26,10 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import bluej.codecoverage.pref.CoveragePrefManager;
 import bluej.codecoverage.pref.CoveragePrefManager.CurrentPreferences;
 import bluej.codecoverage.utils.join.BCoverageClass;
+import bluej.codecoverage.utils.join.BCoverage;
 import bluej.codecoverage.utils.join.BCoveragePackage;
 import bluej.codecoverage.utils.join.ClassInfo;
+import bluej.codecoverage.utils.join.BCoverageClass.BCoverageMethod;
 import bluej.extensions.PackageNotFoundException;
 import bluej.extensions.ProjectNotOpenException;
 
@@ -37,7 +43,7 @@ public class CoverageReportFrame extends JFrame
     List<BCoveragePackage> coverage;
     private JTabbedPane tabs;
     private CoverageOverviewPane overview;
-    private Map<String, JScrollPane> classToDisplay;
+    private Map<String, CoverageSourceDisplay> classToDisplay;
     CurrentPreferences prefs = CoveragePrefManager.getPrefs()
         .get();
 
@@ -58,21 +64,20 @@ public class CoverageReportFrame extends JFrame
 
     private void generateTabs()
     {
-        classToDisplay = new HashMap<String, JScrollPane>();
+        classToDisplay = new HashMap<String, CoverageSourceDisplay>();
         tabs = new JTabbedPane();
         // add(tabs, BorderLayout.CENTER);
         overview = new CoverageOverviewPane(coverage, prefs);
-        
-        JScrollPane pane = new JScrollPane(overview);
-        pane.setPreferredSize(new Dimension(getWidth(), 100));
+
+        overview.setPreferredSize(new Dimension(getWidth(), 100));
 
         JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, tabs,
             overview);
 
         add(split);
-        split.setDividerLocation(getWidth() / 2);
+        split.setDividerLocation((getWidth() / 2) + 30);
         split.setOneTouchExpandable(true);
-        overview.addTreeSelectionListener(new TreeListener());
+        overview.addListener(new TreeListener());
     }
 
     private void bringUpTab(BCoverageClass clz)
@@ -80,13 +85,30 @@ public class CoverageReportFrame extends JFrame
         try
         {
             ClassInfo bclass = clz.getClassInfo();
-            JScrollPane existingDisplay = classToDisplay.get(clz.getId());
+            CoverageSourceDisplay existingDisplay = classToDisplay.get(clz.getId());
             if (existingDisplay == null)
             {
-                existingDisplay =new CoverageSourceDisplay(clz);
-                classToDisplay.put(clz.getId(), existingDisplay);
+                final CoverageSourceDisplay newDisplay = new CoverageSourceDisplay(clz);
+                classToDisplay.put(newDisplay.getId(), newDisplay);
+                newDisplay.getSource().addKeyListener(new KeyAdapter()
+                {
+    
 
-                tabs.add(existingDisplay, bclass.getName());
+                    @Override
+                    public void keyPressed(KeyEvent e)
+                    {
+                        System.out.println(e);
+                        if (e.getKeyCode() == KeyEvent.VK_W
+                            && e.isControlDown())
+                        {
+                            CoverageSourceDisplay selected = (CoverageSourceDisplay) tabs.getSelectedComponent();
+                            tabs.remove(selected);
+                            classToDisplay.remove(selected.getId());
+                        }
+                    }
+                });
+                tabs.add(newDisplay, bclass.getName());
+                existingDisplay = newDisplay;
             }
             tabs.setSelectedComponent(existingDisplay);
         }
@@ -98,19 +120,35 @@ public class CoverageReportFrame extends JFrame
 
     }
 
-
+    private void moveCaret(DefaultMutableTreeNode node)
+    {
+        DefaultMutableTreeNode parent = (DefaultMutableTreeNode) node.getParent();
+        bringUpTab((BCoverageClass)parent.getUserObject());
+        BCoverageMethod selectedCoverage = (BCoverageMethod) node.getUserObject();
+        
+       
+            ((CoverageSourceDisplay) tabs.getSelectedComponent()).moveCaret(selectedCoverage
+                .getFirstLine());
+        
+    }
     class TreeListener implements TreeSelectionListener
     {
 
         @Override
         public void valueChanged(TreeSelectionEvent e)
         {
-            DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) overview.getLastSelectedPathComponent();
-            if (selectedNode.getUserObject() instanceof BCoverageClass)
+            DefaultMutableTreeNode node = overview.getSelectedNode();
+            BCoverage<?> selectedCoverage = (BCoverage<?>) node.getUserObject();
+            if (selectedCoverage instanceof BCoverageClass)
             {
-                BCoverageClass bClassInfo = (BCoverageClass) selectedNode.getUserObject();
+                BCoverageClass bClassInfo = (BCoverageClass) selectedCoverage;
                 bringUpTab(bClassInfo);
+            }
+            else if (selectedCoverage instanceof BCoverageMethod)
+            {
+                moveCaret(node);
             }
         }
     }
+    
 }

@@ -7,7 +7,12 @@ import bluej.codecoverage.ui.ext.DefaultLineAttributes;
 import bluej.codecoverage.ui.ext.DefaultLineToolTip;
 import bluej.codecoverage.ui.ext.LineAttributes;
 import bluej.codecoverage.ui.ext.LineToolTip;
-
+/**
+ * Default Preference loader to use when displaying the coverage information.
+ * 
+ * @author Ian
+ *
+ */
 public class StandardGUIPrefs
 {
 

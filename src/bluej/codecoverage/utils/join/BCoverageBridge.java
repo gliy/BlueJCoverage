@@ -73,14 +73,14 @@ public class BCoverageBridge
         return toGet;
     }
 
-    public static final Comparator<? super BCoverageInformation> SORT_BY_COVERAGE =
-        new Comparator<BCoverageInformation>()
+    public static final Comparator<? super BCoverage<?>> SORT_BY_COVERAGE =
+        new Comparator<BCoverage<?>>()
     {
 
         @Override
-        public int compare(BCoverageInformation o1, BCoverageInformation o2)
+        public int compare(BCoverage<?> o1, BCoverage<?> o2)
         {
-            int order = o1.getObjectCoverage().getMissed() - o2.getObjectCoverage().getMissed();
+            int order = o1.getLineCoverage().getMissed() - o2.getLineCoverage().getMissed();
             if(!o1.getNodes().isEmpty()) {
                 Collections.sort(o1.getNodes(), SORT_BY_COVERAGE);
             }

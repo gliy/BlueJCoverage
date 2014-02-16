@@ -273,10 +273,14 @@ public class TextLineNumber extends JPanel
         {
             try
             {
-                if (isCurrentLine(rowStartOffset))
+                if (isCurrentLine(rowStartOffset)){
                     g.setColor( getCurrentLineForeground() );
-                else
+                    g.setFont(g.getFont().deriveFont(Font.BOLD));
+                }
+                else{
                     g.setColor( getForeground() );
+                    g.setFont(g.getFont().deriveFont(0));
+                }
 
                 //  Get the line number as a string and then determine the
                 //  "X" and "Y" offsets for drawing the string.

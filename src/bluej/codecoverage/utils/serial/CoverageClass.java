@@ -1,6 +1,7 @@
 package bluej.codecoverage.utils.serial;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 /**
  * Serializable representation of 
@@ -11,33 +12,48 @@ import java.util.List;
  * @author Ian
  * 
  */
-public class CoverageClass implements Serializable
+public class CoverageClass extends Coverage implements Serializable
 {
-
-
-    private static final long serialVersionUID = -1459075392091370960L;
+    private static final long serialVersionUID = 5343197807669888739L;
     private String packageName;
-    private String name;
     private String sourceFileName;
     private List<CoverageLine> lineCounter;
-    private CoverageCounter totalCoverage;
+    private List<CoverageMethod> methodCounter;
+    private List<CoverageClass> classCounter;
+    
     private int firstLine;
     private int lastLine;
+    
+    private String[] interfaces;
+    private String superClass;
 
-    public CoverageClass()
+    public CoverageClass(String packageName, String name,
+        List<CoverageLine> lineCounter, int firstLine, int lastLine)
     {
+        this();
+        this.packageName = packageName;
+        this.lineCounter = lineCounter;
+        this.firstLine = firstLine;
+        this.lastLine = lastLine;
         
+        setName(name);
+    }
+    public CoverageClass() {
+        this.interfaces = new String[0];
+        this.superClass = "";
+        this.methodCounter = new ArrayList<CoverageMethod>();
+        this.classCounter = new ArrayList<CoverageClass>();
+    }
+    public List<CoverageMethod> getMethodCounter()
+    {
+        return methodCounter;
     }
 
-    public CoverageCounter getTotalCoverage()
+    public void setMethodCounter(List<CoverageMethod> methodCounter)
     {
-        return totalCoverage;
+        this.methodCounter = methodCounter;
     }
 
-    public void setTotalCoverage(CoverageCounter totalCoverage)
-    {
-        this.totalCoverage = totalCoverage;
-    }
 
     public List<CoverageLine> getLineCounter()
     {
@@ -54,10 +70,6 @@ public class CoverageClass implements Serializable
         this.packageName = packageName;
     }
 
-    public void setName(String name)
-    {
-        this.name = name;
-    }
 
     public void setFirstLine(int firstLine)
     {
@@ -69,14 +81,13 @@ public class CoverageClass implements Serializable
         this.lastLine = lastLine;
     }
 
-    public CoverageClass(String packageName, String name,
-        List<CoverageLine> lineCounter, int firstLine, int lastLine)
+    public List<CoverageClass> getclassCounter()
     {
-        this.packageName = packageName;
-        this.name = name;
-        this.lineCounter = lineCounter;
-        this.firstLine = firstLine;
-        this.lastLine = lastLine;
+        return classCounter;
+    }
+    public void addClass(CoverageClass clz)
+    {
+        classCounter.add(clz);
     }
 
     public String getPackageName()
@@ -84,11 +95,7 @@ public class CoverageClass implements Serializable
         return packageName;
     }
 
-    public String getName()
-    {
-        return name;
-    }
-
+   
     public CoverageLine getLine(int lineNum)
     {
         return lineCounter.get(lineNum);
@@ -112,6 +119,22 @@ public class CoverageClass implements Serializable
     public void setSourceFileName(String sourceFileName)
     {
         this.sourceFileName = sourceFileName;
+    }
+    public String[] getInterfaces()
+    {
+        return interfaces;
+    }
+    public void setInterfaces(String[] interfaces)
+    {
+        this.interfaces = interfaces;
+    }
+    public String getSuperClass()
+    {
+        return superClass;
+    }
+    public void setSuperClass(String superClass)
+    {
+        this.superClass = superClass;
     }
 
 }

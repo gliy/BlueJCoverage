@@ -2,6 +2,7 @@ package bluej.codecoverage.utils;
 
 import java.io.Closeable;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -10,21 +11,22 @@ import java.io.PipedOutputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Arrays;
 
 import org.jacoco.core.analysis.Analyzer;
 import org.jacoco.core.analysis.CoverageBuilder;
 import org.jacoco.core.analysis.IBundleCoverage;
-import org.jacoco.core.analysis.IClassCoverage;
-import org.jacoco.core.analysis.ICounter;
 import org.jacoco.core.analysis.IPackageCoverage;
-import org.jacoco.core.analysis.ISourceFileCoverage;
-import org.jacoco.core.data.ExecutionData;
 import org.jacoco.core.data.ExecutionDataStore;
 import org.jacoco.core.data.SessionInfoStore;
 import org.jacoco.core.runtime.RemoteControlReader;
 import org.jacoco.core.runtime.RemoteControlWriter;
 import org.jacoco.core.runtime.RuntimeData;
-import org.objectweb.asm.ClassReader;
+import org.jacoco.report.DirectorySourceFileLocator;
+import org.jacoco.report.FileMultiReportOutput;
+import org.jacoco.report.IReportVisitor;
+import org.jacoco.report.MultiReportVisitor;
+import org.jacoco.report.html.HTMLFormatter;
 
 import bluej.codecoverage.utils.serial.CoverageBridge;
 
@@ -95,9 +97,10 @@ public class CoverageListener
         private  ExecutionDataStore executionData = new ExecutionDataStore(); 
         private SessionInfoStore sesionInfo = new SessionInfoStore();
         private final RemoteControlWriter trigger;
+        private RuntimeData data;
         Handler(final Socket socket) throws IOException {
             this.socket = socket;
-
+            this.data = new RuntimeData();
             // Just send a valid header:
             trigger = new RemoteControlWriter(socket.getOutputStream());
             
@@ -127,6 +130,7 @@ public class CoverageListener
                 {
                     // resets the coverage information to prepare for a new collection
                     trigger.visitDumpCommand(false, true);
+                    executionData.reset();
                 }
                 catch (Exception e)
                 {
@@ -134,17 +138,17 @@ public class CoverageListener
                 }
             }
         }
-        public ObjectInputStream getResults(File file) {
+        public ObjectInputStream getResults(final File file) {
             try
             {
                 if(socket.isConnected()) {
                     System.out.println("Dump requested");
-                    // dumps the information and resets all collected coverage information
-                    trigger.visitDumpCommand(true, true);
-                  
-                    ExecutionDataStore storage = new ExecutionDataStore(); 
                     
-                    RuntimeData data = new RuntimeData();
+                    System.out.println(sesionInfo.isEmpty());
+                    // dumps the information and resets all collected coverage information
+                    trigger.visitDumpCommand(true, false);
+                    trigger.sendCmdOk();
+                    
                     data.collect(executionData, sesionInfo, true);
                     
                     // creates an input/output pipe to send the coverage information
@@ -153,7 +157,11 @@ public class CoverageListener
                     final CoverageBuilder coverageBuilder = new CoverageBuilder();
                     final Analyzer analyzer = new Analyzer(executionData, coverageBuilder);
                    // analyzer.analyzeAll(file);
+                  
                     analyzer.analyzeAll(file.getAbsolutePath(), null);
+                    IBundleCoverage bundle = coverageBuilder.getBundle("Run");
+                    test(bundle, file);
+
                     new Thread(new Runnable()
                     
                     {
@@ -165,10 +173,10 @@ public class CoverageListener
                                 ObjectOutputStream outputStream = new ObjectOutputStream(outPipe);
                                 
                                 IBundleCoverage bundle = coverageBuilder.getBundle("Run");
+   
                                 // send all gathered coverage information
                                 for (IPackageCoverage coverage : bundle.getPackages())
                                 {
-                                    System.out.println("Sending package: " + coverage.getName());
                                     outputStream.writeObject(CoverageBridge.toSerializable(coverage));
                                 }
                                 outputStream.writeObject(null);
@@ -179,9 +187,12 @@ public class CoverageListener
                                 
                             }
                         }
+
+                       
                     }).start();
                     return new ObjectInputStream(inPipe);
                 }
+               
             }
             catch (Exception e)
             {
@@ -189,7 +200,18 @@ public class CoverageListener
                 
             }
             return null;
-        }
+        } 
+        private void test(IBundleCoverage bundle, File src) throws Exception
+        {
+            DirectorySourceFileLocator loc = new DirectorySourceFileLocator(src, "UTF-8", 4);
+            File test = new File("F:\\test", "test");
+            System.out.println(test.getAbsolutePath());
+          
+            IReportVisitor format = new HTMLFormatter().createVisitor(
+                new FileMultiReportOutput(test));
+            format.visitInfo(sesionInfo.getInfos(), executionData.getContents());
+            format.visitBundle(bundle, loc);
+         }
         
         private static void close(Closeable close) {
             try {
@@ -199,4 +221,5 @@ public class CoverageListener
             }
         }
     }
+
 }

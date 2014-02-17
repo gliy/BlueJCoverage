@@ -86,12 +86,12 @@ public class CoveragePrefManager
     {
         public final ImageIcon getPackageIcon()
         {
-            return getImage("package.png");
+            return getImage("package.gif");
         }
 
         public final ImageIcon getSourceIcon()
         {
-            return getImage("source.png");
+            return getImage("class.gif");
         }
         public final ImageIcon getMethodIcon()
         {

@@ -73,7 +73,7 @@ class CoverageOverviewPane extends JPanel
                     tree, value, selected, expanded, leaf, row, hasFocus);
                 Object treeNode = ((DefaultMutableTreeNode) value).getUserObject();
 
-                if (treeNode instanceof BCoverage)
+                if (treeNode instanceof BCoverage<?>)
                 {
 
                     JPanel rtn = new JPanel();

@@ -45,14 +45,15 @@ public final class CoverageUtilities
 
     /** The number of targets. */
     private static final String PROPERTY_FILE_NAME = "bluej.properties";
-
+    private static final String VM_ARG_KEY = "bluej.vm.args";
+    private static final String PORT_NUMBER = "port.number";
 
     /** Running instance of bluej. */
     private BlueJ bluej;
 
     private String vmArgsToAdd;
-    private static final String VM_ARG_KEY = "bluej.vm.args";
-    private int port = 6300;
+    
+    private int port;
 
     private static CoverageUtilities utils;
     private static CurrentPreferences prefs;
@@ -165,15 +166,20 @@ public final class CoverageUtilities
     {
         findFiles();
         checkHooks();
-
     }
 
     private void findFiles()
     {
-        agentFile = new File(bluej.getUserConfigDir() + File.separator + AGENT_FILE_NAME);
-        propertyFile = new File(bluej.getUserConfigDir() + File.separator + PROPERTY_FILE_NAME);
+        agentFile = new File(bluej.getUserConfigDir(), AGENT_FILE_NAME);
+        propertyFile = new File(bluej.getUserConfigDir(), PROPERTY_FILE_NAME);
     }
 
+    /**
+     * Validates that the bluej properties file has the required VM arguments, and that
+     * the agent jarfile is present.
+     * 
+     * @throws IOException
+     */
     private void checkHooks() throws IOException
     {
 
@@ -208,6 +214,7 @@ public final class CoverageUtilities
             + "=output=tcpclient,port=" + port + getExcludes();
         return arg;
     }
+    
     private String getExcludes() {
         StringBuilder buildExcludes = new StringBuilder();
         for(String ex : prefs.getExcluded()) {
@@ -221,10 +228,16 @@ public final class CoverageUtilities
         return rtn;
     }
 
+    /**
+     * Attempts to locate a usable port if the default port is not free.
+     * @return valid port number to use.
+     */
     private int findOpenPort() 
     {
+        if(1==1)
+            return 6300;
         int tried = 0;
-        int newPort = port;
+        int newPort = Integer.parseInt(bluej.getExtensionPropertyString(PORT_NUMBER, "6300"));
         boolean notFound = true;
         ServerSocket server = null;
         while (tried < 10 && notFound)
@@ -250,6 +263,7 @@ public final class CoverageUtilities
         {
             throw new RuntimeException("No port found");
         }
+        bluej.setExtensionPropertyString(PORT_NUMBER, "" + newPort);
         return newPort;
 
     }
@@ -273,14 +287,7 @@ public final class CoverageUtilities
                         if (current == null || !current.toString()
                             .contains(vmArgsToAdd))
                         {
-                            String toAdd = "";
-                            if (current != null)
-                            {
-                               // toAdd = current + " ";
-                            }
-                            toAdd += "-javaagent:" + agentFile.getAbsolutePath()
-                                + "=output=tcpclient,port=" + port + getExcludes();
-                            props.put(VM_ARG_KEY, toAdd);
+                            props.put(VM_ARG_KEY, buildVMArgs());
                             props.store(new FileOutputStream(propertyFile),
                                 "");
 

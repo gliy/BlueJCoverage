@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import bluej.extensions.BClass;
 import bluej.extensions.editor.Editor;
@@ -16,6 +17,7 @@ public interface ClassInfo
 {
     String getName();
     String getLine(int lineNum);
+    String getId();
     int getNumberOfLines();
 }
 class FileClassInfo implements ClassInfo {
@@ -23,9 +25,11 @@ class FileClassInfo implements ClassInfo {
     private String name;
     private LineNumberReader reader;
     private List<String> fileData;
+    private String id;
     public FileClassInfo(File source, String name) throws Exception {
         this.file = source;
         this.name = name;
+        this.id = UUID.randomUUID().toString();
         reader = new LineNumberReader(new InputStreamReader(new FileInputStream(source)));
         fileData = new ArrayList<String>();
         String input;
@@ -50,35 +54,9 @@ class FileClassInfo implements ClassInfo {
     {
         return fileData.size();
     }
-}
-class BClassInfo implements ClassInfo {
-    private BClass clz;
-    Editor editor;
-    public BClassInfo(BClass clz) throws Exception
-    {
-        this.clz = clz;   
-        editor = clz.getEditor();
-    }
-
     @Override
-    public String getName()
+    public String getId()
     {
-        return clz.getName();
+       return id;
     }
-
-    @Override
-    public String getLine(int lineNum)
-    {
-       
-
-        return editor.getText(new TextLocation(lineNum, 0), new TextLocation(lineNum,
-            editor.getLineLength(lineNum) - 1));
-    }
-
-    @Override
-    public int getNumberOfLines()
-    {
-        return editor.getLineCount();
-    }
-    
 }

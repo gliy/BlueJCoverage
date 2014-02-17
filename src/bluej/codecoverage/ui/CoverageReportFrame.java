@@ -29,7 +29,9 @@ import bluej.codecoverage.utils.join.BCoverageClass;
 import bluej.codecoverage.utils.join.BCoverage;
 import bluej.codecoverage.utils.join.BCoveragePackage;
 import bluej.codecoverage.utils.join.ClassInfo;
+import bluej.codecoverage.utils.join.Locatable;
 import bluej.codecoverage.utils.join.BCoverageClass.BCoverageMethod;
+import bluej.extensions.BPackage;
 import bluej.extensions.PackageNotFoundException;
 import bluej.extensions.ProjectNotOpenException;
 
@@ -85,7 +87,7 @@ public class CoverageReportFrame extends JFrame
         try
         {
             ClassInfo bclass = clz.getClassInfo();
-            CoverageSourceDisplay existingDisplay = classToDisplay.get(clz.getId());
+            CoverageSourceDisplay existingDisplay = classToDisplay.get(bclass.getId());
             if (existingDisplay == null)
             {
                 final CoverageSourceDisplay newDisplay = new CoverageSourceDisplay(clz);
@@ -111,6 +113,7 @@ public class CoverageReportFrame extends JFrame
                 existingDisplay = newDisplay;
             }
             tabs.setSelectedComponent(existingDisplay);
+           
         }
         catch (Exception e)
         {
@@ -120,11 +123,10 @@ public class CoverageReportFrame extends JFrame
 
     }
 
-    private void moveCaret(DefaultMutableTreeNode node)
+    private void moveCaret(DefaultMutableTreeNode node, DefaultMutableTreeNode parent)
     {
-        DefaultMutableTreeNode parent = (DefaultMutableTreeNode) node.getParent();
         bringUpTab((BCoverageClass)parent.getUserObject());
-        BCoverageMethod selectedCoverage = (BCoverageMethod) node.getUserObject();
+        Locatable selectedCoverage = (Locatable) node.getUserObject();
         
        
             ((CoverageSourceDisplay) tabs.getSelectedComponent()).moveCaret(selectedCoverage
@@ -139,15 +141,18 @@ public class CoverageReportFrame extends JFrame
         {
             DefaultMutableTreeNode node = overview.getSelectedNode();
             BCoverage<?> selectedCoverage = (BCoverage<?>) node.getUserObject();
-            if (selectedCoverage instanceof BCoverageClass)
+            if (!(selectedCoverage instanceof BCoveragePackage))
             {
-                BCoverageClass bClassInfo = (BCoverageClass) selectedCoverage;
-                bringUpTab(bClassInfo);
+                DefaultMutableTreeNode parent = node;
+                if (((DefaultMutableTreeNode) node.getParent()).getUserObject() instanceof BCoverageClass)
+                {
+                    parent = (DefaultMutableTreeNode) node.getParent();
+                }
+                moveCaret(node, parent);
+                //BCoverageClass bClassInfo = (BCoverageClass) selectedCoverage;
+                //bringUpTab(bClassInfo);
             }
-            else if (selectedCoverage instanceof BCoverageMethod)
-            {
-                moveCaret(node);
-            }
+          
         }
     }
     

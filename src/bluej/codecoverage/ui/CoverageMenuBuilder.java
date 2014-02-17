@@ -39,7 +39,7 @@ public class CoverageMenuBuilder
 
         JPanel coverage = new JPanel();
 
-        coverageButton = new JToggleButton("Start Coverage",
+        coverageButton = new JToggleButton(getText("Start"),
             false);
         coverageButton.addItemListener(new ItemListener()
         {
@@ -50,20 +50,23 @@ public class CoverageMenuBuilder
                 
                 if (coverageButton.isSelected())
                 {
-                    coverageButton.setText("End Coverage");
+                    coverageButton.setText(getText("End"));
                 }
                 else
                 {
-                    coverageButton.setText("Start Coverage");
+                    coverageButton.setText(getText("Start"));
                 }
             }
         });
-
         coverage.setLayout(new BoxLayout(coverage, BoxLayout.Y_AXIS));
         coverage.setAlignmentX(0.5f);
         coverage.add(coverageButton);
+        
         leftBar.add(coverage, 1);
 
+    }
+    private static String getText(String state) {
+        return "<html>" + state + "</br>Coverage</html>";
     }
     public JToggleButton getButton() {
         return coverageButton;

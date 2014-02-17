@@ -6,7 +6,7 @@ import java.util.List;
 import bluej.codecoverage.utils.serial.CoverageClass;
 import bluej.codecoverage.utils.serial.CoverageMethod;
 
-public class BCoverageClass extends BCoverage<CoverageClass>
+public class BCoverageClass extends BCoverage<CoverageClass> implements Locatable
 {
     private ClassInfo classinfo;
     private BCoveragePackage parent;
@@ -28,12 +28,15 @@ public class BCoverageClass extends BCoverage<CoverageClass>
             classes.add(new BCoverageClass(bclass, clz));
         }
     }
+    
     public void setParent(BCoveragePackage parent) {
         this.parent = parent;
     }
+    
     public BCoveragePackage getParent() {
         return parent;
     }
+    
     public ClassInfo getClassInfo()
     {
         return classinfo;
@@ -43,7 +46,7 @@ public class BCoverageClass extends BCoverage<CoverageClass>
     @Override
     public String getName()
     {
-        String name = classinfo.getName();
+        String name = src.getName();
         if(name.contains("/")) {
             name = name.substring(name.lastIndexOf("/") + 1);
         }
@@ -60,7 +63,7 @@ public class BCoverageClass extends BCoverage<CoverageClass>
     }
  
     
-    public class BCoverageMethod extends BCoverage<CoverageMethod>{
+    public class BCoverageMethod extends BCoverage<CoverageMethod> implements Locatable {
 
         protected BCoverageMethod(CoverageMethod src)
         {
@@ -77,5 +80,12 @@ public class BCoverageClass extends BCoverage<CoverageClass>
             return src.getStartLine();
         }
         
+    }
+
+
+    @Override
+    public int getFirstLine()
+    {
+        return src.getFirstLine();
     }
 }

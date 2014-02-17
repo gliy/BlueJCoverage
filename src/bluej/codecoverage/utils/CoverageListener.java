@@ -2,7 +2,6 @@ package bluej.codecoverage.utils;
 
 import java.io.Closeable;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -11,13 +10,13 @@ import java.io.PipedOutputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Arrays;
 
 import org.jacoco.core.analysis.Analyzer;
 import org.jacoco.core.analysis.CoverageBuilder;
 import org.jacoco.core.analysis.IBundleCoverage;
 import org.jacoco.core.analysis.IPackageCoverage;
 import org.jacoco.core.data.ExecutionDataStore;
+import org.jacoco.core.data.SessionInfo;
 import org.jacoco.core.data.SessionInfoStore;
 import org.jacoco.core.runtime.RemoteControlReader;
 import org.jacoco.core.runtime.RemoteControlWriter;
@@ -25,7 +24,6 @@ import org.jacoco.core.runtime.RuntimeData;
 import org.jacoco.report.DirectorySourceFileLocator;
 import org.jacoco.report.FileMultiReportOutput;
 import org.jacoco.report.IReportVisitor;
-import org.jacoco.report.MultiReportVisitor;
 import org.jacoco.report.html.HTMLFormatter;
 
 import bluej.codecoverage.utils.serial.CoverageBridge;
@@ -91,23 +89,21 @@ public class CoverageListener
     private static class Handler implements Runnable {
 
         private final Socket socket;
-
         private final RemoteControlReader reader;
-
-        private  ExecutionDataStore executionData = new ExecutionDataStore(); 
+        private ExecutionDataStore executionData = new ExecutionDataStore(); 
         private SessionInfoStore sesionInfo = new SessionInfoStore();
-        private final RemoteControlWriter trigger;
-        private RuntimeData data;
+        private RemoteControlWriter trigger;
         Handler(final Socket socket) throws IOException {
             this.socket = socket;
-            this.data = new RuntimeData();
+
             // Just send a valid header:
             trigger = new RemoteControlWriter(socket.getOutputStream());
-            
+       
             reader = new RemoteControlReader(socket.getInputStream());
             reader.setSessionInfoVisitor(sesionInfo);
             reader.setExecutionDataVisitor(executionData);
-            
+
+            trigger.sendCmdOk();
             
         }
 
@@ -115,8 +111,7 @@ public class CoverageListener
             try {
      
                 while (reader.read()) {
-                 
-                }             
+                }
                 socket.close();
             } catch (final Exception e) {
                 e.printStackTrace();
@@ -129,7 +124,7 @@ public class CoverageListener
                 try
                 {
                     // resets the coverage information to prepare for a new collection
-                    trigger.visitDumpCommand(false, true);
+                    trigger.visitDumpCommand(false, false);
                     executionData.reset();
                 }
                 catch (Exception e)
@@ -143,24 +138,21 @@ public class CoverageListener
             {
                 if(socket.isConnected()) {
                     System.out.println("Dump requested");
-                    
-                    System.out.println(sesionInfo.isEmpty());
                     // dumps the information and resets all collected coverage information
                     trigger.visitDumpCommand(true, false);
-                    trigger.sendCmdOk();
+
                     
-                    data.collect(executionData, sesionInfo, true);
+                   // new RuntimeData().collect(executionData, sesionInfo, false);
                     
                     // creates an input/output pipe to send the coverage information
                     PipedInputStream inPipe = new PipedInputStream();
                     final PipedOutputStream outPipe = new PipedOutputStream(inPipe);
                     final CoverageBuilder coverageBuilder = new CoverageBuilder();
                     final Analyzer analyzer = new Analyzer(executionData, coverageBuilder);
-                   // analyzer.analyzeAll(file);
-                  
+
                     analyzer.analyzeAll(file.getAbsolutePath(), null);
-                    IBundleCoverage bundle = coverageBuilder.getBundle("Run");
-                    test(bundle, file);
+                    //IBundleCoverage bundle = coverageBuilder.getBundle("Run");
+                   // test(bundle, file);
 
                     new Thread(new Runnable()
                     
@@ -171,7 +163,7 @@ public class CoverageListener
                         {
                             try {
                                 ObjectOutputStream outputStream = new ObjectOutputStream(outPipe);
-                                
+                               
                                 IBundleCoverage bundle = coverageBuilder.getBundle("Run");
    
                                 // send all gathered coverage information

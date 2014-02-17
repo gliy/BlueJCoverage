@@ -24,12 +24,11 @@ public class BCoverageBridge
 {
 
     /**
-     * Goes through all open BlueJ projects, and attempts to join coverage information
-     * with the BlueJ objects. If a mapping to a BlueJ object
-     *  is not found for the coverage information, then the local filesystem is searched.
+     * Goes through all the coverage information, and searches the local filesystem.
      * This is because BlueJ does not provide BPackages for packages that are not currently open in the GUI.
      * 
      * If the Filestystem search is unable to locate the file, then the coverage information is excluded.
+     * 
      * @param packages all collected coverage information.
      * @param baseDir the base directory to search from
      * @return the mapped coverage information

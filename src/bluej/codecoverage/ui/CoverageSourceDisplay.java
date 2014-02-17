@@ -77,7 +77,7 @@ class CoverageSourceDisplay extends JScrollPane
         return source;
     }
     public String getId() {
-        return coverage.getId();
+        return coverage.getClassInfo().getId();
     }
     private void generateDisplay() throws BadLocationException,
         ProjectNotOpenException, PackageNotFoundException

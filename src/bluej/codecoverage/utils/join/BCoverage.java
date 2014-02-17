@@ -17,7 +17,7 @@ public abstract class BCoverage<E extends Coverage>
 {
     protected final String id;
     protected E src;
-
+    
     protected BCoverage(E src)
     {
         this.id = UUID.randomUUID().toString();

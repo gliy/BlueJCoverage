@@ -6,16 +6,20 @@
 
 	<property name="blue.extension.dest" value="${bluej.lib}/extensions" />
 
-
+  
+   
 	<property name="build.dir" value="build" />
 	<property name="src.dir" value="src" />
 	<path id="class.path">
 
 		<pathelement location="bin" />
 		<fileset dir="lib" includes="*.jar" />
+
 		<pathelement location="${bluej.lib}/bluejext.jar" />
 	</path>
-
+	<taskdef classname="lombok.delombok.ant.DelombokTask"
+		classpath="lib2/lombok.jar" name="delombok" />
+	
 	<property name="lib.dir" value="lib" />
 	<target name="-init" depends="clean">
 
@@ -26,9 +30,12 @@
 		<delete dir="${build.dir}" />
 	</target>
 	<target name="build" depends="-init" description="Build project">
+		<delombok verbose="false" encoding="UTF-8" to="${build.dir}"
+			from="${src.dir}">
 
+		</delombok>
 		<copy todir="${build.dir}">
-			<fileset dir="${src.dir}" />
+
 			<fileset dir="resources" />
 		</copy>
 
@@ -39,7 +46,7 @@
 		</unzip>
 
 		<javac debug="true" debuglevel="lines,vars,source" destdir="${build.dir}"
-			srcdir="${src.dir}" source="1.6" target="1.6">
+			srcdir="${build.dir}" source="1.6" target="1.6">
 			<classpath refid="class.path" />
 		</javac>
 	</target>

@@ -17,6 +17,7 @@ import java.util.Properties;
 import javax.swing.ImageIcon;
 
 import bluej.codecoverage.utils.CoverageUtilities;
+import bluej.codecoverage.utils.serial.CoverageType;
 import bluej.extensions.BlueJ;
 
 /**
@@ -84,24 +85,13 @@ public class CoveragePrefManager
 
     private static class StaticPreferences
     {
-        public final ImageIcon getPackageIcon()
-        {
-            return getImage("package.gif");
-        }
+       
 
-        public final ImageIcon getSourceIcon()
+        public ImageIcon getImage(CoverageType type)
         {
-            return getImage("class.gif");
-        }
-        public final ImageIcon getMethodIcon()
-        {
-            return getImage("method.gif");
-        }
-
-        private ImageIcon getImage(String name)
-        {
+            
             URL imageLoc = getClass().getClassLoader()
-                .getResource(name);
+                .getResource(type.toString().toLowerCase() + ".png");
             ImageIcon image = null;
             if (imageLoc != null)
             {
@@ -251,9 +241,9 @@ public class CoveragePrefManager
         {
             String value = getPrefs().bluej.getExtensionPropertyString(key,
                 null);
-            List<String> rtn = null;
+            List<String> rtn = new ArrayList<String>();
             if(value != null) {
-                rtn = Arrays.asList(value.split("\n"));
+                rtn.addAll(Arrays.asList(value.split("\n")));
             }
             return rtn;
         }

@@ -92,7 +92,6 @@ public class CodeCoverageExtension extends Extension
                     }
                     catch (Exception e)
                     {
-                        // TODO Auto-generated catch block
                         e.printStackTrace();
                     }
                 }
@@ -100,7 +99,6 @@ public class CodeCoverageExtension extends Extension
                 @Override
                 public void packageClosing(PackageEvent event)
                 {
-                    // TODO Auto-generated method stub
 
                 }
             });
@@ -110,7 +108,6 @@ public class CodeCoverageExtension extends Extension
         {
             ex.printStackTrace();
         }
-        // ClassAttachAction(aClass.getPackage().getProject()).actionPerformed(null);
 
     }
 

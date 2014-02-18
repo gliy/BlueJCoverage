@@ -61,6 +61,8 @@ public final class CoverageUtilities
 
     private File propertyFile;
     private File agentFile;
+
+    private static boolean hooked = false;
     /**
      * Instantiates a new test attacher utilities.
      * @throws IOException 
@@ -234,8 +236,6 @@ public final class CoverageUtilities
      */
     private int findOpenPort() 
     {
-        if(1==1)
-            return 6300;
         int tried = 0;
         int newPort = Integer.parseInt(bluej.getExtensionPropertyString(PORT_NUMBER, "6300"));
         boolean notFound = true;
@@ -270,36 +270,39 @@ public final class CoverageUtilities
 
     public void addShutdownHook()
     {
-
-        final Properties props = new Properties();
-        Runtime.getRuntime()
-            .addShutdownHook(new Thread(new Runnable()
-            {
-
-                @Override
-                public void run()
+        if (!hooked )
+        {
+            hooked = true;
+            final Properties props = new Properties();
+            Runtime.getRuntime()
+                .addShutdownHook(new Thread(new Runnable()
                 {
-                    try
-                    {
-                        props.load(new FileInputStream(propertyFile));
-                        Object current = props.get(VM_ARG_KEY);
 
-                        if (current == null || !current.toString()
-                            .contains(vmArgsToAdd))
+                    @Override
+                    public void run()
+                    {
+                        try
                         {
-                            props.put(VM_ARG_KEY, buildVMArgs());
-                            props.store(new FileOutputStream(propertyFile),
-                                "");
+                            props.load(new FileInputStream(propertyFile));
+                            Object current = props.get(VM_ARG_KEY);
+
+                            if (current == null || !current.toString()
+                                .contains(vmArgsToAdd))
+                            {
+                                props.put(VM_ARG_KEY, buildVMArgs());
+                                props.store(new FileOutputStream(propertyFile),
+                                    "");
+
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            e.printStackTrace();
 
                         }
                     }
-                    catch (Exception e)
-                    {
-                        e.printStackTrace();
-
-                    }
-                }
-            }));
+                }));
+        }
 
     }
 

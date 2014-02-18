@@ -14,6 +14,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
+import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.UIManager;
 import javax.swing.event.TreeSelectionListener;
@@ -30,6 +31,7 @@ import bluej.codecoverage.utils.join.BCoverageClass;
 import bluej.codecoverage.utils.join.BCoverageClass.BCoverageMethod;
 import bluej.codecoverage.utils.join.BCoveragePackage;
 import bluej.codecoverage.utils.serial.CoverageCounter;
+import bluej.codecoverage.utils.serial.CoverageType;
 
 /**
  * Displays an overview of the code coverage for a class in a tree structure. Allows the
@@ -113,7 +115,7 @@ class CoverageOverviewPane extends JPanel
 
         tree.setCellRenderer(renderer);
         setLayout(new BorderLayout());
-        add(tree, BorderLayout.CENTER);
+        add(new JScrollPane(tree), BorderLayout.CENTER);
 
         add(summary, BorderLayout.SOUTH);
     }
@@ -168,17 +170,8 @@ class CoverageOverviewPane extends JPanel
 
     private ImageIcon getDisplayIcon(BCoverage<?> coverage)
     {
-        ImageIcon rtn = null;
-        if (coverage instanceof BCoveragePackage)
-        {
-            rtn = prefs.getPackageIcon();
-        }
-        else if (coverage instanceof BCoverageClass)
-        {
-            rtn = prefs.getSourceIcon();
-        } else if(coverage instanceof BCoverageMethod) {
-            rtn = prefs.getMethodIcon();
-        }
+        ImageIcon rtn = prefs.getImage(CoverageType.findType(coverage.getSource()));
+        
         return rtn;
     }
 
@@ -192,11 +185,13 @@ class CoverageOverviewPane extends JPanel
     {
         DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) tree
             .getLastSelectedPathComponent();
-        BCoverage<?> info = (BCoverage<?>) selectedNode
-            .getUserObject();
+        if (selectedNode != null)
+        {
+            BCoverage<?> info = (BCoverage<?>) selectedNode
+                .getUserObject();
 
-        buildSummary(info);
-
+            buildSummary(info);
+        }
         return selectedNode;
     }
 

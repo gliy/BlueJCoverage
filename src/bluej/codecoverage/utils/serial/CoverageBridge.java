@@ -88,10 +88,9 @@ public class CoverageBridge
             inner.setName(findName(inner));
             String key = inner.getPackageName() + inner.getSourceFileName();
             CoverageClass parent = byFileName.get(key);
-            System.out.println(inner.getName() + "  << with " + key );
-            // failsafe, should not occur.
+            // failsafe
             if(parent == null) {
-                System.out.println("NO");
+
                 byFileName.put(key, inner);
             } else {
                 parent.addClass(inner);
@@ -112,7 +111,9 @@ public class CoverageBridge
     {
         String name = new JavaNames().getClassName(inner.getName(), null,
             inner.getSuperClass(), inner.getInterfaces());
-        name = name.substring(name.lastIndexOf(".") + 1);
+        if(name.contains(".")) {
+            name = name.substring(name.indexOf(".") + 1);
+        }
         return name;
     }
 

@@ -2,6 +2,11 @@ package bluej.codecoverage.utils.serial;
 
 import java.io.Serializable;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Setter
+@Getter
 public class CoverageMethod extends Coverage implements Serializable
 {
  
@@ -11,15 +16,6 @@ public class CoverageMethod extends Coverage implements Serializable
     public CoverageMethod(int startLine)
     {
         super();
-        this.startLine = startLine;
-    }
-   
-    public int getStartLine()
-    {
-        return startLine;
-    }
-    public void setStartLine(int startLine)
-    {
         this.startLine = startLine;
     }
 

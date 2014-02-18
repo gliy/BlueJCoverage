@@ -23,7 +23,7 @@ public class BCoverageClass extends BCoverage<CoverageClass> implements Locatabl
         {
             methods.add(new BCoverageMethod(method));
         }
-        for (CoverageClass clz : classCoverage.getclassCounter())
+        for (CoverageClass clz : classCoverage.getClassCounter())
         {
             classes.add(new BCoverageClass(bclass, clz));
         }

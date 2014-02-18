@@ -2,6 +2,9 @@ package bluej.codecoverage.utils.serial;
 
 import java.io.Serializable;
 
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * Serializable representation of 
  * {@linkplain http://www.eclemma.org/jacoco/trunk/doc/api/org/jacoco/core/analysis/ILine.html}.
@@ -11,6 +14,8 @@ import java.io.Serializable;
  * @author Ian
  * 
  */
+@Getter
+@Setter
 public class CoverageLine implements Serializable
 {
 
@@ -24,25 +29,7 @@ public class CoverageLine implements Serializable
         this.status = status;
         this.branchCounter = branchCounter;
     }
-    public int getStatus()
-    {
-        return status;
-    }
-    public CoverageCounter getBranchCounter()
-    {
-        return branchCounter;
-    }
-    public CoverageLine()
-    {
-    }
-    public void setStatus(int status)
-    {
-        this.status = status;
-    }
-    public void setBranchCounter(CoverageCounter branchCounter)
-    {
-        this.branchCounter = branchCounter;
-    }
+  
     @Override
     public String toString()
     {

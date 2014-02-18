@@ -24,37 +24,34 @@ import javax.swing.JScrollPane;
 import bluej.codecoverage.pref.CoveragePrefManager;
 import bluej.codecoverage.pref.CoveragePrefManager.CurrentPreferences;
 import bluej.codecoverage.pref.CoveragePrefManager.PrefKey;
+import bluej.codecoverage.utils.CoverageUtilities;
 import bluej.extensions.BlueJ;
 import bluej.extensions.PreferenceGenerator;
 
 public class CoveragePreferences implements PreferenceGenerator
 {
-  
+
     private BlueJ bluej;
-    private List<String> ignoredPackages;
     private CurrentPreferences prefs;
+    private DefaultListModel<String> ignore;
 
     public CoveragePreferences(BlueJ bluej)
     {
         this.bluej = bluej;
-        ignoredPackages = new ArrayList<String>();
-
     }
 
     @Override
     public JPanel getPanel()
     {
         loadValues();
-        JButton addIgnore = new JButton(
-            "<html>Add package to ignore</br><font color=red> (Requires BlueJ restart)</font></html>");
 
         final JPanel rtn = new JPanel(new BorderLayout());
         JPanel buttons = new JPanel();
         buttons.setLayout(new BoxLayout(buttons, BoxLayout.Y_AXIS));
 
-        buttons.add(addIgnore);
         JButton guiButton = new JButton("GUI Settings");
         buttons.add(guiButton);
+
         guiButton.addActionListener(new ActionListener()
         {
 
@@ -66,10 +63,9 @@ public class CoveragePreferences implements PreferenceGenerator
                     JOptionPane.PLAIN_MESSAGE);
             }
         });
-        rtn.add(buttons, BorderLayout.EAST);
-
+        rtn.add(buttons, BorderLayout.SOUTH);
         rtn.add(getExcluded(), BorderLayout.CENTER);
-       
+
         return rtn;
     }
 
@@ -87,36 +83,89 @@ public class CoveragePreferences implements PreferenceGenerator
             .save();
 
     }
-    private JPanel getExcluded() {
-        
-        DefaultListModel<String> ignore = new DefaultListModel<String>(){
+
+    private JPanel getExcluded()
+    {
+
+        ignore = new DefaultListModel<String>()
+        {
             {
-                for(String excluded : prefs.getExcluded()) {
+                for (String excluded : prefs.getExcluded())
+                {
                     super.addElement(excluded);
                 }
             }
+
             @Override
             public void addElement(String element)
             {
                 prefs.addExcluded(element);
+                CoverageUtilities.get().addShutdownHook();
             }
+
             @Override
             public boolean removeElement(Object obj)
             {
-               
-               prefs.removeExcluded(obj.toString());
-               return super.removeElement(obj);
+
+                prefs.removeExcluded(obj.toString());
+                CoverageUtilities.get().addShutdownHook();
+                return super.removeElement(obj);
             }
         };
-      
+
         JPanel rtn = new JPanel(new BorderLayout());
-        JList<String> ignoreList = new JList<String>(ignore);
+        final JList<String> ignoreList = new JList<String>(ignore);
 
         JScrollPane ignoreScrollPane = new JScrollPane(ignoreList);
-        ignoreScrollPane.setBorder(BorderFactory.createTitledBorder("Ignored"));
+        ignoreScrollPane.setBorder(BorderFactory
+            .createTitledBorder("Ignored (Changes require BlueJ restart)"));
+
+        JButton addIgnore = new JButton(
+            "Add package");
+
+        addIgnore.addActionListener(new ActionListener()
+        {
+
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                String ignoreInput = JOptionPane
+                    .showInputDialog("Enter package/class to ignore");
+                if (ignoreInput != null)
+                {
+                    ignore.addElement(ignoreInput);
+                }
+            }
+        });
+
+        JButton removeIgnore = new JButton(
+            "Remove package");
+
+        addIgnore.addActionListener(new ActionListener()
+        {
+
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                int selected = ignoreList.getSelectedIndex();
+                if (selected != -1)
+                {
+                    ignore.remove(selected);
+                }
+            }
+        });
+
+        JPanel ignoreButtons = new JPanel();
+        ignoreButtons.setLayout(new BoxLayout(ignoreButtons, BoxLayout.Y_AXIS));
+        ignoreButtons.add(addIgnore);
+        ignoreButtons.add(removeIgnore);
+
+        rtn.add(ignoreButtons, BorderLayout.EAST);
         rtn.add(ignoreScrollPane, BorderLayout.CENTER);
+
         return rtn;
     }
+
     private JPanel getGUIOptions()
     {
         final JPanel main = new JPanel();
@@ -127,7 +176,7 @@ public class CoveragePreferences implements PreferenceGenerator
             if (key.getDisplay() != null)
             {
                 JPanel opt = new JPanel(new GridLayout(1, 2));
-                
+
                 opt.add(new JLabel(key.getDisplay()));
                 final JPanel color = new JPanel();
                 color.setBackground((Color) prefs.getPref(key));

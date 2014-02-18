@@ -33,7 +33,7 @@ public class CoveragePreferences implements PreferenceGenerator
 
     private BlueJ bluej;
     private CurrentPreferences prefs;
-    private DefaultListModel<String> ignore;
+    private DefaultListModel ignore;
 
     public CoveragePreferences(BlueJ bluej)
     {
@@ -87,7 +87,7 @@ public class CoveragePreferences implements PreferenceGenerator
     private JPanel getExcluded()
     {
 
-        ignore = new DefaultListModel<String>()
+        ignore = new DefaultListModel()
         {
             {
                 for (String excluded : prefs.getExcluded())
@@ -97,9 +97,9 @@ public class CoveragePreferences implements PreferenceGenerator
             }
 
             @Override
-            public void addElement(String element)
+            public void addElement(Object element)
             {
-                prefs.addExcluded(element);
+                prefs.addExcluded(element.toString());
                 CoverageUtilities.get().addShutdownHook();
             }
 
@@ -114,7 +114,7 @@ public class CoveragePreferences implements PreferenceGenerator
         };
 
         JPanel rtn = new JPanel(new BorderLayout());
-        final JList<String> ignoreList = new JList<String>(ignore);
+        final JList ignoreList = new JList(ignore);
 
         JScrollPane ignoreScrollPane = new JScrollPane(ignoreList);
         ignoreScrollPane.setBorder(BorderFactory

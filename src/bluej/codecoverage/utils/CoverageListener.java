@@ -11,13 +11,17 @@ import java.io.PipedOutputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Arrays;
 
 import org.jacoco.core.analysis.Analyzer;
 import org.jacoco.core.analysis.CoverageBuilder;
 import org.jacoco.core.analysis.IBundleCoverage;
 import org.jacoco.core.analysis.IPackageCoverage;
+import org.jacoco.core.data.ExecutionData;
 import org.jacoco.core.data.ExecutionDataStore;
+import org.jacoco.core.data.ExecutionDataWriter;
+import org.jacoco.core.data.IExecutionDataVisitor;
+import org.jacoco.core.data.ISessionInfoVisitor;
+import org.jacoco.core.data.SessionInfo;
 import org.jacoco.core.data.SessionInfoStore;
 import org.jacoco.core.runtime.RemoteControlReader;
 import org.jacoco.core.runtime.RemoteControlWriter;
@@ -25,7 +29,6 @@ import org.jacoco.core.runtime.RuntimeData;
 import org.jacoco.report.DirectorySourceFileLocator;
 import org.jacoco.report.FileMultiReportOutput;
 import org.jacoco.report.IReportVisitor;
-import org.jacoco.report.MultiReportVisitor;
 import org.jacoco.report.html.HTMLFormatter;
 
 import bluej.codecoverage.utils.serial.CoverageBridge;
@@ -97,25 +100,27 @@ public class CoverageListener
         private  ExecutionDataStore executionData = new ExecutionDataStore(); 
         private SessionInfoStore sesionInfo = new SessionInfoStore();
         private final RemoteControlWriter trigger;
-        private RuntimeData data;
+        private Object lock;
         Handler(final Socket socket) throws IOException {
             this.socket = socket;
-            this.data = new RuntimeData();
+            this.lock = new Object();
             // Just send a valid header:
             trigger = new RemoteControlWriter(socket.getOutputStream());
             
             reader = new RemoteControlReader(socket.getInputStream());
             reader.setSessionInfoVisitor(sesionInfo);
             reader.setExecutionDataVisitor(executionData);
-            
-            
         }
+       
 
         public void run() {
             try {
      
                 while (reader.read()) {
-                 
+                    synchronized (lock)
+                    {
+                        lock.notifyAll();
+                    }
                 }             
                 socket.close();
             } catch (final Exception e) {
@@ -131,6 +136,7 @@ public class CoverageListener
                     // resets the coverage information to prepare for a new collection
                     trigger.visitDumpCommand(false, true);
                     executionData.reset();
+                    sesionInfo = new SessionInfoStore();
                 }
                 catch (Exception e)
                 {
@@ -143,23 +149,24 @@ public class CoverageListener
             {
                 if(socket.isConnected()) {
                     System.out.println("Dump requested");
-  
-                    // dumps the information and resets all collected coverage information
-                    trigger.visitDumpCommand(true, false);
-                    trigger.sendCmdOk();
-                    
-                    data.collect(executionData, sesionInfo, true);
-                    
+                    synchronized (lock)
+                    {
+                        // dumps the information and resets all collected coverage information
+                        trigger.visitDumpCommand(true, false);
+                        trigger.sendCmdOk();
+                        trigger.flush();
+                        lock.wait();
+                    }
+                   
+      
                     // creates an input/output pipe to send the coverage information
                     PipedInputStream inPipe = new PipedInputStream();
                     final PipedOutputStream outPipe = new PipedOutputStream(inPipe);
                     final CoverageBuilder coverageBuilder = new CoverageBuilder();
                     final Analyzer analyzer = new Analyzer(executionData, coverageBuilder);
-                   // analyzer.analyzeAll(file);
                   
+                    System.out.println(file.getAbsolutePath());
                     analyzer.analyzeAll(file.getAbsolutePath(), null);
-                  //  IBundleCoverage bundle = coverageBuilder.getBundle("Run");
-                    //test(bundle, file);
 
                     new Thread(new Runnable()
                     

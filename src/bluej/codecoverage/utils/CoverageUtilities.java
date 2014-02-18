@@ -256,7 +256,14 @@ public final class CoverageUtilities
                 ex.printStackTrace();
                 System.out.println("Trying to connect to port " + newPort);
             } finally {
-                close(server);
+                try
+                {
+                    server.close();
+                }
+                catch (IOException e)
+                {
+                }
+               // close(server);
             }
         }
         if (!notFound)

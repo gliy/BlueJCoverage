@@ -17,6 +17,9 @@ import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.UIManager;
+import javax.swing.event.TreeExpansionEvent;
+import javax.swing.event.TreeExpansionListener;
+import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
@@ -48,7 +51,19 @@ class CoverageOverviewPane extends JPanel
     private DefaultTreeModel model;
     private JTree tree;
     private JPanel summary;
-
+    private TreeSelectionListener summarySelection = new TreeSelectionListener()
+    {
+        
+        @Override
+        public void valueChanged(TreeSelectionEvent e)
+        {
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode)
+                tree.getLastSelectedPathComponent();
+            if(node != null) {
+                buildSummary((BCoverage<?>)node.getUserObject());
+            }
+        }
+    };
     public CoverageOverviewPane(List<BCoveragePackage> coverage, CurrentPreferences prefs)
     {
         super();
@@ -112,11 +127,11 @@ class CoverageOverviewPane extends JPanel
         tree.getSelectionModel()
             .setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         tree.setToggleClickCount(1);
-
         tree.setCellRenderer(renderer);
+        tree.addTreeSelectionListener(summarySelection);
+        
         setLayout(new BorderLayout());
         add(new JScrollPane(tree), BorderLayout.CENTER);
-
         add(summary, BorderLayout.SOUTH);
     }
 
@@ -190,7 +205,7 @@ class CoverageOverviewPane extends JPanel
             BCoverage<?> info = (BCoverage<?>) selectedNode
                 .getUserObject();
 
-            buildSummary(info);
+          //  buildSummary(info);
         }
         return selectedNode;
     }

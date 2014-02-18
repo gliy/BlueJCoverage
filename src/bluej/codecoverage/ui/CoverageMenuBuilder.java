@@ -2,6 +2,7 @@ package bluej.codecoverage.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.List;
@@ -41,6 +42,7 @@ public class CoverageMenuBuilder
 
         coverageButton = new JToggleButton(getText("Start"),
             false);
+        
         coverageButton.addItemListener(new ItemListener()
         {
 
@@ -50,7 +52,7 @@ public class CoverageMenuBuilder
                 
                 if (coverageButton.isSelected())
                 {
-                    coverageButton.setText(getText("End"));
+                    coverageButton.setText(getText("  End"));
                 }
                 else
                 {
@@ -61,12 +63,13 @@ public class CoverageMenuBuilder
         coverage.setLayout(new BoxLayout(coverage, BoxLayout.Y_AXIS));
         coverage.setAlignmentX(0.5f);
         coverage.add(coverageButton);
-        
+        coverageButton.setFont(coverageButton.getFont().deriveFont(0, 10f));
+       // coverageButton.setPreferredSize(new Dimension(coverageButton.getSize()));
         leftBar.add(coverage, 1);
 
     }
     private static String getText(String state) {
-        return "<html>" + state + "</br>Coverage</html>";
+        return state + " Coverage";
     }
     public JToggleButton getButton() {
         return coverageButton;

@@ -2,13 +2,12 @@ package bluej.codecoverage.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.GridLayout;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -100,25 +99,28 @@ public class CoveragePreferences implements PreferenceGenerator
             public void addElement(Object element)
             {
                 prefs.addExcluded(element.toString());
+                super.addElement(element);
                 CoverageUtilities.get().addShutdownHook();
             }
 
             @Override
-            public boolean removeElement(Object obj)
+            public Object remove(int index)
             {
 
-                prefs.removeExcluded(obj.toString());
+                prefs.removeExcluded(index);
                 CoverageUtilities.get().addShutdownHook();
-                return super.removeElement(obj);
+                return super.remove(index);
             }
+
+            
         };
 
         JPanel rtn = new JPanel(new BorderLayout());
         final JList ignoreList = new JList(ignore);
-
+        ignoreList.setVisibleRowCount(10);
         JScrollPane ignoreScrollPane = new JScrollPane(ignoreList);
         ignoreScrollPane.setBorder(BorderFactory
-            .createTitledBorder("Ignored (Changes require BlueJ restart)"));
+            .createTitledBorder("Excluded (Changes require BlueJ restart)"));
 
         JButton addIgnore = new JButton(
             "Add package");
@@ -130,7 +132,7 @@ public class CoveragePreferences implements PreferenceGenerator
             public void actionPerformed(ActionEvent e)
             {
                 String ignoreInput = JOptionPane
-                    .showInputDialog("Enter package/class to ignore");
+                    .showInputDialog("Enter package/class to excluded");
                 if (ignoreInput != null)
                 {
                     ignore.addElement(ignoreInput);
@@ -141,7 +143,7 @@ public class CoveragePreferences implements PreferenceGenerator
         JButton removeIgnore = new JButton(
             "Remove package");
 
-        addIgnore.addActionListener(new ActionListener()
+        removeIgnore.addActionListener(new ActionListener()
         {
 
             @Override
@@ -175,18 +177,18 @@ public class CoveragePreferences implements PreferenceGenerator
         {
             if (key.getDisplay() != null)
             {
-                JPanel opt = new JPanel(new GridLayout(1, 2));
+                JPanel opt = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
-                opt.add(new JLabel(key.getDisplay()));
-                final JPanel color = new JPanel();
+               
+                final JButton color = new JButton();
                 color.setBackground((Color) prefs.getPref(key));
-                color.addMouseListener(new MouseAdapter()
+                color.addActionListener(new ActionListener()
                 {
                     @Override
-                    public void mousePressed(MouseEvent e)
+                    public void actionPerformed(ActionEvent e )
                     {
-                        if (e.getButton() == MouseEvent.BUTTON1)
-                        {
+                      //  if (e.getButton() == MouseEvent.BUTTON1)
+                      //  {
                             Color choice = JColorChooser.showDialog(main,
                                 "Choose color for " + key.getDisplay(),
                                 color.getBackground());
@@ -195,11 +197,13 @@ public class CoveragePreferences implements PreferenceGenerator
                                 prefs.setPref(key, choice);
                                 color.setBackground(choice);
                             }
-                        }
+                       // }
                     }
                 });
+                color.setPreferredSize(new Dimension(40, 20));
                 opt.add(color);
-                opt.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
+                opt.add(new JLabel(key.getDisplay()));
+              //  opt.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
                 main.add(opt);
             }
         }

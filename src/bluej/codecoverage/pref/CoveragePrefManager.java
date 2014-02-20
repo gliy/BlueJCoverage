@@ -60,7 +60,11 @@ public class CoveragePrefManager
 
         for (PrefKey key : PrefKey.values())
         {
-            currentPrefs.setPref(key, key.type.load(key.name()));
+            Object loadedValue = key.type.load(key.name());
+            if (loadedValue != null)
+            {
+                currentPrefs.setPref(key, loadedValue);
+            }
         }
 
         return currentPrefs;
@@ -68,8 +72,6 @@ public class CoveragePrefManager
 
     public void save()
     {
-        OutputStream out = null;
-
         for (Entry<PrefKey, Object> current : currentPrefs.prefs.entrySet())
         {
             bluej.setExtensionPropertyString(current.getKey()
@@ -138,10 +140,10 @@ public class CoveragePrefManager
             setPref(PrefKey.EXCLUDED, excluded);
         }
 
-        public void removeExcluded(String name)
+        public void removeExcluded(int index)
         {
             List<String> excluded = getExcluded();
-            excluded.remove(name);
+            excluded.remove(index);
             setPref(PrefKey.EXCLUDED, excluded);
         }
 
@@ -151,7 +153,7 @@ public class CoveragePrefManager
 
     private static class DefaultPreferences extends CurrentPreferences
     {
-        private static final String[] DEFAULT_EXCLUDES = new String[]{"bluej/runtime**/*.class","**/*__SHELL*"};
+        public static final String[] DEFAULT_EXCLUDES = new String[]{"bluej/runtime**/*.class","**/*__SHELL*"};
 
         private DefaultPreferences()
         {
@@ -229,6 +231,9 @@ public class CoveragePrefManager
         @Override
         public String save(List<String> value)
         {
+            if(value == null || value.isEmpty()) {
+                value = Arrays.asList(DefaultPreferences.DEFAULT_EXCLUDES);
+            }
             String save = "";
             for(String toSave : value) {
                 save += toSave + "\n";
@@ -241,10 +246,11 @@ public class CoveragePrefManager
         {
             String value = getPrefs().bluej.getExtensionPropertyString(key,
                 null);
-            List<String> rtn = new ArrayList<String>();
-            if(value != null) {
-                rtn.addAll(Arrays.asList(value.split("\n")));
+            List<String> rtn = null;
+            if(value != null && value.length() > 0) {
+                rtn = new ArrayList<String>(Arrays.asList(value.split("\n")));
             }
+            
             return rtn;
         }
 

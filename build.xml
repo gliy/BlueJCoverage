@@ -6,8 +6,8 @@
 
 	<property name="blue.extension.dest" value="${bluej.lib}/extensions" />
 
-  
-   
+
+
 	<property name="build.dir" value="build" />
 	<property name="src.dir" value="src" />
 	<path id="class.path">
@@ -19,7 +19,7 @@
 	</path>
 	<taskdef classname="lombok.delombok.ant.DelombokTask"
 		classpath="lib2/lombok.jar" name="delombok" />
-	
+
 	<property name="lib.dir" value="lib" />
 	<target name="-init" depends="clean">
 
@@ -54,8 +54,8 @@
 	<target name="build-jar" depends="build">
 		<jar destfile="${blue.extension.dest}/CoverageExtension.jar"
 			basedir="${build.dir}" includes="**" manifest="MANIFEST.MF">
-			
-			
+
+
 		</jar>
 
 

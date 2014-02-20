@@ -47,7 +47,6 @@ class CoverageOverviewPane extends JPanel
 {
 
     private CurrentPreferences prefs;
-    private List<BCoveragePackage> coverage;
     private DefaultTreeModel model;
     private JTree tree;
     private JPanel summary;
@@ -67,7 +66,6 @@ class CoverageOverviewPane extends JPanel
     public CoverageOverviewPane(List<BCoveragePackage> coverage, CurrentPreferences prefs)
     {
         super();
-        this.coverage = coverage;
         this.prefs = prefs;
         this.summary = new JPanel();
         summary.setBorder(BorderFactory.createEtchedBorder());
@@ -150,6 +148,7 @@ class CoverageOverviewPane extends JPanel
             summary.add(summaryLabel);
             summary.add(Box.createVerticalStrut(10));
         }
+        summary.revalidate();
         summary.repaint();
     }
 

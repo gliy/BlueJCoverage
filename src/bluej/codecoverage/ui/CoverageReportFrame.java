@@ -1,39 +1,27 @@
 package bluej.codecoverage.ui;
 
-import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.BoxLayout;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
-import javax.swing.JTextPane;
-import javax.swing.JTree;
-import javax.swing.JViewport;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
-import javax.swing.text.BadLocationException;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import bluej.codecoverage.pref.CoveragePrefManager;
 import bluej.codecoverage.pref.CoveragePrefManager.CurrentPreferences;
-import bluej.codecoverage.utils.join.BCoverageClass;
 import bluej.codecoverage.utils.join.BCoverage;
+import bluej.codecoverage.utils.join.BCoverageClass;
 import bluej.codecoverage.utils.join.BCoveragePackage;
 import bluej.codecoverage.utils.join.ClassInfo;
 import bluej.codecoverage.utils.join.Locatable;
-import bluej.codecoverage.utils.join.BCoverageClass.BCoverageMethod;
-import bluej.extensions.BPackage;
-import bluej.extensions.PackageNotFoundException;
-import bluej.extensions.ProjectNotOpenException;
 
 /**
  * Main display for the results of the code coverage.
@@ -42,26 +30,58 @@ import bluej.extensions.ProjectNotOpenException;
  */
 public class CoverageReportFrame extends JFrame
 {
-    List<BCoveragePackage> coverage;
+    private List<BCoveragePackage> coverage;
     private JTabbedPane tabs;
     private CoverageOverviewPane overview;
     private Map<String, CoverageSourceDisplay> classToDisplay;
-    CurrentPreferences prefs = CoveragePrefManager.getPrefs()
+    private CurrentPreferences prefs = CoveragePrefManager.getPrefs()
         .get();
-
-    public CoverageReportFrame(List<BCoveragePackage> classesCovered)
-        throws ProjectNotOpenException, PackageNotFoundException,
-        BadLocationException
+    private static CoverageReportFrame instance;
+    private Frame location;
+    public static CoverageReportFrame create(List<BCoveragePackage> classesCovered, Frame location)
+        throws Exception
     {
+        if (instance == null)
+        {
+            instance = new CoverageReportFrame(classesCovered, location);
+        }
+        else
+        {
+            
+            instance.reset(classesCovered);
+        }
+        
+        return instance;
+    }
 
-        this.coverage = classesCovered;
-        setSize(700, 500);
-        generateTabs();
-        // generateDisplay(classesCovered);
-        // pack();
+   private CoverageReportFrame(List<BCoveragePackage> classesCovered, Frame fr)
+         throws Exception {
+      this.location = fr;
 
-        setTitle("Coverage Report");
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+      this.coverage = classesCovered;
+      setSize(700, 500);
+      generateTabs();
+      setTitle("Coverage Report");
+      setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+      setLocationRelativeTo(location);
+      location = this;
+   }
+    private void reset(List<BCoveragePackage> newInfo) {
+       this.coverage = newInfo;
+       classToDisplay.clear();
+       tabs.removeAll();
+       
+       CoverageOverviewPane overviewTmp = new CoverageOverviewPane(coverage, prefs);
+       overviewTmp.setPreferredSize(new Dimension(overview.getWidth(), 100));
+       overviewTmp.addListener(new TreeListener());
+       overview = overviewTmp;
+       
+       JSplitPane split = ((JSplitPane)getContentPane());
+       
+       split.setRightComponent(overview);
+       split.setDividerLocation(split.getDividerLocation());
+       setLocationRelativeTo(location);
+       location = this;
     }
 
     private void generateTabs()
@@ -70,14 +90,15 @@ public class CoverageReportFrame extends JFrame
         tabs = new JTabbedPane();
         // add(tabs, BorderLayout.CENTER);
         overview = new CoverageOverviewPane(coverage, prefs);
-
         overview.setPreferredSize(new Dimension(getWidth(), 100));
 
         JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, tabs,
             overview);
+        
 
-        add(split);
+        setContentPane(split);
         split.setDividerLocation((getWidth() / 2) + 30);
+        split.setDividerSize(8);
         split.setOneTouchExpandable(true);
         overview.addListener(new TreeListener());
     }

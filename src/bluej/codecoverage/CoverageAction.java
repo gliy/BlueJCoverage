@@ -41,9 +41,9 @@ public class CoverageAction implements ItemListener
             Frame location = bluej.getCurrentFrame();
             File dir = bluej.getCurrentPackage().getProject().getDir();
             List<CoveragePackage> coverage = CoverageUtilities.get().getResults(dir);
-            List<BCoveragePackage> bcoverage = BCoverageBridge.toBCoverage(coverage, dir);
-            JFrame report = new CoverageReportFrame(bcoverage);
-            report.setLocationRelativeTo(location);
+            List<BCoveragePackage> bcoverage = BCoverageBridge
+                .toBCoverage(coverage, dir);
+            JFrame report = CoverageReportFrame.create(bcoverage, location); 
             report.setVisible(true);
         }
         catch (Exception e)

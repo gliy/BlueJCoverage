@@ -5,8 +5,8 @@ import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 import java.util.jar.JarOutputStream;
@@ -20,6 +20,8 @@ import bluej.codecoverage.ui.CoveragePreferences;
 import bluej.codecoverage.utils.CoverageUtilities;
 import bluej.extensions.BlueJ;
 import bluej.extensions.Extension;
+import bluej.extensions.PackageNotFoundException;
+import bluej.extensions.ProjectNotOpenException;
 import bluej.extensions.event.PackageEvent;
 import bluej.extensions.event.PackageListener;
 
@@ -33,7 +35,7 @@ public class CodeCoverageExtension extends Extension
 {
 
     /** The Constant NAME. */
-    private static final String NAME = "BCoverage";
+    private static final String NAME = "Code Coverage";
 
     /** The Constant VERSION. */
     private static final String VERSION = "1.0";
@@ -55,7 +57,7 @@ public class CodeCoverageExtension extends Extension
             // test(bluej);
             // System.exit(1);
 
-            final List<JToggleButton> coverageButtons = new ArrayList<JToggleButton>();
+            final Map<File, JToggleButton> coverageButtons = new HashMap<File, JToggleButton>();
             CoverageAction.init(bluej);
             bluej.setPreferenceGenerator(new CoveragePreferences(bluej));
             bluej.addPackageListener(new PackageListener()
@@ -66,29 +68,35 @@ public class CodeCoverageExtension extends Extension
                 {
                     try
                     {
-                        CoverageMenuBuilder builder = new CoverageMenuBuilder(bluej, event.getPackage());
+                        CoverageMenuBuilder builder = new CoverageMenuBuilder(bluej,
+                            event.getPackage());
                         boolean selected = false;
-                        if(!coverageButtons.isEmpty()) {
-                            selected = coverageButtons.get(0).isSelected();
-                        } else {
+                        if (!coverageButtons.isEmpty())
+                        {
+                            selected = coverageButtons.values().iterator().next()
+                                .isSelected();
+                        }
+                        else
+                        {
                             builder.getButton().addItemListener(CoverageAction.get());
                         }
-                        coverageButtons.add(builder.getButton());
+                        coverageButtons.put(event.getPackage().getDir(),
+                            builder.getButton());
                         builder.getButton().setSelected(selected);
                         builder.getButton().addItemListener(new ItemListener()
                         {
-                            
+
                             @Override
                             public void itemStateChanged(ItemEvent e)
                             {
-                                for (JToggleButton button : coverageButtons)
+                                for (JToggleButton button : coverageButtons.values())
                                 {
                                     button.setSelected(e.getStateChange() == ItemEvent.SELECTED);
                                 }
-                                
+
                             }
                         });
-                        
+
                     }
                     catch (Exception e)
                     {
@@ -99,6 +107,23 @@ public class CodeCoverageExtension extends Extension
                 @Override
                 public void packageClosing(PackageEvent event)
                 {
+                    try
+                    {
+                        File dir = event.getPackage().getDir();
+                        JToggleButton button = coverageButtons.remove(dir);
+                        if (button != null)
+                        {
+                            for (ItemListener listener : button.getItemListeners())
+                            {
+                                button.removeItemListener(listener);
+                            }
+                            button.getParent().remove(button);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        e.printStackTrace();
+                    }
 
                 }
             });
@@ -115,8 +140,8 @@ public class CodeCoverageExtension extends Extension
     {
         JarInputStream is = new JarInputStream(getClass().getClassLoader()
             .getResourceAsStream("jacocoagent.jar"));
-        JarOutputStream out = new JarOutputStream(
-            new FileOutputStream(new File(bluej.getUserConfigDir(), "jacoco2agent.jar")));
+        JarOutputStream out = new JarOutputStream(new FileOutputStream(new File(
+            bluej.getUserConfigDir(), "jacoco2agent.jar")));
 
         copyFiles(is, out);
 

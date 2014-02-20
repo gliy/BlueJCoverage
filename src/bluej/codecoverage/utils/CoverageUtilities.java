@@ -194,7 +194,7 @@ public final class CoverageUtilities
         if (!agentFile.exists())
         {
             String err = "jacocoagent.jar was not found at " + agentFile.getAbsolutePath();
-            JOptionPane.showMessageDialog(bluej.getCurrentFrame(), err, "BCoverage",
+            JOptionPane.showMessageDialog(bluej.getCurrentFrame(), err, "Code Coverage",
                 JOptionPane.ERROR_MESSAGE);
 
         }
@@ -204,7 +204,8 @@ public final class CoverageUtilities
             JOptionPane.showMessageDialog(
                 bluej.getCurrentFrame(),
                 "This looks like a setting changed or it is your first time running"
-                    + " BCoverage.\nPlease restart bluej for it to take effect.");
+                    + " Code Coverage.\nPlease restart bluej for it to take effect.", "Code Coverage",
+                    JOptionPane.PLAIN_MESSAGE);
            addShutdownHook();
            throw new ExtensionUnloadedException();
         }

@@ -5,11 +5,13 @@ import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.jar.JarEntry;
-import java.util.jar.JarInputStream;
-import java.util.jar.JarOutputStream;
+import java.util.jar.JarFile;
 
 import javax.swing.JToggleButton;
 
@@ -54,11 +56,9 @@ public class CodeCoverageExtension extends Extension
         {
             CoveragePrefManager.getPrefs(bluej);
             CoverageUtilities.create(bluej);
-            // test(bluej);
-            // System.exit(1);
-
-            final Map<File, JToggleButton> coverageButtons = new HashMap<File, JToggleButton>();
             CoverageAction.init(bluej);
+            
+            final Map<File, JToggleButton> coverageButtons = new HashMap<File, JToggleButton>();
             bluej.setPreferenceGenerator(new CoveragePreferences(bluej));
             bluej.addPackageListener(new PackageListener()
             {
@@ -134,42 +134,6 @@ public class CodeCoverageExtension extends Extension
             ex.printStackTrace();
         }
 
-    }
-
-    private void test(BlueJ bluej) throws Exception
-    {
-        JarInputStream is = new JarInputStream(getClass().getClassLoader()
-            .getResourceAsStream("jacocoagent.jar"));
-        JarOutputStream out = new JarOutputStream(new FileOutputStream(new File(
-            bluej.getUserConfigDir(), "jacoco2agent.jar")));
-
-        copyFiles(is, out);
-
-    }
-
-    private static void copyFiles(JarInputStream in, JarOutputStream out)
-        throws IOException
-    {
-        JarEntry inEntry;
-        byte[] buffer = new byte[4096];
-
-        while ((inEntry = (JarEntry) in.getNextEntry()) != null)
-        {
-
-            out.putNextEntry(new JarEntry(inEntry));
-            int size = (int) inEntry.getSize();
-            int len;
-
-            int off = 0;
-            while (size > 0 && (len = in.read(buffer, off, size)) >= 0)
-            {
-                out.write(buffer, 0, len);
-                off += len;
-                size -= len;
-            }
-            out.flush();
-        }
-        out.close();
     }
 
     @Override

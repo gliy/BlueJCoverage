@@ -72,11 +72,11 @@ class CoverageOverviewPane extends JPanel
         summary.setLayout(new BoxLayout(summary, BoxLayout.Y_AXIS));
         model = new DefaultTreeModel(createRootNode(coverage));
         tree = new JTree(model);
-        UIManager.put("ProgressBar.foreground", new Color(58, 242, 70)); // green
+        UIManager.put("ProgressBar.foreground", new Color(122, 215, 122)); // green
         UIManager.put("ProgressBar.selectionForeground", Color.BLACK);
 
         tree.setRootVisible(false);
-        tree.setRowHeight(0);
+        tree.setRowHeight(20);
         DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer()
         {
             @Override

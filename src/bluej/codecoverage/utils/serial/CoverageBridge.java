@@ -130,12 +130,13 @@ public class CoverageBridge
         List<CoverageLine> lines = new ArrayList<CoverageLine>();
         int first = clz.getFirstLine();
         int last = clz.getLastLine();
-        for (int lineNum = first; lineNum < last; lineNum++)
+        for (int lineNum = first; lineNum <= last; lineNum++)
         {
             ILine iline = clz.getLine(lineNum);
             lines.add(toLine(iline));
   
         }
+        System.out.println(clz.getName() + ": " + clz.getFirstLine() + ", " + clz.getLastLine());
         CoverageClass rtn = new CoverageClass();
         rtn.setLineCounter(lines);
         rtn.setFirstLine(first);

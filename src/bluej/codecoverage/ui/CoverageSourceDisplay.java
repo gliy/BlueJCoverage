@@ -84,20 +84,18 @@ class CoverageSourceDisplay extends JScrollPane
     {
 
         CoverageClass clz = coverage.getSource();
-        ClassInfo bclz = coverage.getClassInfo();
+        ClassInfo sourceFile = coverage.getClassInfo();
 
         StyledDocument doc = source.getStyledDocument();
         Map<Integer, AttributeSet> lineToStyle = createStyleMap(clz);
 
         JPanel lineNumbers = new JPanel();
         lineNumbers.setLayout(new BoxLayout(lineNumbers, BoxLayout.Y_AXIS));
-        
-       // lineNumbers.setBackground(Color.GRAY);
-        //lineNumbers.setOpaque(false);
-        for (int line = 0; line < bclz.getNumberOfLines(); line++)
+
+        for (int line = 0; line < sourceFile.getNumberOfLines(); line++)
         {
 
-            String sourceCode = bclz.getLine(line);
+            String sourceCode = sourceFile.getLine(line);
             AttributeSet style = lineToStyle.get(line);
             doc.insertString(doc.getLength(), sourceCode + "\n", style);
             JLabel lineLabel = new JLabel("" + (line + 1));
@@ -130,7 +128,7 @@ class CoverageSourceDisplay extends JScrollPane
     {
         int base = clz.getFirstLine();
         Map<Integer, CoverageLine> rtn = new HashMap<Integer, CoverageLine>();
-        for (int i = 0; i < (clz.getLastLine() - base); i++)
+        for (int i = 0; i <= (clz.getLastLine() - base); i++)
         {
             CoverageLine covLine = clz.getLine(i);
             CoverageCounterValue lineStatus = CoverageCounterValue.from(covLine.getStatus());

@@ -181,7 +181,13 @@ public class CoveragePreferences implements PreferenceGenerator
 
                
                 final JButton color = new JButton();
+                
+             
+                color.setContentAreaFilled(false);
                 color.setBackground((Color) prefs.getPref(key));
+                color.setForeground(color.getBackground());
+                color.setOpaque(true);
+                color.setBorderPainted(true);
                 color.addActionListener(new ActionListener()
                 {
                     @Override
@@ -203,7 +209,6 @@ public class CoveragePreferences implements PreferenceGenerator
                 color.setPreferredSize(new Dimension(40, 20));
                 opt.add(color);
                 opt.add(new JLabel(key.getDisplay()));
-              //  opt.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
                 main.add(opt);
             }
         }

@@ -146,8 +146,7 @@ public class CoverageBridge {
          lines.add(toLine(iline));
 
       }
-      System.out.println(clz.getName() + ": " + clz.getFirstLine() + ", "
-            + clz.getLastLine());
+
       CoverageClass rtn = new CoverageClass();
       rtn.setLineCounter(lines);
       rtn.setFirstLine(first);

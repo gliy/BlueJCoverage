@@ -3,14 +3,12 @@ package bluej.codecoverage.ui;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Point;
-import java.awt.event.KeyAdapter;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -43,159 +41,144 @@ import bluej.extensions.ProjectNotOpenException;
  * @author ikingsbu
  * 
  */
-class CoverageSourceDisplay extends JScrollPane
-{
-    private BCoverageClass coverage;
-    private List<LineAttributes> lineAttributes;
-    private Map<Integer, CoverageLine> lineStats;
-    private LineToolTip tooltip;
-    private JTextPane source;
+class CoverageSourceDisplay extends JScrollPane {
+   private BCoverageClass coverage;
+   private List<LineAttributes> lineAttributes;
+   private Map<Integer, CoverageLine> lineStats;
+   private LineToolTip tooltip;
+   private JTextPane source;
 
-    public CoverageSourceDisplay(BCoverageClass coverage)
-        throws ProjectNotOpenException, PackageNotFoundException,
-        BadLocationException
-    {
-        this(coverage, new StandardGUIPrefs().getAttributes(),
+   public CoverageSourceDisplay(BCoverageClass coverage)
+         throws ProjectNotOpenException, PackageNotFoundException,
+         BadLocationException {
+      this(coverage, new StandardGUIPrefs().getAttributes(),
             new StandardGUIPrefs().getTooltip());
-    }
+   }
 
-    public CoverageSourceDisplay(BCoverageClass coverage,
-        List<LineAttributes> lineAttributes, LineToolTip tooltip)
-        throws ProjectNotOpenException, PackageNotFoundException,
-        BadLocationException
-    {
-        super();
-        this.source = new CustomJTextPane();
-        this.coverage = coverage;
-        this.lineAttributes = lineAttributes;
-        this.tooltip = tooltip;
-        this.lineStats = mapLineToCoverage(coverage.getSource());
-        generateDisplay();
-    }
+   public CoverageSourceDisplay(BCoverageClass coverage,
+         List<LineAttributes> lineAttributes, LineToolTip tooltip)
+         throws ProjectNotOpenException, PackageNotFoundException,
+         BadLocationException {
+      super();
+      this.source = new CustomJTextPane();
+      this.coverage = coverage;
+      this.lineAttributes = lineAttributes;
+      this.tooltip = tooltip;
+      this.lineStats = mapLineToCoverage(coverage.getSource());
+      generateDisplay();
+   }
 
-    public JTextPane getSource() {
-        return source;
-    }
-    public String getId() {
-        return coverage.getClassInfo().getId();
-    }
-    private void generateDisplay() throws BadLocationException,
-        ProjectNotOpenException, PackageNotFoundException
-    {
+   public JTextPane getSource() {
+      return source;
+   }
 
-        CoverageClass clz = coverage.getSource();
-        ClassInfo sourceFile = coverage.getClassInfo();
+   public String getId() {
+      return coverage.getClassInfo().getId();
+   }
 
-        StyledDocument doc = source.getStyledDocument();
-        Map<Integer, AttributeSet> lineToStyle = createStyleMap(clz);
+   private void generateDisplay() throws BadLocationException,
+         ProjectNotOpenException, PackageNotFoundException {
 
-        JPanel lineNumbers = new JPanel();
-        lineNumbers.setLayout(new BoxLayout(lineNumbers, BoxLayout.Y_AXIS));
+      CoverageClass clz = coverage.getSource();
+      ClassInfo sourceFile = coverage.getClassInfo();
 
-        for (int line = 0; line < sourceFile.getNumberOfLines(); line++)
-        {
+      StyledDocument doc = source.getStyledDocument();
+      Map<Integer, AttributeSet> lineToStyle = createStyleMap(clz);
 
-            String sourceCode = sourceFile.getLine(line);
-            AttributeSet style = lineToStyle.get(line);
-            doc.insertString(doc.getLength(), sourceCode + "\n", style);
-            JLabel lineLabel = new JLabel("" + (line + 1));
-           
-            if (style != null &&  style.getAttribute(StyleConstants.Background) != null)
-            {
-                Object background = style.getAttribute(StyleConstants.Background);
+      JPanel lineNumbers = new JPanel();
+      lineNumbers.setLayout(new BoxLayout(lineNumbers, BoxLayout.Y_AXIS));
 
-                lineLabel.setBackground((Color) background);
-                lineLabel.setOpaque(true);
+      for (int line = 0; line < sourceFile.getNumberOfLines(); line++) {
+
+         String sourceCode = sourceFile.getLine(line);
+         AttributeSet style = lineToStyle.get(line);
+         doc.insertString(doc.getLength(), sourceCode + "\n", style);
+         JLabel lineLabel = new JLabel("" + (line + 1));
+
+         if (style != null
+               && style.getAttribute(StyleConstants.Background) != null) {
+            Object background = style.getAttribute(StyleConstants.Background);
+
+            lineLabel.setBackground((Color) background);
+            lineLabel.setOpaque(true);
+         }
+
+         lineNumbers.add(lineLabel);
+
+      }
+      JViewport viewPort = new JViewport();
+      viewPort.add(new TextLineNumber(source));
+      setRowHeader(viewPort);
+      source.setCaretPosition(0);
+      ToolTipManager.sharedInstance().registerComponent(source);
+      source.setEditable(false);
+      setViewportView(source);
+
+   }
+
+   private Map<Integer, CoverageLine> mapLineToCoverage(CoverageClass clz) {
+      int base = clz.getFirstLine();
+      Map<Integer, CoverageLine> rtn = new HashMap<Integer, CoverageLine>();
+      for (int i = 0; i <= (clz.getLastLine() - base); i++) {
+         CoverageLine covLine = clz.getLine(i);
+         CoverageCounterValue lineStatus = CoverageCounterValue.from(covLine
+               .getStatus());
+         if (lineStatus != CoverageCounterValue.EMPTY) {
+            rtn.put(base + i - 1, clz.getLine(i));
+         }
+      }
+      return rtn;
+   }
+
+   private Map<Integer, AttributeSet> createStyleMap(CoverageClass clz) {
+      Map<CoverageCounterValue, MutableAttributeSet> cache = new HashMap<CoverageCounterValue, MutableAttributeSet>();
+      Map<Integer, AttributeSet> lineToStyle = new HashMap<Integer, AttributeSet>();
+      for (Entry<Integer, CoverageLine> lineStat : lineStats.entrySet()) {
+         CoverageCounterValue lineStatus = CoverageCounterValue.from(lineStat
+               .getValue().getStatus());
+         MutableAttributeSet styleToUse = cache.get(lineStatus);
+         if (styleToUse == null) {
+
+            styleToUse = new SimpleAttributeSet();
+            for (LineAttributes attr : lineAttributes) {
+               attr.setStyle(styleToUse, lineStat.getValue());
             }
-            
+            cache.put(lineStatus, styleToUse);
+         }
+         lineToStyle.put(lineStat.getKey(), styleToUse);
+      }
+      return lineToStyle;
+   }
 
-            lineNumbers.add(lineLabel);
+   private class CustomJTextPane extends JTextPane {
 
-        }
-        JViewport viewPort = new JViewport();
-        viewPort.add(new TextLineNumber(source));
-        setRowHeader(viewPort);
-        source.setCaretPosition(0);
-        ToolTipManager.sharedInstance()
-            .registerComponent(source);
-        source.setEditable(false);
-        setViewportView(source);
+      public CustomJTextPane() {
+         setFont(new Font("Monospaced", 0, 11));
+      }
 
-    }
+      @Override
+      public String getToolTipText(MouseEvent arg0) {
 
+         int modelPoint = viewToModel(new Point(arg0.getX(), arg0.getY()));
+         Element map = getDocument().getDefaultRootElement();
+         modelPoint = map.getElementIndex(modelPoint);
 
-    private Map<Integer, CoverageLine> mapLineToCoverage(CoverageClass clz)
-    {
-        int base = clz.getFirstLine();
-        Map<Integer, CoverageLine> rtn = new HashMap<Integer, CoverageLine>();
-        for (int i = 0; i <= (clz.getLastLine() - base); i++)
-        {
-            CoverageLine covLine = clz.getLine(i);
-            CoverageCounterValue lineStatus = CoverageCounterValue.from(covLine.getStatus());
-            if (lineStatus != CoverageCounterValue.EMPTY)
-            {
-                rtn.put(base + i - 1, clz.getLine(i));
-            }
-        }
-        return rtn;
-    }
+         String rtn = null;
+         if (lineStats.containsKey(modelPoint)) {
+            CoverageLine li = lineStats.get(modelPoint);
+            rtn = tooltip.getToolTip(modelPoint, li);
+         }
+         return rtn;
+      }
+   }
 
-    private Map<Integer, AttributeSet> createStyleMap(CoverageClass clz)
-    {
-        Map<CoverageCounterValue, MutableAttributeSet> cache = new HashMap<CoverageCounterValue, MutableAttributeSet>();
-        Map<Integer, AttributeSet> lineToStyle = new HashMap<Integer, AttributeSet>();
-        for (Entry<Integer, CoverageLine> lineStat : lineStats.entrySet())
-        {
-            CoverageCounterValue lineStatus = CoverageCounterValue.from(lineStat.getValue()
-                .getStatus());
-            MutableAttributeSet styleToUse = cache.get(lineStatus);
-            if (styleToUse == null)
-            {
+   public void moveCaret(int firstLine) {
 
-                styleToUse = new SimpleAttributeSet();
-                for (LineAttributes attr : lineAttributes)
-                {
-                    attr.setStyle(styleToUse, lineStat.getValue());
-                }
-                cache.put(lineStatus, styleToUse);
-            }
-            lineToStyle.put(lineStat.getKey(), styleToUse);
-        }
-        return lineToStyle;
-    }
+      StyledDocument document = source.getStyledDocument();
 
-    private class CustomJTextPane extends JTextPane
-    {
-
-        public CustomJTextPane() {
-            setFont(new Font("Monospaced", 0, 11));
-        }
-        @Override
-        public String getToolTipText(MouseEvent arg0)
-        {
-
-            int modelPoint = viewToModel(new Point(arg0.getX(), arg0.getY()));
-            Element map = getDocument().getDefaultRootElement();
-            modelPoint = map.getElementIndex(modelPoint);
-
-            String rtn = null;
-            if (lineStats.containsKey(modelPoint))
-            {
-                CoverageLine li = lineStats.get(modelPoint);
-                rtn = tooltip.getToolTip(modelPoint, li);
-            }
-            return rtn;
-        }
-    }
-
-    public void moveCaret(int firstLine)
-    {
-
-        StyledDocument document = source.getStyledDocument();
-
-        int location = document.getDefaultRootElement().getElement(firstLine)
+      int location = document.getDefaultRootElement().getElement(firstLine)
             .getStartOffset() - 1;
-        source.setCaretPosition(location);
-        source.moveCaretPosition(location);
-    }
+      source.setCaretPosition(location);
+      source.moveCaretPosition(location);
+   }
 }

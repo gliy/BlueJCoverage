@@ -7,32 +7,29 @@ import bluej.codecoverage.ui.ext.DefaultLineAttributes;
 import bluej.codecoverage.ui.ext.DefaultLineToolTip;
 import bluej.codecoverage.ui.ext.LineAttributes;
 import bluej.codecoverage.ui.ext.LineToolTip;
+
 /**
  * Default Preference loader to use when displaying the coverage information.
  * 
  * @author Ian
- *
+ * 
  */
-public class StandardGUIPrefs
-{
+public class StandardGUIPrefs {
 
-    private LineAttributes attributes;
-    private LineToolTip tooltip;
+   private LineAttributes attributes;
+   private LineToolTip tooltip;
 
-    public StandardGUIPrefs()
-    {
-        attributes = new DefaultLineAttributes();
-        tooltip = new DefaultLineToolTip();
-    }
+   public StandardGUIPrefs() {
+      attributes = new DefaultLineAttributes();
+      tooltip = new DefaultLineToolTip();
+   }
 
-    public List<LineAttributes> getAttributes()
-    {
-        return Arrays.asList(attributes);
-    }
+   public List<LineAttributes> getAttributes() {
+      return Arrays.asList(attributes);
+   }
 
-    public LineToolTip getTooltip()
-    {
-        return tooltip;
-    }
+   public LineToolTip getTooltip() {
+      return tooltip;
+   }
 
 }

@@ -7,54 +7,48 @@ import bluej.codecoverage.utils.serial.Coverage;
 import bluej.codecoverage.utils.serial.CoverageCounter;
 
 /**
- * Basic interface for coverage information that allows users to treat package coverage
- * and class coverage the same.
+ * Basic interface for coverage information that allows users to treat package
+ * coverage and class coverage the same.
  * 
  * @author ikingsbu
  * 
  */
-public abstract class BCoverage<E extends Coverage>
-{
-    protected final String id;
-    protected E src;
-    
-    protected BCoverage(E src)
-    {
-        this.id = UUID.randomUUID().toString();
-        this.src = src;
-    }
+public abstract class BCoverage<E extends Coverage> {
+   protected final String id;
+   protected E src;
 
-    public String getName()
-    {
-        return src.getName();
-    }
+   protected BCoverage(E src) {
+      this.id = UUID.randomUUID().toString();
+      this.src = src;
+   }
 
-    public CoverageCounter getLineCoverage()
-    {
-        return src.getLineCoverage();
-    }
+   public String getName() {
+      return src.getName();
+   }
 
-    public CoverageCounter getMethodCoverage()
-    {
-        return src.getMethodCoverage();
-    }
+   public CoverageCounter getLineCoverage() {
+      return src.getLineCoverage();
+   }
 
-    public CoverageCounter getBranchCoverage()
-    {
-        return src.getBranchCoverage();
-    }
+   public CoverageCounter getMethodCoverage() {
+      return src.getMethodCoverage();
+   }
 
-    public CoverageCounter getClassCoverage()
-    {
-        return src.getClassCoverage();
-    }
+   public CoverageCounter getBranchCoverage() {
+      return src.getBranchCoverage();
+   }
 
-    public String getId()
-    {
-        return id;
-    }
-    public E getSource() {
-        return src;
-    }
-    public abstract List<? extends BCoverage<?>> getNodes();
+   public CoverageCounter getClassCoverage() {
+      return src.getClassCoverage();
+   }
+
+   public String getId() {
+      return id;
+   }
+
+   public E getSource() {
+      return src;
+   }
+
+   public abstract List<? extends BCoverage<?>> getNodes();
 }

@@ -3,10 +3,11 @@
  */
 package bluej.codecoverage.utils;
 
+import java.awt.Color;
+import java.awt.Desktop;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,24 +15,24 @@ import java.io.ObjectInputStream;
 import java.lang.reflect.Method;
 import java.net.ConnectException;
 import java.net.ServerSocket;
-import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+import javax.swing.JComponent;
 import javax.swing.JOptionPane;
+import javax.swing.JTextPane;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
 
 import bluej.codecoverage.pref.CoveragePrefManager;
 import bluej.codecoverage.pref.CoveragePrefManager.CurrentPreferences;
 import bluej.codecoverage.utils.serial.CoveragePackage;
 import bluej.extensions.BlueJ;
 import bluej.extensions.ExtensionUnloadedException;
-import bluej.extensions.PackageNotFoundException;
-import bluej.extensions.ProjectNotOpenException;
 
 /**
  * Utiltiy Class that controls all interactions that might be needed by multiple
@@ -50,6 +51,7 @@ public final class CoverageUtilities {
    private static final String VM_ARG_KEY = "bluej.vm.args";
    private static final String PORT_NUMBER = "port.number";
 
+   private static final String HELP_URL = "https://github.com/gliy/BlueJCoverage/wiki/Help";
    /** Running instance of bluej. */
    private BlueJ bluej;
 
@@ -129,11 +131,43 @@ public final class CoverageUtilities {
             rtn.add((CoveragePackage) readIn);
          }
       } catch (Exception e) {
-         e.printStackTrace();
+         JOptionPane.showMessageDialog(bluej.getCurrentFrame(),
+               buildErrorMessage(getRootCause(e).getMessage()),
+               "Code Coverage Error", JOptionPane.ERROR_MESSAGE);
+         return null;
       } finally {
          close(input);
       }
       return rtn;
+   }
+
+   private JComponent buildErrorMessage(String ex) {
+      // "An error was encountered while gathering coverage data\n"
+      // getRootCause(e).getMessage()
+      JTextPane error = new JTextPane();
+      error.setContentType("text/html");
+      error.setEditable(false);
+      error.setText(String
+            .format(
+                  "An error was encountered while gathering coverage data <br> "
+                        + "<span style=\"color:red;font-size:14px;font-family:monospace\">%s</span><br>"
+                        + "<a href=%s>Visit the FAQ for more information</a>",
+                  ex, HELP_URL));
+      error.setBackground(new Color(240, 240, 240));
+      error.addHyperlinkListener(new HyperlinkListener() {
+         @Override
+         public void hyperlinkUpdate(HyperlinkEvent e) {
+            if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+               if (Desktop.isDesktopSupported()) {
+                  try {
+                     Desktop.getDesktop().browse(e.getURL().toURI());
+                  } catch (Exception e1) {
+                  }
+               }
+            }
+         }
+      });
+      return error;
    }
 
    /**
@@ -171,8 +205,7 @@ public final class CoverageUtilities {
          copyAgent(getClass().getProtectionDomain().getCodeSource()
                .getLocation().getFile());
       }
-      if (current == null
-            || !current.toString().contains(vmArgsToAdd)) {
+      if (current == null || !current.toString().contains(vmArgsToAdd)) {
          JOptionPane
                .showMessageDialog(
                      bluej.getCurrentFrame(),
@@ -252,7 +285,7 @@ public final class CoverageUtilities {
             @Override
             public void run() {
                try {
-                 
+
                   props.load(new FileInputStream(propertyFile));
                   Object current = props.get(VM_ARG_KEY);
 
@@ -276,7 +309,7 @@ public final class CoverageUtilities {
       JarFile jar = new JarFile(jarFile);
       Enumeration<JarEntry> jarEnum = jar.entries();
       while (jarEnum.hasMoreElements()) {
-         JarEntry file = (JarEntry) jarEnum.nextElement();
+         JarEntry file = jarEnum.nextElement();
          if (file.getName().equals("jacocoagent.jar")) {
             InputStream is = jar.getInputStream(file);
             FileOutputStream fos = new FileOutputStream(agentFile);
@@ -302,4 +335,11 @@ public final class CoverageUtilities {
       }
    }
 
+   private static Throwable getRootCause(Throwable e) {
+      Throwable root = e;
+      while (root.getCause() != null) {
+         root = root.getCause();
+      }
+      return root;
+   }
 }

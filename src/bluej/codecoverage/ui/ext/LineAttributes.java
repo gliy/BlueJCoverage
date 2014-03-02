@@ -6,6 +6,6 @@ import bluej.codecoverage.utils.serial.CoverageLine;
 
 public interface LineAttributes {
 
-	void setStyle(MutableAttributeSet style, CoverageLine line);
-	
+   void setStyle(MutableAttributeSet style, CoverageLine line);
+
 }

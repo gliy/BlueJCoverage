@@ -21,63 +21,57 @@ import bluej.extensions.BlueJ;
  * @author Ian
  * 
  */
-public class CoverageAction implements ItemListener
-{
+public class CoverageAction implements ItemListener {
 
-    private BlueJ bluej;
-    private static CoverageAction action;
-    private CoverageAction(BlueJ bluej)
-    {
-        super();
-        this.bluej = bluej;
-        
-    }
-    
+   private BlueJ bluej;
+   private static CoverageAction action;
 
-    private void endCoverage()
-    {
-        try
-        {
-            Frame location = bluej.getCurrentFrame();
-            File dir = bluej.getCurrentPackage().getProject().getDir();
-            List<CoveragePackage> coverage = CoverageUtilities.get().getResults(dir);
-            List<BCoveragePackage> bcoverage = BCoverageBridge
-                .toBCoverage(coverage, dir);
-            JFrame report = CoverageReportFrame.create(bcoverage, location); 
+   private CoverageAction(BlueJ bluej) {
+      super();
+      this.bluej = bluej;
+
+   }
+
+   private void endCoverage() {
+      try {
+         Frame location = bluej.getCurrentFrame();
+         File dir = bluej.getCurrentPackage().getProject().getDir();
+         List<CoveragePackage> coverage = CoverageUtilities.get().getResults(
+               dir);
+         if (coverage != null) {
+            List<BCoveragePackage> bcoverage = BCoverageBridge.toBCoverage(
+                  coverage, dir);
+            JFrame report = CoverageReportFrame.create(bcoverage, location);
             report.setVisible(true);
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-    
-    }
+         }
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
 
-    private void startCoverage()
-    {
-        CoverageUtilities utils = CoverageUtilities.get();
-        utils.clearResults(); 
-    }
+   }
 
-    @Override
-    public void itemStateChanged(ItemEvent e)
-    {
-        boolean selected = e.getStateChange() == ItemEvent.SELECTED;
-        if(selected ) {
-            startCoverage();
-        } else  {
-            endCoverage();
-        }
-        
-    }
+   private void startCoverage() {
+      CoverageUtilities utils = CoverageUtilities.get();
+      utils.clearResults();
+   }
 
+   @Override
+   public void itemStateChanged(ItemEvent e) {
+      boolean selected = e.getStateChange() == ItemEvent.SELECTED;
+      if (selected) {
+         startCoverage();
+      } else {
+         endCoverage();
+      }
 
-    public static void init(BlueJ bluej) {
-        action = new CoverageAction(bluej);
-    }
-    public static ItemListener get()
-    {
-        return action;
-    }
+   }
+
+   public static void init(BlueJ bluej) {
+      action = new CoverageAction(bluej);
+   }
+
+   public static ItemListener get() {
+      return action;
+   }
 
 }

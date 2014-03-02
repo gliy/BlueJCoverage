@@ -11,6 +11,7 @@ import java.util.Map;
 import javax.swing.JFrame;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
+import javax.swing.WindowConstants;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -28,31 +29,27 @@ import bluej.codecoverage.utils.join.Locatable;
  * 
  * @author Ian
  */
-public class CoverageReportFrame extends JFrame
-{
-    private List<BCoveragePackage> coverage;
-    private JTabbedPane tabs;
-    private CoverageOverviewPane overview;
-    private Map<String, CoverageSourceDisplay> classToDisplay;
-    private CurrentPreferences prefs = CoveragePrefManager.getPrefs()
-        .get();
-    private static CoverageReportFrame instance;
-    private Frame location;
-    public static CoverageReportFrame create(List<BCoveragePackage> classesCovered, Frame location)
-        throws Exception
-    {
-        if (instance == null)
-        {
-            instance = new CoverageReportFrame(classesCovered, location);
-        }
-        else
-        {
-            
-            instance.reset(classesCovered);
-        }
-        
-        return instance;
-    }
+public class CoverageReportFrame extends JFrame {
+   private List<BCoveragePackage> coverage;
+   private JTabbedPane tabs;
+   private CoverageOverviewPane overview;
+   private Map<String, CoverageSourceDisplay> classToDisplay;
+   private CurrentPreferences prefs = CoveragePrefManager.getPrefs().get();
+   private static CoverageReportFrame instance;
+   private Frame location;
+
+   public static CoverageReportFrame create(
+         List<BCoveragePackage> classesCovered, Frame location)
+         throws Exception {
+      if (instance == null) {
+         instance = new CoverageReportFrame(classesCovered, location);
+      } else {
+
+         instance.reset(classesCovered);
+      }
+
+      return instance;
+   }
 
    private CoverageReportFrame(List<BCoveragePackage> classesCovered, Frame fr)
          throws Exception {
@@ -62,119 +59,108 @@ public class CoverageReportFrame extends JFrame
       setSize(700, 500);
       generateTabs();
       setTitle("Coverage Report");
-      setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+      setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
       setLocationRelativeTo(location);
       location = this;
    }
-    private void reset(List<BCoveragePackage> newInfo) {
-       this.coverage = newInfo;
-       classToDisplay.clear();
-       tabs.removeAll();
-       
-       CoverageOverviewPane overviewTmp = new CoverageOverviewPane(coverage, prefs);
-       overviewTmp.setPreferredSize(new Dimension(overview.getWidth(), 100));
-       overviewTmp.addListener(new TreeListener());
-       overview = overviewTmp;
-       
-       JSplitPane split = ((JSplitPane)getContentPane());
-       
-       split.setRightComponent(overview);
-       split.setDividerLocation(split.getDividerLocation());
-       setLocationRelativeTo(location);
-       location = this;
-    }
 
-    private void generateTabs()
-    {
-        classToDisplay = new HashMap<String, CoverageSourceDisplay>();
-        tabs = new JTabbedPane();
-        // add(tabs, BorderLayout.CENTER);
-        overview = new CoverageOverviewPane(coverage, prefs);
-        overview.setPreferredSize(new Dimension(getWidth(), 100));
+   private void reset(List<BCoveragePackage> newInfo) {
+      this.coverage = newInfo;
+      classToDisplay.clear();
+      tabs.removeAll();
 
-        JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, tabs,
+      CoverageOverviewPane overviewTmp = new CoverageOverviewPane(coverage,
+            prefs);
+      overviewTmp.setPreferredSize(new Dimension(overview.getWidth(), 100));
+      overviewTmp.addListener(new TreeListener());
+      overview = overviewTmp;
+
+      JSplitPane split = ((JSplitPane) getContentPane());
+
+      split.setRightComponent(overview);
+      split.setDividerLocation(split.getDividerLocation());
+      setLocationRelativeTo(location);
+      location = this;
+   }
+
+   private void generateTabs() {
+      classToDisplay = new HashMap<String, CoverageSourceDisplay>();
+      tabs = new JTabbedPane();
+      // add(tabs, BorderLayout.CENTER);
+      overview = new CoverageOverviewPane(coverage, prefs);
+      overview.setPreferredSize(new Dimension(getWidth(), 100));
+
+      JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, tabs,
             overview);
-        
 
-        setContentPane(split);
-        split.setDividerLocation((getWidth() / 2) + 30);
-        split.setDividerSize(8);
-        split.setOneTouchExpandable(true);
-        overview.addListener(new TreeListener());
-    }
+      setContentPane(split);
+      split.setDividerLocation((getWidth() / 2) + 30);
+      split.setDividerSize(8);
+      split.setOneTouchExpandable(true);
+      overview.addListener(new TreeListener());
+   }
 
-    private void bringUpTab(BCoverageClass clz)
-    {
-        try
-        {
-            ClassInfo bclass = clz.getClassInfo();
-            CoverageSourceDisplay existingDisplay = classToDisplay.get(bclass.getId());
-            if (existingDisplay == null)
-            {
-                final CoverageSourceDisplay newDisplay = new CoverageSourceDisplay(clz);
-                classToDisplay.put(newDisplay.getId(), newDisplay);
-                newDisplay.getSource().addKeyListener(new KeyAdapter()
-                {
-    
+   private void bringUpTab(BCoverageClass clz) {
+      try {
+         ClassInfo bclass = clz.getClassInfo();
+         CoverageSourceDisplay existingDisplay = classToDisplay.get(bclass
+               .getId());
+         if (existingDisplay == null) {
+            final CoverageSourceDisplay newDisplay = new CoverageSourceDisplay(
+                  clz);
+            classToDisplay.put(newDisplay.getId(), newDisplay);
+            newDisplay.getSource().addKeyListener(new KeyAdapter() {
 
-                    @Override
-                    public void keyPressed(KeyEvent e)
-                    {
-                        System.out.println(e);
-                        if (e.getKeyCode() == KeyEvent.VK_W
-                            && e.isControlDown())
-                        {
-                            CoverageSourceDisplay selected = (CoverageSourceDisplay) tabs.getSelectedComponent();
-                            tabs.remove(selected);
-                            classToDisplay.remove(selected.getId());
-                        }
-                    }
-                });
-                tabs.add(newDisplay, bclass.getName());
-                existingDisplay = newDisplay;
+               @Override
+               public void keyPressed(KeyEvent e) {
+                  System.out.println(e);
+                  if (e.getKeyCode() == KeyEvent.VK_W && e.isControlDown()) {
+                     CoverageSourceDisplay selected = (CoverageSourceDisplay) tabs
+                           .getSelectedComponent();
+                     tabs.remove(selected);
+                     classToDisplay.remove(selected.getId());
+                  }
+               }
+            });
+            tabs.add(newDisplay, bclass.getName());
+            existingDisplay = newDisplay;
+         }
+         tabs.setSelectedComponent(existingDisplay);
+
+      } catch (Exception e) {
+         // TODO Auto-generated catch block
+         e.printStackTrace();
+      }
+
+   }
+
+   private void moveCaret(DefaultMutableTreeNode node,
+         DefaultMutableTreeNode parent) {
+      bringUpTab((BCoverageClass) parent.getUserObject());
+      Locatable selectedCoverage = (Locatable) node.getUserObject();
+
+      ((CoverageSourceDisplay) tabs.getSelectedComponent())
+            .moveCaret(selectedCoverage.getFirstLine());
+
+   }
+
+   class TreeListener implements TreeSelectionListener {
+
+      @Override
+      public void valueChanged(TreeSelectionEvent e) {
+         DefaultMutableTreeNode node = overview.getSelectedNode();
+         BCoverage<?> selectedCoverage = (BCoverage<?>) node.getUserObject();
+         if (!(selectedCoverage instanceof BCoveragePackage)) {
+            DefaultMutableTreeNode parent = node;
+            if (((DefaultMutableTreeNode) node.getParent()).getUserObject() instanceof BCoverageClass) {
+               parent = (DefaultMutableTreeNode) node.getParent();
             }
-            tabs.setSelectedComponent(existingDisplay);
-           
-        }
-        catch (Exception e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+            moveCaret(node, parent);
+            // BCoverageClass bClassInfo = (BCoverageClass) selectedCoverage;
+            // bringUpTab(bClassInfo);
+         }
 
-    }
+      }
+   }
 
-    private void moveCaret(DefaultMutableTreeNode node, DefaultMutableTreeNode parent)
-    {
-        bringUpTab((BCoverageClass)parent.getUserObject());
-        Locatable selectedCoverage = (Locatable) node.getUserObject();
-        
-       
-            ((CoverageSourceDisplay) tabs.getSelectedComponent()).moveCaret(selectedCoverage
-                .getFirstLine());
-        
-    }
-    class TreeListener implements TreeSelectionListener
-    {
-
-        @Override
-        public void valueChanged(TreeSelectionEvent e)
-        {
-            DefaultMutableTreeNode node = overview.getSelectedNode();
-            BCoverage<?> selectedCoverage = (BCoverage<?>) node.getUserObject();
-            if (!(selectedCoverage instanceof BCoveragePackage))
-            {
-                DefaultMutableTreeNode parent = node;
-                if (((DefaultMutableTreeNode) node.getParent()).getUserObject() instanceof BCoverageClass)
-                {
-                    parent = (DefaultMutableTreeNode) node.getParent();
-                }
-                moveCaret(node, parent);
-                //BCoverageClass bClassInfo = (BCoverageClass) selectedCoverage;
-                //bringUpTab(bClassInfo);
-            }
-          
-        }
-    }
-    
 }

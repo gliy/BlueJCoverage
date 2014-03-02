@@ -6,8 +6,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Serializable representation of {@linkplain http
- * ://www.eclemma.org/jacoco/trunk/doc/api/org/jacoco/core/analysis/ICounter.html}.
+ * Serializable representation of {@linkplain http 
+ * ://www.eclemma.org/jacoco/trunk
+ * /doc/api/org/jacoco/core/analysis/ICounter.html}.
  * 
  * Can be used by BlueJ extensions that are using the provided ClassLoader.
  * 
@@ -16,32 +17,29 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class CoverageCounter implements Serializable
-{
+public class CoverageCounter implements Serializable {
 
-    private static final long serialVersionUID = 8372346998202557372L;
-    private int covered;
-    private int missed;
-    private int total;
-    private int status;
+   private static final long serialVersionUID = 8372346998202557372L;
+   private int covered;
+   private int missed;
+   private int total;
+   private int status;
 
-    private double coveredRatio;
-    private double missedRatio;
+   private double coveredRatio;
+   private double missedRatio;
 
-    public CoverageCounter()
-    {
+   public CoverageCounter() {
 
-    }
+   }
 
-    public CoverageCounter(int covered, int missed, int total, int status,
-        double coveredRatio, double missedRation)
-    {
-        this.covered = covered;
-        this.missed = missed;
-        this.total = total;
-        this.status = status;
-        this.coveredRatio = coveredRatio;
-        coveredRatio = missedRation;
-    }
+   public CoverageCounter(int covered, int missed, int total, int status,
+         double coveredRatio, double missedRation) {
+      this.covered = covered;
+      this.missed = missed;
+      this.total = total;
+      this.status = status;
+      this.coveredRatio = coveredRatio;
+      coveredRatio = missedRation;
+   }
 
 }

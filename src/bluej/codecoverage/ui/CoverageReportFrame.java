@@ -69,7 +69,7 @@ public class CoverageReportFrame extends JFrame {
       classToDisplay.clear();
       tabs.removeAll();
 
-      CoverageOverviewPane overviewTmp = new CoverageOverviewPane(coverage,
+      /*CoverageOverviewPane overviewTmp = new CoverageOverviewPane(coverage,
             prefs);
       overviewTmp.setPreferredSize(new Dimension(overview.getWidth(), 100));
       overviewTmp.addListener(new TreeListener());
@@ -80,7 +80,9 @@ public class CoverageReportFrame extends JFrame {
       split.setRightComponent(overview);
       split.setDividerLocation(split.getDividerLocation());
       setLocationRelativeTo(location);
-      location = this;
+      location = this;*/
+  
+      overview.reset(newInfo);
    }
 
    private void generateTabs() {
@@ -113,7 +115,6 @@ public class CoverageReportFrame extends JFrame {
 
                @Override
                public void keyPressed(KeyEvent e) {
-                  System.out.println(e);
                   if (e.getKeyCode() == KeyEvent.VK_W && e.isControlDown()) {
                      CoverageSourceDisplay selected = (CoverageSourceDisplay) tabs
                            .getSelectedComponent();

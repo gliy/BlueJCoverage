@@ -72,44 +72,7 @@ class CoverageOverviewPane extends JPanel {
 
       tree.setRootVisible(false);
       tree.setRowHeight(20);
-      DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer() {
-         @Override
-         public Component getTreeCellRendererComponent(JTree tree,
-               Object value, boolean selected, boolean expanded, boolean leaf,
-               int row, boolean hasFocus) {
-            Component defaultDisplay = super.getTreeCellRendererComponent(tree,
-                  value, selected, expanded, leaf, row, hasFocus);
-            Object treeNode = ((DefaultMutableTreeNode) value).getUserObject();
 
-            if (treeNode instanceof BCoverage<?>) {
-
-               JPanel rtn = new JPanel();
-               BCoverage<?> info = (BCoverage<?>) treeNode;
-
-               ImageIcon iconToUse = getDisplayIcon(info);
-               if (iconToUse != null) {
-                  setIcon(iconToUse);
-               }
-               setText(info.getName());
-
-               CoverageCounter counter = info.getLineCoverage();
-               JProgressBar progress = new JProgressBar();
-               progress.setBorderPainted(true);
-               progress.setPreferredSize(new Dimension((int) progress
-                     .getPreferredSize().getWidth(), this.getHeight()));
-               progress.setValue((int) (counter.getCoveredRatio() * 100));
-
-               progress.setStringPainted(true);
-               rtn.add(this);
-               rtn.add(progress);
-               rtn.setBackground(Color.WHITE);
-               return rtn;
-            } else {
-               return defaultDisplay;
-            }
-
-         }
-      };
       tree.getSelectionModel().setSelectionMode(
             TreeSelectionModel.SINGLE_TREE_SELECTION);
       tree.setToggleClickCount(1);
@@ -119,6 +82,19 @@ class CoverageOverviewPane extends JPanel {
       setLayout(new BorderLayout());
       add(new JScrollPane(tree), BorderLayout.CENTER);
       add(summary, BorderLayout.SOUTH);
+   }
+
+   public void reset(List<BCoveragePackage> coverage) {
+      TreeSelectionListener[] listeners = tree.getListeners(TreeSelectionListener.class);
+      for (TreeSelectionListener listener : listeners) {
+         tree.removeTreeSelectionListener(listener);
+      }
+     // tree.removeTreeSelectionListener(summarySelection);
+      model.setRoot(createRootNode(coverage));
+     // tree.addTreeSelectionListener(summarySelection);
+      for (TreeSelectionListener listener : listeners) {
+         tree.addTreeSelectionListener(listener);
+      }
    }
 
    private void buildSummary(BCoverage<?> selected) {
@@ -178,12 +154,44 @@ class CoverageOverviewPane extends JPanel {
    public DefaultMutableTreeNode getSelectedNode() {
       DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) tree
             .getLastSelectedPathComponent();
-      if (selectedNode != null) {
-         BCoverage<?> info = (BCoverage<?>) selectedNode.getUserObject();
-
-         // buildSummary(info);
-      }
       return selectedNode;
    }
+   DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer() {
+      @Override
+      public Component getTreeCellRendererComponent(JTree tree,
+            Object value, boolean selected, boolean expanded, boolean leaf,
+            int row, boolean hasFocus) {
+         Component defaultDisplay = super.getTreeCellRendererComponent(tree,
+               value, selected, expanded, leaf, row, hasFocus);
+         Object treeNode = ((DefaultMutableTreeNode) value).getUserObject();
 
+         if (treeNode instanceof BCoverage<?>) {
+
+            JPanel rtn = new JPanel();
+            BCoverage<?> info = (BCoverage<?>) treeNode;
+
+            ImageIcon iconToUse = getDisplayIcon(info);
+            if (iconToUse != null) {
+               setIcon(iconToUse);
+            }
+            setText(info.getName());
+
+            CoverageCounter counter = info.getLineCoverage();
+            JProgressBar progress = new JProgressBar();
+            progress.setBorderPainted(true);
+            progress.setPreferredSize(new Dimension((int) progress
+                  .getPreferredSize().getWidth(), this.getHeight()));
+            progress.setValue((int) (counter.getCoveredRatio() * 100));
+
+            progress.setStringPainted(true);
+            rtn.add(this);
+            rtn.add(progress);
+            rtn.setBackground(Color.WHITE);
+            return rtn;
+         } else {
+            return defaultDisplay;
+         }
+
+      }
+   };
 }

@@ -24,9 +24,10 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
-import bluej.codecoverage.pref.StandardGUIPrefs;
+import bluej.codecoverage.pref.SourceDisplayGUIPrefs;
 import bluej.codecoverage.ui.ext.LineAttributes;
 import bluej.codecoverage.ui.ext.LineToolTip;
+import bluej.codecoverage.ui.ext.SidebarPainter;
 import bluej.codecoverage.utils.join.BCoverageClass;
 import bluej.codecoverage.utils.join.ClassInfo;
 import bluej.codecoverage.utils.serial.CoverageClass;
@@ -47,26 +48,21 @@ class CoverageSourceDisplay extends JScrollPane {
    private Map<Integer, CoverageLine> lineStats;
    private LineToolTip tooltip;
    private JTextPane source;
-
+   private SidebarPainter painter;
    public CoverageSourceDisplay(BCoverageClass coverage)
          throws ProjectNotOpenException, PackageNotFoundException,
          BadLocationException {
-      this(coverage, new StandardGUIPrefs().getAttributes(),
-            new StandardGUIPrefs().getTooltip());
-   }
-
-   public CoverageSourceDisplay(BCoverageClass coverage,
-         List<LineAttributes> lineAttributes, LineToolTip tooltip)
-         throws ProjectNotOpenException, PackageNotFoundException,
-         BadLocationException {
       super();
+      SourceDisplayGUIPrefs prefs = new SourceDisplayGUIPrefs();
       this.source = new CustomJTextPane();
       this.coverage = coverage;
-      this.lineAttributes = lineAttributes;
-      this.tooltip = tooltip;
+      this.lineAttributes = prefs.getAttributes();
+      this.tooltip = prefs.getTooltip();
+      this.painter = prefs.getPainter();
       this.lineStats = mapLineToCoverage(coverage.getSource());
       generateDisplay();
    }
+
 
    public JTextPane getSource() {
       return source;
@@ -107,7 +103,9 @@ class CoverageSourceDisplay extends JScrollPane {
 
       }
       JViewport viewPort = new JViewport();
-      viewPort.add(new TextLineNumber(source));
+      TextLineNumber number = new TextLineNumber(source);
+      number.setPainter(painter);
+      viewPort.add(number);
       setRowHeader(viewPort);
       source.setCaretPosition(0);
       ToolTipManager.sharedInstance().registerComponent(source);

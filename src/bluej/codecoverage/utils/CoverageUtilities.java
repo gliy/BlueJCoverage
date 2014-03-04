@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Properties;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
@@ -42,6 +44,10 @@ import bluej.extensions.ExtensionUnloadedException;
  * @author Ian
  */
 public final class CoverageUtilities {
+
+   private static final int START_PORT = 6000;
+
+   private static final int END_PORT = 7000;
 
    /** Standard Java package separator. */
    private static final String AGENT_FILE_NAME = "jacocoagent.jar";
@@ -76,8 +82,9 @@ public final class CoverageUtilities {
    private CoverageUtilities(BlueJ bluej) throws IOException {
       this.bluej = bluej;
       prefs = CoveragePrefManager.getPrefs(bluej).get();
-      port = findOpenPort();
       setup();
+      //port = findOpenPort();
+     
       setupListener();
 
    }
@@ -205,7 +212,7 @@ public final class CoverageUtilities {
          copyAgent(getClass().getProtectionDomain().getCodeSource()
                .getLocation().getFile());
       }
-      if (current == null || !current.toString().contains(vmArgsToAdd)) {
+      if (current == null || !current.toString().contains(buildAgentPath())) {
          JOptionPane
                .showMessageDialog(
                      bluej.getCurrentFrame(),
@@ -214,12 +221,16 @@ public final class CoverageUtilities {
                      "Code Coverage", JOptionPane.PLAIN_MESSAGE);
          addShutdownHook();
          throw new ExtensionUnloadedException();
+      } else {
+         updateVmArguments();
       }
    }
 
+   private String buildAgentPath() {
+      return "-javaagent:" + agentFile.getAbsolutePath();
+   }
    private String buildVMArgs() {
-      final File agent = agentFile;
-      String arg = "-javaagent:" + agent.getAbsolutePath()
+      String arg = buildAgentPath() 
             + "=output=tcpclient,port=" + port + getExcludes();
       return arg;
    }
@@ -303,7 +314,51 @@ public final class CoverageUtilities {
          }));
       }
 
-   }
+    }
+
+    private void updateVmArguments()
+    {
+        final Properties props = new Properties();   
+        
+        FileInputStream fis = null;
+        FileOutputStream fos = null;
+        try
+        {
+           fis = new FileInputStream(propertyFile);
+           
+           props.load(fis);
+           Object current = props.get(VM_ARG_KEY);
+            if (current != null)
+            {
+                String currentVM = current.toString();
+                Pattern portRegex = Pattern.compile("port=([0-9]+)");
+                Matcher match = portRegex.matcher(currentVM);
+                match.find();
+                Integer newPort = Integer.parseInt(match.group(1));
+                this.port = newPort;
+                if(newPort != null && newPort > END_PORT) {
+                   newPort = START_PORT;
+                }
+               
+                newPort += 1;
+                String newArgs= match.replaceAll("port=" + newPort);
+                props.put(VM_ARG_KEY, newArgs);
+                fos = new FileOutputStream(propertyFile);
+                props.store(fos, "Updated port for Coverage");
+                System.out.println("Updating Coverage port for next app to " + newPort);
+                bluej.setExtensionPropertyString(PORT_NUMBER, "" + newPort);
+                
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+
+        }finally {
+           close(fis);
+           close(fos);
+        }
+    }
 
    private void copyAgent(String jarFile) throws IOException {
       JarFile jar = new JarFile(jarFile);

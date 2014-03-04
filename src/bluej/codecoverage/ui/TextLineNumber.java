@@ -6,6 +6,7 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Insets;
+import java.awt.Paint;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.beans.PropertyChangeEvent;
@@ -13,6 +14,7 @@ import java.beans.PropertyChangeListener;
 import java.util.HashMap;
 
 import javax.swing.JPanel;
+import javax.swing.Painter;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
@@ -28,6 +30,8 @@ import javax.swing.text.Element;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.Utilities;
+
+import bluej.codecoverage.ui.ext.SidebarPainter;
 
 /**
  * This class will display line numbers for a related text component. The text
@@ -69,7 +73,7 @@ public class TextLineNumber extends JPanel implements CaretListener,
    private int lastDigits;
    private int lastHeight;
    private int lastLine;
-
+   private SidebarPainter painter;
    private HashMap<String, FontMetrics> fonts;
 
    /**
@@ -288,6 +292,9 @@ public class TextLineNumber extends JPanel implements CaretListener,
                g.fillRect(0, rowStartOffset, 10, endOffset - rowStartOffset);
                g.setColor(prev);
             }
+            if (painter != null) {
+               //painter.paint(g, Integer.parseInt(lineNumber), 0, rowStartOffset, 10, endOffset - rowStartOffset);
+            }
             g.drawString(lineNumber, x, y);
 
             // Move to the next row
@@ -484,5 +491,8 @@ public class TextLineNumber extends JPanel implements CaretListener,
             repaint();
          }
       }
+   }
+   public void setPainter(SidebarPainter painter) {
+      this.painter = painter;
    }
 }

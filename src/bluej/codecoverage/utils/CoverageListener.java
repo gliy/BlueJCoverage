@@ -59,13 +59,13 @@ public class CoverageListener {
       @Override
       public void run() {
          try {
-            System.out.println("connecting...");
+            System.out.println("connecting on port " + port);
             final ServerSocket server = new ServerSocket(port, 0,
                   InetAddress.getByName(ADDRESS));
 
             while (!server.isClosed()) {
                current = new Handler(server.accept());
-               System.out.println("connected");
+               System.out.println("connected to coverage agent");
                new Thread(current).start();
             }
          } catch (Exception e) {

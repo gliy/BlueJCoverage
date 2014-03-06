@@ -141,10 +141,9 @@ class CoverageOverviewPane extends JPanel {
    }
 
    private ImageIcon getDisplayIcon(BCoverage<?> coverage) {
-      ImageIcon rtn = prefs
-            .getImage(CoverageType.findType(coverage.getSource()));
+     
 
-      return rtn;
+      return  CoverageType.findType(coverage.getSource()).getImage();
    }
 
    public void addListener(TreeSelectionListener listen) {

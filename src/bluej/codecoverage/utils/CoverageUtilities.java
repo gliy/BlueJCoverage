@@ -47,7 +47,7 @@ public final class CoverageUtilities {
 
    private static final int START_PORT = 6000;
 
-   private static final int END_PORT = 7000;
+   private static final int END_PORT = 6010;
 
    /** Standard Java package separator. */
    private static final String AGENT_FILE_NAME = "jacocoagent.jar";

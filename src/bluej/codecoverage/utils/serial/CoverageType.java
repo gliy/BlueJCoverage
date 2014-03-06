@@ -1,8 +1,23 @@
 package bluej.codecoverage.utils.serial;
 
+import java.awt.Image;
+
+import javax.swing.ImageIcon;
+
+import bluej.codecoverage.pref.CoveragePrefManager.CurrentPreferences;
+
 public enum CoverageType {
    PACKAGE, CLASS, METHOD, ENUM;
 
+   private ImageIcon img;
+   
+   private CoverageType() {
+      img = CurrentPreferences.getImage(this, "png");
+   }
+   public ImageIcon getImage() {
+      return img;
+   }
+   
    public static CoverageType findType(Coverage node) {
 
       if (node instanceof CoveragePackage) {

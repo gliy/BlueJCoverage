@@ -69,11 +69,11 @@ public class CoveragePrefManager {
    }
 
    private static class StaticPreferences {
+      
+      public static ImageIcon getImage(Enum<?> type, String ext) {
 
-      public ImageIcon getImage(CoverageType type) {
-
-         URL imageLoc = getClass().getClassLoader().getResource(
-               type.toString().toLowerCase() + ".png");
+         URL imageLoc = StaticPreferences.class.getClassLoader().getResource(
+               type.toString().toLowerCase() +"." +ext);
          ImageIcon image = null;
          if (imageLoc != null) {
             image = new ImageIcon(imageLoc);

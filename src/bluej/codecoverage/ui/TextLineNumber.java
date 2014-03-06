@@ -6,15 +6,14 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Insets;
-import java.awt.Paint;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.HashMap;
+import java.util.Random;
 
 import javax.swing.JPanel;
-import javax.swing.Painter;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
@@ -285,21 +284,17 @@ public class TextLineNumber extends JPanel implements CaretListener,
             int stringWidth = fontMetrics.stringWidth(lineNumber);
             int x = getOffsetX(availableWidth, stringWidth) + insets.left;
             int y = getOffsetY(rowStartOffset, fontMetrics);
-            Color background = getLineBackground(rowStartOffset);
-            if (background != null) {
-               Color prev = g.getColor();
-               g.setColor(background);
-               g.fillRect(0, rowStartOffset, 10, endOffset - rowStartOffset);
-               g.setColor(prev);
-            }
+            int nextRow =  Utilities.getRowEnd(component, rowStartOffset) + 1;
+          
             if (painter != null) {
-               //painter.paint(g, Integer.parseInt(lineNumber), 0, rowStartOffset, 10, endOffset - rowStartOffset);
+               painter.paint(g, Integer.parseInt(lineNumber), 0, y
+                        - fontMetrics.getHeight(), 20, fontMetrics.getHeight());
             }
             g.drawString(lineNumber, x, y);
 
             // Move to the next row
 
-            rowStartOffset = Utilities.getRowEnd(component, rowStartOffset) + 1;
+            rowStartOffset = nextRow;
          } catch (Exception e) {
             break;
          }

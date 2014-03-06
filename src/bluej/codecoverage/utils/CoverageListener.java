@@ -19,6 +19,7 @@ import org.jacoco.core.data.ExecutionDataStore;
 import org.jacoco.core.data.SessionInfoStore;
 import org.jacoco.core.runtime.RemoteControlReader;
 import org.jacoco.core.runtime.RemoteControlWriter;
+import org.jacoco.report.html.HTMLFormatter;
 
 import bluej.codecoverage.utils.serial.CoverageBridge;
 
@@ -155,7 +156,6 @@ public class CoverageListener {
                      coverageBuilder);
 
                analyzer.analyzeAll(file);
-
                new Thread(new Runnable()
 
                {

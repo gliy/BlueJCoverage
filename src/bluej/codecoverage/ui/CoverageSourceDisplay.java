@@ -122,7 +122,8 @@ class CoverageSourceDisplay extends JScrollPane {
          CoverageCounterValue lineStatus = CoverageCounterValue.from(covLine
                .getStatus());
          if (lineStatus != CoverageCounterValue.EMPTY) {
-            rtn.put(base + i - 1, clz.getLine(i));
+            rtn.put(base + i - 1, covLine);
+            painter.registerLine(base +i-1, covLine);
          }
       }
       return rtn;

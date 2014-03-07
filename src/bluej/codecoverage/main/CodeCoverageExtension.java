@@ -3,6 +3,8 @@ package bluej.codecoverage.main;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,6 +34,7 @@ public class CodeCoverageExtension extends Extension {
    /** The Constant VERSION. */
    private static final String VERSION = "1.0";
 
+   private static URL SITE_URL = null;
    /**
     * When this method is called, the extension may start its work.
     * 
@@ -42,6 +45,7 @@ public class CodeCoverageExtension extends Extension {
    public void startup(final BlueJ bluej) {
 
       try {
+         SITE_URL = new URL("http://gliy.github.io/BlueJCoverage");
          CoveragePrefManager.getPrefs(bluej);
          CoverageUtilities.create(bluej);
          CoverageAction.init(bluej);
@@ -54,16 +58,16 @@ public class CodeCoverageExtension extends Extension {
             public void packageOpened(PackageEvent event) {
                try {
                   CoverageMenuBuilder builder = new CoverageMenuBuilder(bluej,
-                        event.getPackage());
+                           event.getPackage());
                   boolean selected = false;
                   if (!coverageButtons.isEmpty()) {
                      selected = coverageButtons.values().iterator().next()
-                           .isSelected();
+                              .isSelected();
                   } else {
                      builder.getButton().addItemListener(CoverageAction.get());
                   }
                   coverageButtons.put(event.getPackage().getDir(),
-                        builder.getButton());
+                           builder.getButton());
                   builder.getButton().setSelected(selected);
                   builder.getButton().addItemListener(new ItemListener() {
 
@@ -122,7 +126,12 @@ public class CodeCoverageExtension extends Extension {
 
    @Override
    public String getDescription() {
-      return ("Adds Jacoco Code Coverage to BlueJ");
+      return "Adds Jacoco Code Coverage to BlueJ\r\nCreated By Ian Kingsbury\r\nPlugin Idea from Dr.Dalbey";
+   }
+
+   @Override
+   public URL getURL() {
+      return SITE_URL;
    }
 
 }

@@ -287,8 +287,15 @@ public class TextLineNumber extends JPanel implements CaretListener,
             int nextRow =  Utilities.getRowEnd(component, rowStartOffset) + 1;
           
             if (painter != null) {
+<<<<<<< HEAD
                painter.paint(g, Integer.parseInt(lineNumber), 0, y
                         - fontMetrics.getHeight(), 20, fontMetrics.getHeight());
+=======
+              // int paintStart = Utilities.getRowEnd(component, rowStartOffset);
+            //   int paintEnd = Utilities.getRowEnd(component, rowStartOffset);
+             //   painter.paint(g, Integer.parseInt(lineNumber), 0,
+               // clip.y, 10, clip.height);
+>>>>>>> Bug fixs and icon addition
             }
             g.drawString(lineNumber, x, y);
 
@@ -487,6 +494,7 @@ public class TextLineNumber extends JPanel implements CaretListener,
          }
       }
    }
+
    public void setPainter(SidebarPainter painter) {
       this.painter = painter;
    }

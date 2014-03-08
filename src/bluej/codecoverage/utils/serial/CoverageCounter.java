@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Serializable representation of {@linkplain http 
+ * Serializable representation of {@linkplain http
  * ://www.eclemma.org/jacoco/trunk
  * /doc/api/org/jacoco/core/analysis/ICounter.html}.
  * 

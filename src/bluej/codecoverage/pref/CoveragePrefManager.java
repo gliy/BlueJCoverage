@@ -116,7 +116,7 @@ public class CoveragePrefManager {
          excluded.remove(index);
          setPref(PrefKey.EXCLUDED, excluded);
       }
-      
+
       public FrameGUIPrefs getFramePrefs() {
          return new FrameGUIPrefs(getPrefs().bluej);
       }
@@ -166,7 +166,6 @@ public class CoveragePrefManager {
 
       E load(String key);
    }
-  
 
    private final static Storable<Color> COLOR_TYPE = new Storable<Color>() {
 

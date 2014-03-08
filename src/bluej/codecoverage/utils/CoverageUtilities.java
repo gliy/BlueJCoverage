@@ -82,9 +82,10 @@ public final class CoverageUtilities {
    private CoverageUtilities(BlueJ bluej) throws IOException {
       this.bluej = bluej;
       prefs = CoveragePrefManager.getPrefs(bluej).get();
+      port = Integer.parseInt(bluej.getExtensionPropertyString(PORT_NUMBER, "" + START_PORT));
+      port = Math.max(START_PORT, port);
       setup();
-      //port = findOpenPort();
-     
+      
       setupListener();
 
    }
@@ -95,7 +96,7 @@ public final class CoverageUtilities {
                .loadClass(CoverageListener.class.getName())
                .getConstructor(Integer.TYPE).newInstance(port);
       } catch (Exception e) {
-         // TODO Auto-generated catch block
+         addShutdownHook();
          e.printStackTrace();
       }
    }
@@ -229,9 +230,10 @@ public final class CoverageUtilities {
    private String buildAgentPath() {
       return "-javaagent:" + agentFile.getAbsolutePath();
    }
+
    private String buildVMArgs() {
-      String arg = buildAgentPath() 
-            + "=output=tcpclient,port=" + port + getExcludes();
+      String arg = buildAgentPath() + "=output=tcpclient,port=" + port
+            + getExcludes();
       return arg;
    }
 
@@ -247,45 +249,6 @@ public final class CoverageUtilities {
       return rtn;
    }
 
-   /**
-    * Attempts to locate a usable port if the default port is not free.
-    * 
-    * @return valid port number to use.
-    */
-   private int findOpenPort() {
-      int tried = 0;
-      int newPort = Integer.parseInt(bluej.getExtensionPropertyString(
-            PORT_NUMBER, "6300"));
-      boolean notFound = true;
-      ServerSocket server = null;
-      while (tried < 10 && notFound) {
-         try {
-            tried++;
-            server = new ServerSocket(newPort);
-            notFound = server.isBound();
-         } catch (ConnectException ex) {
-            break;
-         } catch (Exception ex) {
-            newPort++;
-            ex.printStackTrace();
-            System.out.println("Trying to connect to port " + newPort);
-         } finally {
-            try {
-               if (server != null) {
-                  server.close();
-               }
-            } catch (IOException e) {
-            }
-
-         }
-      }
-      if (!notFound) {
-         throw new RuntimeException("No port found");
-      }
-      bluej.setExtensionPropertyString(PORT_NUMBER, "" + newPort);
-      return newPort;
-
-   }
 
    public void addShutdownHook() {
       if (!hooked) {
@@ -302,7 +265,7 @@ public final class CoverageUtilities {
 
                   if (current == null
                         || !current.toString().contains(vmArgsToAdd)) {
-                     props.put(VM_ARG_KEY, buildVMArgs());
+                     props.put(VM_ARG_KEY, replaceVmArgs(current.toString(), buildVMArgs()));
                      props.store(new FileOutputStream(propertyFile), "");
 
                   }
@@ -311,54 +274,65 @@ public final class CoverageUtilities {
 
                }
             }
+
+           
          }));
       }
 
-    }
-
-    private void updateVmArguments()
-    {
-        final Properties props = new Properties();   
+   }
+   
+   private static String replaceVmArgs(String currentArgs, String newArgs) {
+      int javaagent = currentArgs.indexOf("-javaagent");
+      StringBuilder builder = new StringBuilder(currentArgs);
+      if(javaagent >= 0){
+         builder.delete(javaagent, currentArgs.indexOf(" ", javaagent));
+         builder.insert(javaagent, newArgs + " ");
         
-        FileInputStream fis = null;
-        FileOutputStream fos = null;
-        try
-        {
-           fis = new FileInputStream(propertyFile);
-           
-           props.load(fis);
-           Object current = props.get(VM_ARG_KEY);
-            if (current != null)
-            {
-                String currentVM = current.toString();
-                Pattern portRegex = Pattern.compile("port=([0-9]+)");
-                Matcher match = portRegex.matcher(currentVM);
-                match.find();
-                Integer newPort = Integer.parseInt(match.group(1));
-                this.port = newPort;
-                if(newPort != null && newPort > END_PORT) {
-                   newPort = START_PORT;
-                }
-               
-                newPort += 1;
-                String newArgs= match.replaceAll("port=" + newPort);
-                props.put(VM_ARG_KEY, newArgs);
-                fos = new FileOutputStream(propertyFile);
-                props.store(fos, "Updated port for Coverage");
-                System.out.println("Updating Coverage port for next app to " + newPort);
-                bluej.setExtensionPropertyString(PORT_NUMBER, "" + newPort);
-                
-            }
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
+      } else {
+         builder.append(" " + newArgs);
+      }
+      return builder.toString();
+   }
 
-        }finally {
-           close(fis);
-           close(fos);
-        }
-    }
+   private void updateVmArguments() {
+      final Properties props = new Properties();
+
+      FileInputStream fis = null;
+      FileOutputStream fos = null;
+      try {
+         fis = new FileInputStream(propertyFile);
+
+         props.load(fis);
+         Object current = props.get(VM_ARG_KEY);
+         if (current != null) {
+            String currentVM = current.toString();
+            Pattern portRegex = Pattern.compile("port=([0-9]+)");
+            Matcher match = portRegex.matcher(currentVM);
+            match.find();
+            Integer newPort = Integer.parseInt(match.group(1));
+            this.port = newPort;
+            if (newPort != null && (newPort > END_PORT || newPort < START_PORT)) {
+               newPort = START_PORT;
+            }
+
+            newPort += 1;
+            String newArgs = match.replaceAll("port=" + newPort);
+            props.put(VM_ARG_KEY, newArgs);
+            fos = new FileOutputStream(propertyFile);
+            props.store(fos, "Updated port for Coverage");
+            System.out.println("Updating Coverage port for next app to "
+                  + newPort);
+            bluej.setExtensionPropertyString(PORT_NUMBER, "" + newPort);
+
+         }
+      } catch (Exception e) {
+         e.printStackTrace();
+
+      } finally {
+         close(fis);
+         close(fos);
+      }
+   }
 
    private void copyAgent(String jarFile) throws IOException {
       JarFile jar = new JarFile(jarFile);

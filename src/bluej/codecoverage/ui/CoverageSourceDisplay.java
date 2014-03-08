@@ -49,6 +49,7 @@ class CoverageSourceDisplay extends JScrollPane {
    private LineToolTip tooltip;
    private JTextPane source;
    private SidebarPainter painter;
+
    public CoverageSourceDisplay(BCoverageClass coverage)
          throws ProjectNotOpenException, PackageNotFoundException,
          BadLocationException {
@@ -62,7 +63,6 @@ class CoverageSourceDisplay extends JScrollPane {
       this.lineStats = mapLineToCoverage(coverage.getSource());
       generateDisplay();
    }
-
 
    public JTextPane getSource() {
       return source;

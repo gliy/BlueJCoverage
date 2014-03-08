@@ -85,13 +85,14 @@ class CoverageOverviewPane extends JPanel {
    }
 
    public void reset(List<BCoveragePackage> coverage) {
-      TreeSelectionListener[] listeners = tree.getListeners(TreeSelectionListener.class);
+      TreeSelectionListener[] listeners = tree
+            .getListeners(TreeSelectionListener.class);
       for (TreeSelectionListener listener : listeners) {
          tree.removeTreeSelectionListener(listener);
       }
-     // tree.removeTreeSelectionListener(summarySelection);
+      // tree.removeTreeSelectionListener(summarySelection);
       model.setRoot(createRootNode(coverage));
-     // tree.addTreeSelectionListener(summarySelection);
+      // tree.addTreeSelectionListener(summarySelection);
       for (TreeSelectionListener listener : listeners) {
          tree.addTreeSelectionListener(listener);
       }
@@ -155,11 +156,12 @@ class CoverageOverviewPane extends JPanel {
             .getLastSelectedPathComponent();
       return selectedNode;
    }
+
    DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer() {
       @Override
-      public Component getTreeCellRendererComponent(JTree tree,
-            Object value, boolean selected, boolean expanded, boolean leaf,
-            int row, boolean hasFocus) {
+      public Component getTreeCellRendererComponent(JTree tree, Object value,
+            boolean selected, boolean expanded, boolean leaf, int row,
+            boolean hasFocus) {
          Component defaultDisplay = super.getTreeCellRendererComponent(tree,
                value, selected, expanded, leaf, row, hasFocus);
          Object treeNode = ((DefaultMutableTreeNode) value).getUserObject();

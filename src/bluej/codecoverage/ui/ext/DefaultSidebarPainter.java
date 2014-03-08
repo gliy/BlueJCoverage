@@ -17,6 +17,7 @@ public class DefaultSidebarPainter implements SidebarPainter {
 
    @Override
    public void paint(Graphics g, int row, int x, int y, int width, int height) {
+
       CoverageLine line = lineData.get(row);
       if (line.getBranchCoverageType() != null
                && line.getBranchCoverageType() != CoverageBranch.NONE) {
@@ -25,9 +26,11 @@ public class DefaultSidebarPainter implements SidebarPainter {
       }
    }
 
+  
+
    @Override
-   public void registerLine(int line, CoverageLine data) {
-      this.lineData.put(line, data);
+   public void register(Integer line, CoverageLine coverage) {
+      lineToCoverage.put(line, coverage);
 
    }
 

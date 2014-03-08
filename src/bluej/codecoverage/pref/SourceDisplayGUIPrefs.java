@@ -21,6 +21,7 @@ public class SourceDisplayGUIPrefs {
    private LineAttributes attributes;
    private LineToolTip tooltip;
    private SidebarPainter painter;
+
    public SourceDisplayGUIPrefs() {
       attributes = new DefaultLineAttributes();
       tooltip = new DefaultLineToolTip();
@@ -38,6 +39,5 @@ public class SourceDisplayGUIPrefs {
    public SidebarPainter getPainter() {
       return painter;
    }
-   
 
 }

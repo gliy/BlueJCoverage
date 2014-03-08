@@ -46,8 +46,8 @@ public class CoverageReportFrame extends JFrame {
    private JSplitPane split;
 
    public static CoverageReportFrame create(
-            List<BCoveragePackage> classesCovered, Frame location)
-            throws Exception {
+         List<BCoveragePackage> classesCovered, Frame location)
+         throws Exception {
       if (instance == null) {
          instance = new CoverageReportFrame(classesCovered, location);
       } else {
@@ -59,7 +59,7 @@ public class CoverageReportFrame extends JFrame {
    }
 
    private CoverageReportFrame(List<BCoveragePackage> classesCovered, Frame fr)
-            throws Exception {
+         throws Exception {
       this.location = fr;
       this.coverage = classesCovered;
       this.framePrefs = prefs.getFramePrefs();
@@ -108,10 +108,10 @@ public class CoverageReportFrame extends JFrame {
       try {
          ClassInfo bclass = clz.getClassInfo();
          CoverageSourceDisplay existingDisplay = classToDisplay.get(bclass
-                  .getId());
+               .getId());
          if (existingDisplay == null) {
             final CoverageSourceDisplay newDisplay = new CoverageSourceDisplay(
-                     clz);
+                  clz);
             classToDisplay.put(newDisplay.getId(), newDisplay);
             newDisplay.getSource().addKeyListener(new KeyAdapter() {
 
@@ -119,7 +119,7 @@ public class CoverageReportFrame extends JFrame {
                public void keyPressed(KeyEvent e) {
                   if (e.getKeyCode() == KeyEvent.VK_W && e.isControlDown()) {
                      CoverageSourceDisplay selected = (CoverageSourceDisplay) tabs
-                              .getSelectedComponent();
+                           .getSelectedComponent();
                      tabs.remove(selected);
                      classToDisplay.remove(selected.getId());
                   }
@@ -138,19 +138,19 @@ public class CoverageReportFrame extends JFrame {
    }
 
    private void moveCaret(DefaultMutableTreeNode node,
-            DefaultMutableTreeNode parent) {
+         DefaultMutableTreeNode parent) {
       bringUpTab((BCoverageClass) parent.getUserObject());
       Locatable selectedCoverage = (Locatable) node.getUserObject();
 
       ((CoverageSourceDisplay) tabs.getSelectedComponent())
-               .moveCaret(selectedCoverage.getFirstLine());
+            .moveCaret(selectedCoverage.getFirstLine());
 
    }
 
    private WindowListener frameSizeSaver = new WindowAdapter() {
       @Override
       public void windowClosed(WindowEvent e) {
-         
+
          int width = getWidth();
          int height = getHeight();
          int div = split.getDividerLocation();

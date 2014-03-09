@@ -18,19 +18,18 @@ public class DefaultSidebarPainter implements SidebarPainter {
    @Override
    public void paint(Graphics g, int row, int x, int y, int width, int height) {
 
-      CoverageLine line = lineData.get(row);
-      if (line.getBranchCoverageType() != null
-               && line.getBranchCoverageType() != CoverageBranch.NONE) {
-         g.drawImage(line.getBranchCoverageType().getImg().getImage(), x, y,width,height,
-                   null);
+      CoverageLine line = lineData.get(row - 1);
+      if (line != null && line.getBranchCoverageType() != null
+            && line.getBranchCoverageType() != CoverageBranch.NONE) {
+         g.drawImage(line.getBranchCoverageType().getImg().getImage(), x , y + 7,
+               10, 10, null);
+        
       }
    }
 
-  
-
    @Override
-   public void register(Integer line, CoverageLine coverage) {
-      lineToCoverage.put(line, coverage);
+   public void registerLine(int line, CoverageLine data) {
+      lineData.put(line, data);
 
    }
 

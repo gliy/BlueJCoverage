@@ -8,6 +8,7 @@ import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.HashMap;
@@ -15,6 +16,7 @@ import java.util.Random;
 
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.ToolTipManager;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
@@ -30,7 +32,9 @@ import javax.swing.text.JTextComponent;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.Utilities;
 
+import bluej.codecoverage.ui.ext.LineToolTip;
 import bluej.codecoverage.ui.ext.SidebarPainter;
+import bluej.codecoverage.utils.serial.CoverageLine;
 
 /**
  * This class will display line numbers for a related text component. The text
@@ -74,7 +78,8 @@ public class TextLineNumber extends JPanel implements CaretListener,
    private int lastLine;
    private SidebarPainter painter;
    private HashMap<String, FontMetrics> fonts;
-
+   private LineToolTip tooltip;
+   
    /**
     * Create a line number component for a text component. This minimum display
     * width will be based on 3 digits.
@@ -108,6 +113,7 @@ public class TextLineNumber extends JPanel implements CaretListener,
       component.getDocument().addDocumentListener(this);
       component.addCaretListener(this);
       component.addPropertyChangeListener("font", this);
+      ToolTipManager.sharedInstance().registerComponent(this);
    }
 
    /**
@@ -284,24 +290,18 @@ public class TextLineNumber extends JPanel implements CaretListener,
             int stringWidth = fontMetrics.stringWidth(lineNumber);
             int x = getOffsetX(availableWidth, stringWidth) + insets.left;
             int y = getOffsetY(rowStartOffset, fontMetrics);
-            int nextRow =  Utilities.getRowEnd(component, rowStartOffset) + 1;
+
           
-            if (painter != null) {
-<<<<<<< HEAD
+            if (painter != null && !lineNumber.isEmpty()) {
                painter.paint(g, Integer.parseInt(lineNumber), 0, y
                         - fontMetrics.getHeight(), 20, fontMetrics.getHeight());
-=======
-              // int paintStart = Utilities.getRowEnd(component, rowStartOffset);
-            //   int paintEnd = Utilities.getRowEnd(component, rowStartOffset);
-             //   painter.paint(g, Integer.parseInt(lineNumber), 0,
-               // clip.y, 10, clip.height);
->>>>>>> Bug fixs and icon addition
+
             }
             g.drawString(lineNumber, x, y);
 
             // Move to the next row
 
-            rowStartOffset = nextRow;
+            rowStartOffset =  Utilities.getRowEnd(component, rowStartOffset) + 1;;
          } catch (Exception e) {
             break;
          }
@@ -354,6 +354,10 @@ public class TextLineNumber extends JPanel implements CaretListener,
       }
       return color;
 
+   }
+
+   public void setTooltip(LineToolTip tooltip) {
+      this.tooltip = tooltip;
    }
 
    /*
@@ -497,5 +501,15 @@ public class TextLineNumber extends JPanel implements CaretListener,
 
    public void setPainter(SidebarPainter painter) {
       this.painter = painter;
+   }
+   
+   @Override
+   public String getToolTipText(MouseEvent event) {
+
+      int modelPoint = component.viewToModel(new Point(event.getX(), event.getY()));
+      Element map = component.getDocument().getDefaultRootElement();
+      modelPoint = map.getElementIndex(modelPoint);
+
+      return  tooltip.getToolTip(modelPoint);
    }
 }

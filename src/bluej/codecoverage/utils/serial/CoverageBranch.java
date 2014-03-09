@@ -12,22 +12,18 @@ public enum CoverageBranch {
    private CoverageBranch() {
       this.img = CurrentPreferences.getImage(this, "gif");
    }
-   
-   
 
    public ImageIcon getImg() {
       return img;
    }
 
-
-
    public static CoverageBranch fromCounter(CoverageCounter counter) {
-      if(counter.getTotal() ==0 ) {
+      if (counter.getTotal() == 0) {
          return NONE;
       }
-      if (counter.getMissedRatio() == 0) {
+      if (counter.getMissed() == 0) {
          return BRANCH_FC;
-      } else if (counter.getMissedRatio() >= 1.0) {
+      } else if (counter.getMissed() == counter.getTotal()) {
          return BRANCH_NC;
       } else {
          return BRANCH_PC;

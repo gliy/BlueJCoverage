@@ -285,7 +285,8 @@ public final class CoverageUtilities {
       int javaagent = currentArgs.indexOf("-javaagent");
       StringBuilder builder = new StringBuilder(currentArgs);
       if(javaagent >= 0){
-         builder.delete(javaagent, currentArgs.indexOf(" ", javaagent));
+         int last = currentArgs.indexOf(" ", javaagent);
+         builder.delete(javaagent, last != -1 ? last : currentArgs.length());
          builder.insert(javaagent, newArgs + " ");
         
       } else {

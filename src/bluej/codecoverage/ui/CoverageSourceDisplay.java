@@ -105,6 +105,7 @@ class CoverageSourceDisplay extends JScrollPane {
       JViewport viewPort = new JViewport();
       TextLineNumber number = new TextLineNumber(source);
       number.setPainter(painter);
+      number.setTooltip(tooltip);
       viewPort.add(number);
       setRowHeader(viewPort);
       source.setCaretPosition(0);
@@ -124,6 +125,7 @@ class CoverageSourceDisplay extends JScrollPane {
          if (lineStatus != CoverageCounterValue.EMPTY) {
             rtn.put(base + i - 1, covLine);
             painter.registerLine(base +i-1, covLine);
+            tooltip.registerLine(base +i-1, covLine);
          }
       }
       return rtn;
@@ -162,12 +164,7 @@ class CoverageSourceDisplay extends JScrollPane {
          Element map = getDocument().getDefaultRootElement();
          modelPoint = map.getElementIndex(modelPoint);
 
-         String rtn = null;
-         if (lineStats.containsKey(modelPoint)) {
-            CoverageLine li = lineStats.get(modelPoint);
-            rtn = tooltip.getToolTip(modelPoint, li);
-         }
-         return rtn;
+         return  tooltip.getToolTip(modelPoint);
       }
    }
 

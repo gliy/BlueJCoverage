@@ -67,8 +67,8 @@ class CoverageOverviewPane extends JPanel {
       summary.setLayout(new BoxLayout(summary, BoxLayout.Y_AXIS));
       model = new DefaultTreeModel(createRootNode(coverage));
       tree = new JTree(model);
-      UIManager.put("ProgressBar.foreground", new Color(122, 215, 122)); // green
-      UIManager.put("ProgressBar.selectionForeground", Color.BLACK);
+     // UIManager.put("ProgressBar.foreground", new Color(122, 215, 122)); // green
+      //UIManager.put("ProgressBar.selectionForeground", Color.BLACK);
 
       tree.setRootVisible(false);
       tree.setRowHeight(20);
@@ -142,8 +142,6 @@ class CoverageOverviewPane extends JPanel {
    }
 
    private ImageIcon getDisplayIcon(BCoverage<?> coverage) {
-     
-
       return  CoverageType.findType(coverage.getSource()).getImage();
    }
 
@@ -156,6 +154,8 @@ class CoverageOverviewPane extends JPanel {
             .getLastSelectedPathComponent();
       return selectedNode;
    }
+   
+   
 
    DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer() {
       @Override
@@ -176,18 +176,16 @@ class CoverageOverviewPane extends JPanel {
                setIcon(iconToUse);
             }
             setText(info.getName());
-
+            
             CoverageCounter counter = info.getLineCoverage();
-            JProgressBar progress = new JProgressBar();
-            progress.setBorderPainted(true);
+            JProgressBar progress = createJProgressBar((int) (counter.getCoveredRatio() * 100));
+          
+            
             progress.setPreferredSize(new Dimension((int) progress
                   .getPreferredSize().getWidth(), this.getHeight()));
-            progress.setValue((int) (counter.getCoveredRatio() * 100));
-
-            progress.setStringPainted(true);
+            rtn.setBackground(Color.WHITE);
             rtn.add(this);
             rtn.add(progress);
-            rtn.setBackground(Color.WHITE);
             return rtn;
          } else {
             return defaultDisplay;
@@ -195,4 +193,15 @@ class CoverageOverviewPane extends JPanel {
 
       }
    };
+   
+   public static JProgressBar createJProgressBar(int progress) {
+      JProgressBar progressBar = new JProgressBar();
+      progressBar.setStringPainted(true);
+      progressBar.setBackground(Color.WHITE);
+      progressBar.setValue(progress);
+      progressBar.setBorderPainted(true);
+      progressBar.setForeground(Color.GREEN);
+      return progressBar;
+   }
+   
 }

@@ -1,6 +1,3 @@
-/*
- * 
- */
 package bluej.codecoverage.utils;
 
 import java.awt.Color;
@@ -54,94 +51,161 @@ public final class CoverageUtilities {
 
    /** The number of targets. */
    private static final String PROPERTY_FILE_NAME = "bluej.properties";
+   /** Key BlueJ uses for vm arguments */
    private static final String VM_ARG_KEY = "bluej.vm.args";
+   /** Key we store the port number under */
    private static final String PORT_NUMBER = "port.number";
-
+   /** URL for help dialog */
    private static final String HELP_URL = "https://github.com/gliy/BlueJCoverage/wiki/Help";
    /** Running instance of bluej. */
    private BlueJ bluej;
-
+   /** VM Args to be appended under {@link #VM_ARG_KEY} */
    private String vmArgsToAdd;
-
+   /** Current port that we use */
    private int port;
 
+   /** Single instance of this class */
    private static CoverageUtilities utils;
+   /** Single instance of the current preferences */
    private static CurrentPreferences prefs;
+   /**
+    * Jacoco Agent {@link CoverageListener}.
+    * <p>
+    * Created by a different ClassLoader, so must be Object.
+    */
    private Object coverageListener;
 
+   /** File to write our properties to on shutdown */
    private File propertyFile;
+   /** Location of the Jacocoagent.jar file */
    private File agentFile;
-
+   /** Boolean if we have already registered a shutdown hook */
    private static boolean hooked = false;
 
    /**
-    * Instantiates a new test attacher utilities.
+    * Instantiates a new test attacher utilities, loads any saved preferences,
+    * and sets up the required listeners to collect coverage data.
+    * 
+    * @param bluej
+    *           BlueJ instance to save and load information from.
     * 
     * @throws IOException
+    *            if any error is encounted while loading saved preferences,
+    *            throws an {@link IOException}.
     */
    private CoverageUtilities(BlueJ bluej) throws IOException {
       this.bluej = bluej;
       prefs = CoveragePrefManager.getPrefs(bluej).get();
-      port = Integer.parseInt(bluej.getExtensionPropertyString(PORT_NUMBER, "" + START_PORT));
+      port = Integer.parseInt(bluej.getExtensionPropertyString(PORT_NUMBER, ""
+               + START_PORT));
       port = Math.max(START_PORT, port);
       setup();
-      
+
       setupListener();
 
    }
 
+   /**
+    * Sets up the the CoverageListener that records Coverage data from the
+    * client.
+    * <p>
+    * This requires the use of {@link BreakoutClassloader} due to the inability
+    * to load any classes outside of your extension by BlueJ's
+    * {@link BreakoutClassloader}.
+    */
    private void setupListener() {
       try {
          coverageListener = new BreakoutClassloader(bluej.getUserConfigDir())
-               .loadClass(CoverageListener.class.getName())
-               .getConstructor(Integer.TYPE).newInstance(port);
+                  .loadClass(CoverageListener.class.getName())
+                  .getConstructor(Integer.TYPE).newInstance(port);
       } catch (Exception e) {
          addShutdownHook();
          e.printStackTrace();
       }
    }
 
+   /**
+    * Creates an instance of CoverageUtilities.
+    * <p>
+    * This call will throw an {@link IllegalStateException} if this class has
+    * already been created.
+    * <p>
+    * To access an already created instance you must use {@link #get()}
+    * 
+    * @param blueJ
+    *           the instance of BlueJ to load data from.
+    * @return A new utility class.
+    * @throws IOException
+    *            if any error is encounted while loading saved preferences,
+    *            throws an {@link IOException}.
+    */
    public static CoverageUtilities create(BlueJ blueJ) throws IOException {
       if (utils != null) {
-         throw new RuntimeException("Utils class already created");
+         throw new IllegalStateException("Utils class already created");
       }
       utils = new CoverageUtilities(blueJ);
       return utils;
    }
 
+   /**
+    * Returns the current CoverageUtilities instance. *
+    * <p>
+    * This call will throw an {@link IllegalStateException} if this class has
+    * not been created.
+    * <p>
+    * To create a new instance you must use {@link #create(BlueJ)}
+    * 
+    * @return Current utility class.
+    */
    public static CoverageUtilities get() {
       if (utils == null) {
-         throw new RuntimeException("Utils class not created");
+         throw new IllegalStateException("Utils class not created");
       }
       return utils;
    }
 
+   /**
+    * Requests a reset of all collected coverage information so far.
+    * <p>
+    * Used when you want to start a fresh run.
+    */
    public void clearResults() {
       try {
          Method clearMethod = coverageListener.getClass().getDeclaredMethod(
-               "clearResults");
+                  "clearResults");
          clearMethod.invoke(coverageListener);
       } catch (Exception e) {
          e.printStackTrace();
       }
    }
 
+   /**
+    * Requests a dump of all collected coverage information for all classes
+    * located under file. If any error is encountered while reading the coverage
+    * information, an error message is displayed, and null is returned.
+    * 
+    * @param file
+    *           The base directory for finding classes to return coverage for.
+    * @return List of code coverage methods for each package found in the file
+    *         directory.
+    */
    public List<CoveragePackage> getResults(File file) {
       ObjectInputStream input = null;
       List<CoveragePackage> rtn = new ArrayList<CoveragePackage>();
       try {
+         // different class loader, have to serialize
          Method resultsMethod = coverageListener.getClass().getDeclaredMethod(
-               "getResults", File.class);
+                  "getResults", File.class);
          input = (ObjectInputStream) resultsMethod.invoke(coverageListener,
-               file);
+                  file);
          Object readIn;
          while ((readIn = input.readObject()) != null) {
             rtn.add((CoveragePackage) readIn);
          }
       } catch (Exception e) {
          JOptionPane.showMessageDialog(bluej.getCurrentFrame(),
-               buildErrorMessage(getRootCause(e).getMessage()),
-               "Code Coverage Error", JOptionPane.ERROR_MESSAGE);
+                  buildErrorMessage(getRootCause(e).getMessage()),
+                  "Code Coverage Error", JOptionPane.ERROR_MESSAGE);
          return null;
       } finally {
          close(input);
@@ -149,6 +213,13 @@ public final class CoverageUtilities {
       return rtn;
    }
 
+   /**
+    * Generates a generic error message to display.
+    * 
+    * @param ex
+    *           the error to show.
+    * @return a TextPane that can be added to a dialog for error reporting.
+    */
    private JComponent buildErrorMessage(String ex) {
       // "An error was encountered while gathering coverage data\n"
       // getRootCause(e).getMessage()
@@ -156,11 +227,10 @@ public final class CoverageUtilities {
       error.setContentType("text/html");
       error.setEditable(false);
       error.setText(String
-            .format(
-                  "An error was encountered while gathering coverage data <br> "
+               .format("An error was encountered while gathering coverage data <br> "
                         + "<span style=\"color:red;font-size:14px;font-family:monospace\">%s</span><br>"
                         + "<a href=%s>Visit the FAQ for more information</a>",
-                  ex, HELP_URL));
+                        ex, HELP_URL));
       error.setBackground(new Color(240, 240, 240));
       error.addHyperlinkListener(new HyperlinkListener() {
          @Override
@@ -179,27 +249,40 @@ public final class CoverageUtilities {
    }
 
    /**
-    * Sets up the Utilites class so it can properly manage associations.
+    * Finds the required files for loading preferences, and running the
+    * listener, and verifies everything exists and is valid.
     * 
-    * @param bluejApp
-    *           the running blueJ application
     * @throws IOException
+    *            If any error is encountered while reading the properties,
+    *            throws an {@link IOException}
     */
    public void setup() throws IOException {
       findFiles();
       checkHooks();
    }
 
+   /**
+    * Locates the jacocoagent.jar and bluej.properties
+    */
    private void findFiles() {
       agentFile = new File(bluej.getUserConfigDir(), AGENT_FILE_NAME);
       propertyFile = new File(bluej.getUserConfigDir(), PROPERTY_FILE_NAME);
    }
 
    /**
-    * Validates that the bluej properties file has the required VM arguments,
-    * and that the agent jarfile is present.
+    * Validates that the bluej properties file has the required VM arguments and
+    * that the agent jarfile is present.
+    * <p>
+    * If jarfile is missing, then it is extracted from the plugin's jar file,
+    * and placed in the required location.</br> If the value under
+    * {@link #VM_ARG_KEY} in the properties file is invalid, then a shutdown
+    * hook is added to correct the issue. </br> If any of the errors above
+    * occur, the user must restart BlueJ before being able to use the
+    * plugin.</br>
     * 
     * @throws IOException
+    *            If any error is encountered while reading the properties,
+    *            throws an {@link IOException}
     */
    private void checkHooks() throws IOException {
 
@@ -210,16 +293,17 @@ public final class CoverageUtilities {
       Object current = props.get(VM_ARG_KEY);
       vmArgsToAdd = buildVMArgs();
       if (!agentFile.exists()) {
+         // copy the jar to where we expect it if it doesnt already exist
          copyAgent(getClass().getProtectionDomain().getCodeSource()
-               .getLocation().getFile());
+                  .getLocation().getFile());
       }
       if (current == null || !current.toString().contains(buildAgentPath())) {
          JOptionPane
-               .showMessageDialog(
-                     bluej.getCurrentFrame(),
-                     "This looks like a setting changed or it is your first time running"
-                           + " Code Coverage.\nPlease restart bluej for it to take effect.",
-                     "Code Coverage", JOptionPane.PLAIN_MESSAGE);
+                  .showMessageDialog(
+                           bluej.getCurrentFrame(),
+                           "This looks like a setting changed or it is your first time running"
+                                    + " Code Coverage.\nPlease restart bluej for it to take effect.",
+                           "Code Coverage", JOptionPane.PLAIN_MESSAGE);
          addShutdownHook();
          throw new ExtensionUnloadedException();
       } else {
@@ -227,16 +311,36 @@ public final class CoverageUtilities {
       }
    }
 
+   /**
+    * Generates the VM Argument for locating the agent jarfile
+    * 
+    * @return javaagent VM flag with the path
+    */
    private String buildAgentPath() {
       return "-javaagent:" + agentFile.getAbsolutePath();
    }
 
+   /**
+    * Builds the entire VM Argument string that will be added to the
+    * bluej.properties file.
+    * <p>
+    * Uses {@link #buildAgentPath()} for locating the jar file, {@link #port}
+    * for the port number, and {@link #getExcludes()} for any classes to ignore
+    * when collecting coverage information.
+    * 
+    * @return Complete VM Argument for the extension to properly function.
+    */
    private String buildVMArgs() {
       String arg = buildAgentPath() + "=output=tcpclient,port=" + port
-            + getExcludes();
+               + getExcludes();
       return arg;
    }
 
+   /**
+    * Generates classes to ignore based off preferences.
+    * 
+    * @return Single comma seperated String for classes to ignore.
+    */
    private String getExcludes() {
       StringBuilder buildExcludes = new StringBuilder();
       for (String ex : prefs.getExcluded()) {
@@ -249,7 +353,13 @@ public final class CoverageUtilities {
       return rtn;
    }
 
-
+   /**
+    * Registers a shutdown hook if one does not already exist.
+    * <p>
+    * This adds our vm arguments generated by {@link #buildVMArgs()} to
+    * bluej.properties, and prevents BlueJ from overwriting our changes to the
+    * properties file.
+    */
    public void addShutdownHook() {
       if (!hooked) {
          hooked = true;
@@ -264,8 +374,9 @@ public final class CoverageUtilities {
                   Object current = props.get(VM_ARG_KEY);
 
                   if (current == null
-                        || !current.toString().contains(vmArgsToAdd)) {
-                     props.put(VM_ARG_KEY, replaceVmArgs(current.toString(), buildVMArgs()));
+                           || !current.toString().contains(vmArgsToAdd)) {
+                     props.put(VM_ARG_KEY,
+                              replaceVmArgs(current.toString(), buildVMArgs()));
                      props.store(new FileOutputStream(propertyFile), "");
 
                   }
@@ -275,26 +386,48 @@ public final class CoverageUtilities {
                }
             }
 
-           
          }));
       }
 
    }
-   
+
+   /**
+    * Fixes any errors in the VM arguments loaded from the properties file.
+    * <p>
+    * This takes care of the issue where other VM Arguments are present that we
+    * want to preserve.
+    * 
+    * @param currentArgs
+    *           All existing VM Args in the properties file.
+    * @param newArgs
+    *           the VM Args we want to add to the properties file.
+    * @return The VMArg to add
+    */
    private static String replaceVmArgs(String currentArgs, String newArgs) {
       int javaagent = currentArgs.indexOf("-javaagent");
       StringBuilder builder = new StringBuilder(currentArgs);
-      if(javaagent >= 0){
+      // if our vm arg is present
+      if (javaagent >= 0) {
+         // where our arg ends
          int last = currentArgs.indexOf(" ", javaagent);
          builder.delete(javaagent, last != -1 ? last : currentArgs.length());
          builder.insert(javaagent, newArgs + " ");
-        
+
       } else {
+         // if it is not present add it
          builder.append(" " + newArgs);
       }
       return builder.toString();
    }
 
+   /**
+    * Updates any out to date information in our VM Argument that we saved.
+    * <p>
+    * This increases the port number when it is executed, and updates the
+    * properties file, so if anyother instance of BlueJ is launched while this
+    * instance is open, it will attempt to use a different port to collect
+    * coverage information.
+    */
    private void updateVmArguments() {
       final Properties props = new Properties();
 
@@ -305,24 +438,29 @@ public final class CoverageUtilities {
 
          props.load(fis);
          Object current = props.get(VM_ARG_KEY);
+         // if our argument is in the properties file
          if (current != null) {
             String currentVM = current.toString();
+            // pull out the saved port
             Pattern portRegex = Pattern.compile("port=([0-9]+)");
             Matcher match = portRegex.matcher(currentVM);
             match.find();
             Integer newPort = Integer.parseInt(match.group(1));
             this.port = newPort;
+            // if the saved port is outside of the range of START_PORT and
+            // END_PORT, reset it to START_PORT
             if (newPort != null && (newPort > END_PORT || newPort < START_PORT)) {
                newPort = START_PORT;
             }
 
+            // increase the port number and update the properties file
             newPort += 1;
             String newArgs = match.replaceAll("port=" + newPort);
             props.put(VM_ARG_KEY, newArgs);
             fos = new FileOutputStream(propertyFile);
             props.store(fos, "Updated port for Coverage");
             System.out.println("Updating Coverage port for next app to "
-                  + newPort);
+                     + newPort);
             bluej.setExtensionPropertyString(PORT_NUMBER, "" + newPort);
 
          }
@@ -335,6 +473,16 @@ public final class CoverageUtilities {
       }
    }
 
+   /**
+    * Extracts the jacocoagent.jar from the Extension's jar file and into the
+    * local file system.
+    * 
+    * @param jarFile
+    *           the location of the Extension's jar file.
+    * @throws IOException
+    *            If any error is encountered while reading or writing the jar
+    *            file, throws an {@link IOException}
+    */
    private void copyAgent(String jarFile) throws IOException {
       JarFile jar = new JarFile(jarFile);
       Enumeration<JarEntry> jarEnum = jar.entries();
@@ -355,6 +503,12 @@ public final class CoverageUtilities {
       }
    }
 
+   /**
+    * Utility method for swallowing IOExceptions when closing a stream.
+    * 
+    * @param stream
+    *           stream to close.
+    */
    public static void close(Closeable stream) {
       try {
          if (stream != null) {
@@ -365,6 +519,13 @@ public final class CoverageUtilities {
       }
    }
 
+   /**
+    * Utility method for find the root of an exception.
+    * 
+    * @param e
+    *           exception to trace.
+    * @return the Actual exception at the root.
+    */
    private static Throwable getRootCause(Throwable e) {
       Throwable root = e;
       while (root.getCause() != null) {

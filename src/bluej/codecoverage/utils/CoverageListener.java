@@ -22,6 +22,7 @@ import org.jacoco.core.runtime.RemoteControlWriter;
 import org.jacoco.report.html.HTMLFormatter;
 
 import bluej.codecoverage.utils.serial.CoverageBridge;
+import bluej.codecoverage.utils.serial.CoveragePackage;
 
 /**
  * Backend for collecting coverage information from the java agent. This class
@@ -35,17 +36,18 @@ import bluej.codecoverage.utils.serial.CoverageBridge;
  * 
  */
 public class CoverageListener {
-
+   /** Address of the port to listen on */
    private static final String ADDRESS = "localhost";
-
+   /** Current port to listen on */
    private final int port;
+   /** Coverage data collector */
    private Handler current;
 
    /**
-    * Start the server as a standalone program.
+    * Start the server to listening for connections on a seperate thread.
     * 
-    * @param args
-    * @throws IOException
+    * @param port
+    *           port number to listen on
     */
    public CoverageListener(int port) throws IOException {
       this.port = port;
@@ -55,6 +57,10 @@ public class CoverageListener {
 
    }
 
+   /**
+    * Thread that creates {@link #current} and makes sure the connection stays
+    * alive.
+    */
    private Thread listenerThread = new Thread(new Runnable() {
 
       @Override
@@ -62,7 +68,7 @@ public class CoverageListener {
          try {
             System.out.println("connecting on port " + port);
             final ServerSocket server = new ServerSocket(port, 0,
-                  InetAddress.getByName(ADDRESS));
+                     InetAddress.getByName(ADDRESS));
 
             while (!server.isClosed()) {
                current = new Handler(server.accept());
@@ -75,14 +81,41 @@ public class CoverageListener {
       }
    });
 
+   /**
+    * Creates an InputStream to Serialize the Coverage information so that it
+    * can be used in a different ClassLoder.
+    * 
+    * 
+    * @param file
+    *           base directory to search for classess who should be included in
+    *           the returned coverage metrics.
+    * @return InputStream containing {@link CoveragePackage}s
+    */
    public ObjectInputStream getResults(File file) {
       return current.getResults(file);
    }
 
+   /**
+    * Resets all coverage information collected so far.
+    */
    public void clearResults() {
       current.clearResults();
    }
 
+   /**
+    * Manages all interactions with the jacoco agent by sending requests and
+    * recieveing responses from a local port.
+    * <p>
+    * After recieving information from the agent, it marshalls the data into a
+    * Serializable form, so it can be sent to different class loaders.
+    * 
+    * </br> 
+    * Creation of the Serializable forms are handled through class to
+    * {@link CoverageBridge}.
+    * 
+    * @author ikingsbu
+    * 
+    */
    private static class Handler implements Runnable {
 
       private final Socket socket;
@@ -153,7 +186,7 @@ public class CoverageListener {
                final PipedOutputStream outPipe = new PipedOutputStream(inPipe);
                final CoverageBuilder coverageBuilder = new CoverageBuilder();
                final Analyzer analyzer = new Analyzer(executionData,
-                     coverageBuilder);
+                        coverageBuilder);
 
                analyzer.analyzeAll(file);
                new Thread(new Runnable()
@@ -164,15 +197,15 @@ public class CoverageListener {
                   public void run() {
                      try {
                         ObjectOutputStream outputStream = new ObjectOutputStream(
-                              outPipe);
+                                 outPipe);
 
                         IBundleCoverage bundle = coverageBuilder
-                              .getBundle("Run");
+                                 .getBundle("Run");
 
                         // send all gathered coverage information
                         for (IPackageCoverage coverage : bundle.getPackages()) {
                            outputStream.writeObject(CoverageBridge
-                                 .toSerializable(coverage));
+                                    .toSerializable(coverage));
                         }
                         outputStream.writeObject(null);
                      } catch (Exception e) {

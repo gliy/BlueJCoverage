@@ -68,7 +68,7 @@ public class CoverageListener {
          try {
             System.out.println("connecting on port " + port);
             final ServerSocket server = new ServerSocket(port, 0,
-                     InetAddress.getByName(ADDRESS));
+                  InetAddress.getByName(ADDRESS));
 
             while (!server.isClosed()) {
                current = new Handler(server.accept());
@@ -87,7 +87,7 @@ public class CoverageListener {
     * 
     * 
     * @param file
-    *           base directory to search for classess who should be included in
+    *           base directory to search for classes who should be included in
     *           the returned coverage metrics.
     * @return InputStream containing {@link CoveragePackage}s
     */
@@ -104,16 +104,14 @@ public class CoverageListener {
 
    /**
     * Manages all interactions with the jacoco agent by sending requests and
-    * recieveing responses from a local port.
+    * receiving responses from a local port.
     * <p>
-    * After recieving information from the agent, it marshalls the data into a
+    * After receiving information from the agent, it marshals the data into a
     * Serializable form, so it can be sent to different class loaders.
     * 
-    * </br> 
-    * Creation of the Serializable forms are handled through class to
+    * </br> Creation of the Serializable forms are handled through class to
     * {@link CoverageBridge}.
     * 
-    * @author ikingsbu
     * 
     */
    private static class Handler implements Runnable {
@@ -142,7 +140,14 @@ public class CoverageListener {
       public void run() {
          try {
 
+            // keep the connection alive
+            // until client disconnects
             while (reader.read()) {
+               /*
+                * makes sure when we issue a dump command that we wait for the
+                * client to actually finish sending coverage information before
+                * starting to process it.
+                */
                synchronized (lock) {
                   lock.notifyAll();
                }
@@ -186,26 +191,25 @@ public class CoverageListener {
                final PipedOutputStream outPipe = new PipedOutputStream(inPipe);
                final CoverageBuilder coverageBuilder = new CoverageBuilder();
                final Analyzer analyzer = new Analyzer(executionData,
-                        coverageBuilder);
-
+                     coverageBuilder);
+               // read and process all coverage information that the client has sent so far
                analyzer.analyzeAll(file);
-               new Thread(new Runnable()
-
-               {
+               new Thread(new Runnable() {
 
                   @Override
                   public void run() {
                      try {
                         ObjectOutputStream outputStream = new ObjectOutputStream(
-                                 outPipe);
-
+                              outPipe);
+                        // put the information into a bundle
                         IBundleCoverage bundle = coverageBuilder
-                                 .getBundle("Run");
+                              .getBundle("Run");
 
                         // send all gathered coverage information
                         for (IPackageCoverage coverage : bundle.getPackages()) {
+                           // translate jacoco coverage into our serializable version
                            outputStream.writeObject(CoverageBridge
-                                    .toSerializable(coverage));
+                                 .toSerializable(coverage));
                         }
                         outputStream.writeObject(null);
                      } catch (Exception e) {

@@ -28,7 +28,12 @@ public class CoverageAction implements ItemListener {
    private BlueJ bluej;
    private static CoverageAction action;
 
-   private CoverageAction(BlueJ bluej) {
+   /**
+    * Creates a new instance of the class.
+    * @param bluej
+    *           the BlueJ instance to use when load preferences, or determining window location
+    */
+   public CoverageAction(BlueJ bluej) {
       super();
       this.bluej = bluej;
 
@@ -71,24 +76,5 @@ public class CoverageAction implements ItemListener {
 
    }
 
-   /**
-    * Creates a single instance of this class.
-    * TODO:add a null extension.
-    * @param bluej
-    *           the BlueJ instance to use when load preferences, or determining
-    *           how to layout information.
-    */
-   public static void init(BlueJ bluej) {
-      action = new CoverageAction(bluej);
-   }
-
-   /**
-    * Returns this class as a Listener that can be attached to buttons.
-    * 
-    * @return this class as an {@link ItemListener}
-    */
-   public static ItemListener get() {
-      return action;
-   }
 
 }

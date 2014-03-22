@@ -18,9 +18,9 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
-import bluej.codecoverage.pref.CoveragePrefManager;
-import bluej.codecoverage.pref.CoveragePrefManager.CurrentPreferences;
-import bluej.codecoverage.pref.CoveragePrefManager.PrefKey;
+import bluej.codecoverage.pref.PreferenceManager;
+import bluej.codecoverage.pref.PreferenceManager.CurrentPreferences;
+import bluej.codecoverage.pref.PreferenceManager.PrefKey;
 import bluej.codecoverage.utils.CoverageUtilities;
 import bluej.extensions.BlueJ;
 import bluej.extensions.PreferenceGenerator;
@@ -29,7 +29,7 @@ public class CoveragePreferences implements PreferenceGenerator {
 
    private BlueJ bluej;
    private CurrentPreferences prefs;
-   private DefaultListModel ignore;
+   private DefaultListModel<String> ignore;
 
    public CoveragePreferences(BlueJ bluej) {
       this.bluej = bluej;
@@ -62,18 +62,18 @@ public class CoveragePreferences implements PreferenceGenerator {
 
    @Override
    public void loadValues() {
-      prefs = CoveragePrefManager.getPrefs().load();
+      prefs = PreferenceManager.getPrefs().load();
    }
 
    @Override
    public void saveValues() {
-      CoveragePrefManager.getPrefs().save();
+      PreferenceManager.getPrefs().save();
 
    }
 
    private JPanel getExcluded() {
 
-      ignore = new DefaultListModel() {
+      ignore = new DefaultListModel<String>() {
          {
             for (String excluded : prefs.getExcluded()) {
                super.addElement(excluded);
@@ -81,14 +81,14 @@ public class CoveragePreferences implements PreferenceGenerator {
          }
 
          @Override
-         public void addElement(Object element) {
+         public void addElement(String element) {
             prefs.addExcluded(element.toString());
             super.addElement(element);
             CoverageUtilities.get().addShutdownHook();
          }
 
          @Override
-         public Object remove(int index) {
+         public String remove(int index) {
 
             prefs.removeExcluded(index);
             CoverageUtilities.get().addShutdownHook();
@@ -98,7 +98,7 @@ public class CoveragePreferences implements PreferenceGenerator {
       };
 
       JPanel rtn = new JPanel(new BorderLayout());
-      final JList ignoreList = new JList(ignore);
+      final JList<String> ignoreList = new JList<String>(ignore);
       ignoreList.setVisibleRowCount(10);
       JScrollPane ignoreScrollPane = new JScrollPane(ignoreList);
       ignoreScrollPane.setBorder(BorderFactory
@@ -182,3 +182,4 @@ public class CoveragePreferences implements PreferenceGenerator {
    }
 
 }
+

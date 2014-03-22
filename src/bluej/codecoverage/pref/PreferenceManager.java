@@ -21,26 +21,26 @@ import bluej.extensions.BlueJ;
  * @author ikingsbu
  * 
  */
-public class CoveragePrefManager {
-   private static CoveragePrefManager prefs;
+public class PreferenceManager {
+   private static PreferenceManager prefs;
    private CurrentPreferences currentPrefs;
    private BlueJ bluej;
 
-   private CoveragePrefManager(BlueJ bluej) {
+   private PreferenceManager(BlueJ bluej) {
       this.bluej = bluej;
       currentPrefs = new DefaultPreferences();
 
    }
 
-   public static CoveragePrefManager getPrefs(BlueJ bluej) {
+   public static PreferenceManager getPrefs(BlueJ bluej) {
       if (prefs == null) {
-         prefs = new CoveragePrefManager(bluej);
+         prefs = new PreferenceManager(bluej);
          prefs.load();
       }
       return prefs;
    }
 
-   public static CoveragePrefManager getPrefs() {
+   public static PreferenceManager getPrefs() {
       return prefs;
    }
 

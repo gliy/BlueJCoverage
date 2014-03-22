@@ -11,9 +11,9 @@ import java.util.Map;
 import javax.swing.JToggleButton;
 
 import bluej.codecoverage.CoverageAction;
-import bluej.codecoverage.pref.CoveragePrefManager;
-import bluej.codecoverage.ui.CoverageMenuBuilder;
+import bluej.codecoverage.pref.PreferenceManager;
 import bluej.codecoverage.ui.CoveragePreferences;
+import bluej.codecoverage.ui.button.CoverageMenuBuilder;
 import bluej.codecoverage.utils.CoverageUtilities;
 import bluej.extensions.BlueJ;
 import bluej.extensions.Extension;
@@ -33,7 +33,7 @@ public class CodeCoverageExtension extends Extension {
 
    /** The Constant VERSION. */
    private static final String VERSION = "1.0";
-
+   private static BlueJ bluej;
    private static URL SITE_URL = null;
    /**
     * When this method is called, the extension may start its work.
@@ -46,10 +46,9 @@ public class CodeCoverageExtension extends Extension {
 
       try {
          SITE_URL = new URL("http://gliy.github.io/BlueJCoverage");
-         CoveragePrefManager.getPrefs(bluej);
+         PreferenceManager.getPrefs(bluej);
          CoverageUtilities.create(bluej);
-         CoverageAction.init(bluej);
-
+         CodeCoverageExtension.bluej = bluej;
          final Map<File, JToggleButton> coverageButtons = new HashMap<File, JToggleButton>();
          bluej.setPreferenceGenerator(new CoveragePreferences(bluej));
          bluej.addPackageListener(new PackageListener() {
@@ -59,26 +58,6 @@ public class CodeCoverageExtension extends Extension {
                try {
                   CoverageMenuBuilder builder = new CoverageMenuBuilder(bluej,
                            event.getPackage());
-                  boolean selected = false;
-                  if (!coverageButtons.isEmpty()) {
-                     selected = coverageButtons.values().iterator().next()
-                              .isSelected();
-                  } else {
-                     builder.getButton().addItemListener(CoverageAction.get());
-                  }
-                  coverageButtons.put(event.getPackage().getDir(),
-                           builder.getButton());
-                  builder.getButton().setSelected(selected);
-                  builder.getButton().addItemListener(new ItemListener() {
-
-                     @Override
-                     public void itemStateChanged(ItemEvent e) {
-                        for (JToggleButton button : coverageButtons.values()) {
-                           button.setSelected(e.getStateChange() == ItemEvent.SELECTED);
-                        }
-
-                     }
-                  });
 
                } catch (Exception e) {
                   e.printStackTrace();
@@ -107,6 +86,10 @@ public class CodeCoverageExtension extends Extension {
          ex.printStackTrace();
       }
 
+   }
+   
+   public static BlueJ getBlueJ() {
+    return bluej;  
    }
 
    @Override

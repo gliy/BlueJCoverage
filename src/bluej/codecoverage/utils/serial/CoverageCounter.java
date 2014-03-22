@@ -2,6 +2,8 @@ package bluej.codecoverage.utils.serial;
 
 import java.io.Serializable;
 
+import org.jacoco.core.analysis.ICounter;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -31,6 +33,12 @@ public class CoverageCounter implements Serializable {
    public CoverageCounter() {
 
    }
+   
+   public CoverageCounter(ICounter line) {
+      this(line.getCoveredCount(), line.getMissedCount(),
+            line.getTotalCount(), line.getStatus(), line.getCoveredRatio(),
+            line.getMissedRatio());
+   }
 
    public CoverageCounter(int covered, int missed, int total, int status,
          double coveredRatio, double missedRation) {
@@ -39,7 +47,7 @@ public class CoverageCounter implements Serializable {
       this.total = total;
       this.status = status;
       this.coveredRatio = coveredRatio;
-      coveredRatio = missedRation;
+      this.missedRatio = missedRation;
    }
 
 }

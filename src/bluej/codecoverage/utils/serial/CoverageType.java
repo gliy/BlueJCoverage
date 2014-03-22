@@ -4,20 +4,34 @@ import java.awt.Image;
 
 import javax.swing.ImageIcon;
 
-import bluej.codecoverage.pref.CoveragePrefManager.CurrentPreferences;
+import bluej.codecoverage.pref.PreferenceManager.CurrentPreferences;
 
+/**
+ * Joins Coverage information for Java Object's with their respective icon.
+ * 
+ * @author Ian
+ * 
+ */
 public enum CoverageType {
    PACKAGE, CLASS, METHOD, ENUM;
 
+   /** Icon that signifies the class type */
    private ImageIcon img;
-   
+
    private CoverageType() {
       img = CurrentPreferences.getImage(this, "png");
    }
+
    public ImageIcon getImage() {
       return img;
    }
-   
+
+   /**
+    * Determines the CoverageType by checking if we have parsed the information into  a
+    * {@link CoveragePackage}, {@link CoverageMethod}, or a {@link CoverageClass}.
+    * @param node the information to find the type of.
+    * @return the type and image for the information.
+    */
    public static CoverageType findType(Coverage node) {
 
       if (node instanceof CoveragePackage) {

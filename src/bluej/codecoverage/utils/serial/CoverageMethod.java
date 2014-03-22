@@ -5,6 +5,12 @@ import java.io.Serializable;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Represents Code coverage for a method.
+ * 
+ * @author Ian
+ *
+ */
 @Setter
 @Getter
 public class CoverageMethod extends Coverage implements Serializable {

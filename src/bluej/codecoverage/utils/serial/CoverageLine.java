@@ -6,8 +6,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Serializable representation of {@linkplain http 
- * ://www.eclemma.org/jacoco/trunk/doc/api/org/jacoco/core/analysis/ILine.html}.
+ * Serializable representation of 
+ * {@linkplain http://www.eclemma.org/jacoco/trunk/doc/api/org/jacoco/core/analysis/ILine.html}.
  * 
  * Can be used by BlueJ extensions that are using the provided ClassLoader.
  * 

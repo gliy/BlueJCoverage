@@ -2,8 +2,17 @@ package bluej.codecoverage.utils.serial;
 
 import javax.swing.ImageIcon;
 
-import bluej.codecoverage.pref.CoveragePrefManager.CurrentPreferences;
+import bluej.codecoverage.pref.PreferenceManager.CurrentPreferences;
 
+/**
+ * Joins Coverage information for a branch with icons to indicate coverage.
+ * <p>
+ * The icons used are the red,yellow,and green diamonds seen on a typically code
+ * coverage report.
+ * 
+ * @author Ian
+ * 
+ */
 public enum CoverageBranch {
    BRANCH_FC, BRANCH_NC, BRANCH_PC, NONE;
 

@@ -43,10 +43,12 @@ public class CoverageBridge {
     */
    public static CoveragePackage toSerializable(IPackageCoverage pkg) {
       List<CoverageClass> classes = new ArrayList<CoverageClass>();
+      // first convert all of the code coverage for classes
       for (IClassCoverage coverage : pkg.getClasses()) {
          classes.add(toSerializable(coverage));
       }
       Map<String, ISourceFileCoverage> sourceCoverage = new HashMap<String, ISourceFileCoverage>();
+
       for (ISourceFileCoverage source : pkg.getSourceFiles()) {
          sourceCoverage.put(source.getPackageName() + source.getName(), source);
       }
@@ -76,11 +78,15 @@ public class CoverageBridge {
          Map<String, ISourceFileCoverage> sourceCoverage) {
       List<CoverageClass> innerClasses = new ArrayList<CoverageClass>();
       Map<String, CoverageClass> byFileName = new HashMap<String, CoverageClass>();
+
       for (CoverageClass clz : classes) {
          String key = clz.getPackageName() + clz.getSourceFileName();
-         if (clz.getName().equals(
-               clz.getSourceFileName().substring(0,
-                     clz.getSourceFileName().indexOf(".java")))) {
+         String parsedSrcFileName = clz.getSourceFileName().substring(0,
+               clz.getSourceFileName().indexOf(".java"));
+         // if the class is a top level class (class name matches file name)
+         // combine its file coverage with the class coverage and add it to the
+         // map
+         if (clz.getName().equals(parsedSrcFileName)) {
             // use the source file coverage if there is more then 1 class in the
             // file
             ISourceFileCoverage srcCov = sourceCoverage.get(key);
@@ -89,17 +95,19 @@ public class CoverageBridge {
             clz.setName(curName);
             byFileName.put(key, clz);
          } else {
+            // if its an inner class add it to the list to be processed later
             innerClasses.add(clz);
          }
 
       }
+      // go through all the inner classes and add them to their parent class
       for (CoverageClass inner : innerClasses) {
          inner.setName(findName(inner));
          String key = inner.getPackageName() + inner.getSourceFileName();
          CoverageClass parent = byFileName.get(key);
-         // failsafe
+         // if something went wrong and a parent was not found
+         // just pretend they are a top level class
          if (parent == null) {
-
             byFileName.put(key, inner);
          } else {
             parent.addClass(inner);
@@ -141,11 +149,15 @@ public class CoverageBridge {
       List<CoverageLine> lines = new ArrayList<CoverageLine>();
       int first = clz.getFirstLine();
       int last = clz.getLastLine();
-      System.out.println(clz.getName());
+
+      // pull out all the lines of coverage and convert them to our version
+      
+      // NOTE: Our version uses a zero based index for the list of line
+      // coverage, while jacoco uses a list were the first line's number is the
+      // starting index of the array
       for (int lineNum = first; lineNum <= last; lineNum++) {
          ILine iline = clz.getLine(lineNum);
          lines.add(toLine(iline));
-       //  System.out.println("\t" + lineNum +" " + iline.getStatus());
       }
 
       CoverageClass rtn = new CoverageClass();
@@ -172,15 +184,17 @@ public class CoverageBridge {
     */
    private static void fillBase(ICoverageNode src, Coverage dest) {
       dest.setName(src.getName());
-      dest.setLineCoverage(toCounter(src.getLineCounter()));
-      dest.setBranchCoverage(toCounter(src.getBranchCounter()));
-      dest.setMethodCoverage(toCounter(src.getMethodCounter()));
-      dest.setClassCoverage(toCounter(src.getClassCounter()));
+      dest.setLineCoverage(new CoverageCounter(src.getLineCounter()));
+      dest.setBranchCoverage(new CoverageCounter(src.getBranchCounter()));
+      dest.setMethodCoverage(new CoverageCounter(src.getMethodCounter()));
+      dest.setClassCoverage(new CoverageCounter(src.getClassCounter()));
    }
 
    private static List<CoverageMethod> toMethods(
          Collection<IMethodCoverage> methods) {
       ArrayList<CoverageMethod> rtn = new ArrayList<CoverageMethod>();
+      
+      // converts all the methods.
       for (IMethodCoverage method : methods) {
          CoverageMethod coverageMethod = new CoverageMethod(
                method.getFirstLine());
@@ -193,15 +207,8 @@ public class CoverageBridge {
    }
 
    private static CoverageLine toLine(ILine line) {
-      ICounter branch = line.getBranchCounter();
       int status = line.getStatus();
-
-      return new CoverageLine(status, toCounter(line.getBranchCounter()));
+      return new CoverageLine(status, new CoverageCounter(line.getBranchCounter()));
    }
 
-   private static CoverageCounter toCounter(ICounter line) {
-      return new CoverageCounter(line.getCoveredCount(), line.getMissedCount(),
-            line.getTotalCount(), line.getStatus(), line.getCoveredRatio(),
-            line.getMissedRatio());
-   }
 }

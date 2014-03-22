@@ -27,8 +27,8 @@ import javax.swing.JTextPane;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 
-import bluej.codecoverage.pref.CoveragePrefManager;
-import bluej.codecoverage.pref.CoveragePrefManager.CurrentPreferences;
+import bluej.codecoverage.pref.PreferenceManager;
+import bluej.codecoverage.pref.PreferenceManager.CurrentPreferences;
 import bluej.codecoverage.utils.serial.CoveragePackage;
 import bluej.extensions.BlueJ;
 import bluej.extensions.ExtensionUnloadedException;
@@ -95,7 +95,7 @@ public final class CoverageUtilities {
     */
    private CoverageUtilities(BlueJ bluej) throws IOException {
       this.bluej = bluej;
-      prefs = CoveragePrefManager.getPrefs(bluej).get();
+      prefs = PreferenceManager.getPrefs(bluej).get();
       port = Integer.parseInt(bluej.getExtensionPropertyString(PORT_NUMBER, ""
                + START_PORT));
       port = Math.max(START_PORT, port);
@@ -109,13 +109,13 @@ public final class CoverageUtilities {
     * Sets up the the CoverageListener that records Coverage data from the
     * client.
     * <p>
-    * This requires the use of {@link BreakoutClassloader} due to the inability
+    * This requires the use of {@link BreakoutClassLoader} due to the inability
     * to load any classes outside of your extension by BlueJ's
-    * {@link BreakoutClassloader}.
+    * {@link BreakoutClassLoader}.
     */
    private void setupListener() {
       try {
-         coverageListener = new BreakoutClassloader(bluej.getUserConfigDir())
+         coverageListener = new BreakoutClassLoader()
                   .loadClass(CoverageListener.class.getName())
                   .getConstructor(Integer.TYPE).newInstance(port);
       } catch (Exception e) {

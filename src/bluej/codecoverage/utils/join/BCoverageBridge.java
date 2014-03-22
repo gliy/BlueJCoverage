@@ -37,17 +37,23 @@ public class BCoverageBridge {
    public static List<BCoveragePackage> toBCoverage(
          List<CoveragePackage> packages, File baseDir) throws Exception {
       List<BCoveragePackage> bcoverage = new ArrayList<BCoveragePackage>();
+
+      // go through each package first
       for (CoveragePackage coveragePkg : packages) {
          List<BCoverageClass> foundClasses = new ArrayList<BCoverageClass>();
 
+         // go through all the classes
          for (CoverageClass coverageClass : coveragePkg.getClassCoverageInfo()) {
             File src = findFile(baseDir, coverageClass);
+            // only include it in our report if we find the file under the base
+            // directory of the project.
             if (src != null) {
                ClassInfo classInfo = new FileClassInfo(src,
                      coverageClass.getName());
                foundClasses.add(new BCoverageClass(classInfo, coverageClass));
             }
          }
+         // if the package is not empty, add it to the list of packages to show.
          if (!foundClasses.isEmpty()) {
             BCoveragePackage bpkg = new BCoveragePackage(coveragePkg,
                   foundClasses);
@@ -58,8 +64,22 @@ public class BCoverageBridge {
       return bcoverage;
    }
 
+   /**
+    * Tries to find a class file using base as the root directory to start
+    * searching from.
+    * <p>
+    * If no file is found null is returned.
+    * 
+    * @param base
+    *           the base directory for the search
+    * @param clz
+    *           Information about the class to find, like name, and package.
+    * @return File containing the source code for the class defined in clz.
+    * @throws Exception
+    */
    private static File findFile(File base, CoverageClass clz) throws Exception {
       String sep = "";
+      // if there is a package name we need to add a / to the end of it.
       if (clz.getPackageName() != null || !clz.getPackageName().isEmpty()) {
          sep = File.separator;
       }
@@ -73,6 +93,7 @@ public class BCoverageBridge {
       return toGet;
    }
 
+   //TODO: Not working
    public static final Comparator<? super BCoverage<?>> SORT_BY_COVERAGE = new Comparator<BCoverage<?>>() {
 
       @Override

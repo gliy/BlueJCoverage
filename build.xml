@@ -60,7 +60,7 @@
 	<target name="run" depends="build-jar">
 		<!-- jvmargs="-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=4000,suspend=n" -->
 		<java jar="${bluej.lib}/bluej.jar" jvm="F:\Program Files\Java\jdk1.7.0_51\bin\java.exe"
-			jvmargs="-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=4000,suspend=n"
+			jvmargs="-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=4000,suspend=y"
 			fork="true">
 
 		</java>

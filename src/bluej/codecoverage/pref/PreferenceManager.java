@@ -15,7 +15,6 @@ import bluej.codecoverage.main.CodeCoverageModule;
 import bluej.codecoverage.pref.option.ColorPreferences;
 import bluej.codecoverage.pref.option.ExcludesPreferences;
 import bluej.codecoverage.pref.option.FramePreferences;
-import bluej.codecoverage.pref.option.PreferenceStore;
 import bluej.codecoverage.utils.serial.CoverageType;
 import bluej.extensions.BlueJ;
 
@@ -35,14 +34,17 @@ public class PreferenceManager {
    private FramePreferences framePrefs;
    private PreferenceManager(PreferenceStore prefStore) {
       this.prefStore = prefStore;
-      
+      this.excludesPrefs = new ExcludesPreferences(prefStore);
+      this.colorPrefs = new ColorPreferences(prefStore);
+      this.framePrefs = new FramePreferences(prefStore);
    }
 
-   public static void init(CodeCoverageModule module) {
+   public static PreferenceManager init(CodeCoverageModule module) {
       if (prefs == null) {
          prefs = new PreferenceManager(module.getPreferenceStore());
          prefs.load();
       }
+      return prefs;
    }
 
    public void load() {

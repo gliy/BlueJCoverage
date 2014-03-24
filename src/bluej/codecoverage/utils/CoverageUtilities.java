@@ -339,7 +339,7 @@ public final class CoverageUtilities {
     */
    private String getExcludes() {
       StringBuilder buildExcludes = new StringBuilder();
-      for (String ex : prefs.getExcluded()) {
+      for (String ex : module.getPreferenceManager().getExcludesPrefs().getExcludedPrefs()) {
          buildExcludes.append(":" + ex);
       }
       String rtn = buildExcludes.toString();

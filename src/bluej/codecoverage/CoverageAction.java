@@ -50,7 +50,8 @@ public class CoverageAction implements ItemListener {
          if (coverage != null) {
             List<BCoveragePackage> bcoverage = BCoverageBridge.toBCoverage(
                   coverage, dir);
-            JFrame report = module.getReportFrame().create(bcoverage, location);
+            CoverageReportFrame report = module.getReportFrame();
+            report.create(bcoverage, location);
             report.setVisible(true);
          }
       } catch (Exception e) {

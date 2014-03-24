@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import bluej.codecoverage.pref.PreferenceStore;
+
 public class ColorPreferences extends BasePreferenceOption<Color> {
    private static final Pref<Color> NOT_COVERED = pref("Not Covered",
          new Color(255, 170, 170));

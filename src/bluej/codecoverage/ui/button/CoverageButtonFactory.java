@@ -7,19 +7,20 @@ import javax.swing.JToggleButton;
 import javax.swing.JToggleButton.ToggleButtonModel;
 
 import bluej.codecoverage.CoverageAction;
+import bluej.codecoverage.main.CodeCoverageModule;
 import bluej.extensions.BlueJ;
 
 public class CoverageButtonFactory {
 
    private static CoverageButtonFactory inst;
 
-   private CoverageButtonFactory(BlueJ bluej) {
-      model.addItemListener(new CoverageAction(bluej));
+   private CoverageButtonFactory(CodeCoverageModule module) {
+      model.addItemListener(new CoverageAction(module));
    }
 
-   public static CoverageButtonFactory get(BlueJ bluej) {
+   public static CoverageButtonFactory get(CodeCoverageModule module) {
       if (inst == null) {
-         inst = new CoverageButtonFactory(bluej);
+         inst = new CoverageButtonFactory(module);
       }
       return inst;
    }

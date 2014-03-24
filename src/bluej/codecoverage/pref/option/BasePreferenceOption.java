@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import bluej.codecoverage.pref.PreferenceStore;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 

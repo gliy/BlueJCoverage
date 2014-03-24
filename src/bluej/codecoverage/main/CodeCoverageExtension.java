@@ -46,17 +46,16 @@ public class CodeCoverageExtension extends Extension {
 
       try {
          SITE_URL = new URL("http://gliy.github.io/BlueJCoverage");
-         PreferenceManager.init(bluej);
-         CoverageUtilities.create(bluej);
-         CodeCoverageExtension.bluej = bluej;
+         final CodeCoverageModule module = new BlueJCodeCoverageModule(bluej);
+         
          final Map<File, JToggleButton> coverageButtons = new HashMap<File, JToggleButton>();
-         bluej.setPreferenceGenerator(new CoveragePreferencePane(bluej));
+         bluej.setPreferenceGenerator(new CoveragePreferencePane(module));
          bluej.addPackageListener(new PackageListener() {
 
             @Override
             public void packageOpened(PackageEvent event) {
                try {
-                  CoverageMenuBuilder builder = new CoverageMenuBuilder(bluej,
+                  CoverageMenuBuilder builder = new CoverageMenuBuilder(module,
                            event.getPackage());
 
                } catch (Exception e) {
@@ -115,10 +114,6 @@ public class CodeCoverageExtension extends Extension {
    @Override
    public URL getURL() {
       return SITE_URL;
-   }
-
-   public static BlueJ getPreferenceStore() {
-     
    }
 
 }

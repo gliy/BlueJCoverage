@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import bluej.codecoverage.pref.PreferenceStore;
+
 public class ExcludesPreferences extends BasePreferenceOption<List<String>> {
    private static final Pref<List<String>> EXCLUDES = pref("coverage.excludes",
          Arrays.asList("bluej/runtime**/*.class", "**/*__SHELL*"));

@@ -12,6 +12,7 @@ import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JToggleButton;
 
+import bluej.codecoverage.main.CodeCoverageModule;
 import bluej.extensions.BPackage;
 import bluej.extensions.BlueJ;
 
@@ -24,7 +25,7 @@ import bluej.extensions.BlueJ;
 public class CoverageMenuBuilder {
    private JToggleButton coverageButton;
 
-   public CoverageMenuBuilder(BlueJ bluej, BPackage pack) throws Exception {
+   public CoverageMenuBuilder(CodeCoverageModule module, BPackage pack) throws Exception {
 
       JFrame frame = (JFrame) pack.getFrame();
       Container content = frame.getContentPane();
@@ -37,7 +38,7 @@ public class CoverageMenuBuilder {
 
       JPanel coverage = new JPanel();
 
-      coverageButton = CoverageButtonFactory.get(bluej).createButton();
+      coverageButton = CoverageButtonFactory.get(module).createButton();
 
       coverage.setLayout(new BoxLayout(coverage, BoxLayout.Y_AXIS));
       coverage.setAlignmentX(0.5f);

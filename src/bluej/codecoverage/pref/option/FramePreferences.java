@@ -2,6 +2,8 @@ package bluej.codecoverage.pref.option;
 
 import java.awt.Point;
 
+import bluej.codecoverage.pref.PreferenceStore;
+
 public class FramePreferences extends BasePreferenceOption<Integer> {
 
    private static final Pref<Integer> FRAME_LOCATION_Y = pref(

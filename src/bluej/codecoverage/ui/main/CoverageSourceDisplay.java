@@ -1,4 +1,4 @@
-package bluej.codecoverage.ui;
+package bluej.codecoverage.ui.main;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -24,6 +24,7 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
+import bluej.codecoverage.pref.PreferenceManager;
 import bluej.codecoverage.pref.SourceDisplayGUIPrefs;
 import bluej.codecoverage.ui.ext.LineAttributes;
 import bluej.codecoverage.ui.ext.LineToolTip;
@@ -50,11 +51,11 @@ class CoverageSourceDisplay extends JScrollPane {
    private JTextPane source;
    private SidebarPainter painter;
 
-   public CoverageSourceDisplay(BCoverageClass coverage)
+   public CoverageSourceDisplay(PreferenceManager prefManager, BCoverageClass coverage)
          throws ProjectNotOpenException, PackageNotFoundException,
          BadLocationException {
       super();
-      SourceDisplayGUIPrefs prefs = new SourceDisplayGUIPrefs();
+      SourceDisplayGUIPrefs prefs = new SourceDisplayGUIPrefs(prefManager);
       this.source = new CustomJTextPane();
       this.coverage = coverage;
       this.lineAttributes = prefs.getAttributes();

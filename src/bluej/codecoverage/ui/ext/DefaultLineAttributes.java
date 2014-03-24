@@ -1,37 +1,38 @@
 package bluej.codecoverage.ui.ext;
 
-import java.awt.Color;
-
 import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.StyleConstants;
 
-import bluej.codecoverage.pref.PreferenceManager;
-import bluej.codecoverage.pref.PreferenceManager.CurrentPreferences;
-import bluej.codecoverage.pref.PreferenceManager.PrefKey;
+import bluej.codecoverage.pref.option.ColorPreferences;
 import bluej.codecoverage.utils.serial.CoverageCounterValue;
 import bluej.codecoverage.utils.serial.CoverageLine;
 
 public class DefaultLineAttributes implements LineAttributes {
+   private ColorPreferences colors;
+   
+   public DefaultLineAttributes(ColorPreferences colors) {
+      super();
+      this.colors = colors;
+   }
+
    @Override
    public void setStyle(MutableAttributeSet style, CoverageLine line) {
       CoverageCounterValue value = CoverageCounterValue.from(line.getStatus());
-      CurrentPreferences current = PreferenceManager.getPrefs().get();
 
       switch (value) {
       case FULLY_COVERED:
          StyleConstants.setBackground(style,
-               (Color) current.getPref(PrefKey.FULLY_COVERED_COLOR));
+               colors.getFullyCovered());
          break;
       case NOT_COVERED:
          StyleConstants.setBackground(style,
-               (Color) current.getPref(PrefKey.NOT_COVERED_COLOR));
+              colors.getNotCovered());
+         break;
+  
+      case PARTLY_COVERED:
+         StyleConstants.setBackground(style,colors.getPartiallyCovered());
          break;
       case EMPTY:
-         break;
-      case PARTLY_COVERED:
-         StyleConstants.setBackground(style,
-               (Color) current.getPref(PrefKey.PARTIALLY_COVERED_COLOR));
-         break;
       case UNKNOWN:
          break;
       }

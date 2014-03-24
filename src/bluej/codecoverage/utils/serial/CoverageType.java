@@ -1,10 +1,9 @@
 package bluej.codecoverage.utils.serial;
 
-import java.awt.Image;
-
 import javax.swing.ImageIcon;
 
-import bluej.codecoverage.pref.PreferenceManager.CurrentPreferences;
+import bluej.codecoverage.pref.PreferenceManager;
+import bluej.codecoverage.ui.pref.CoveragePreferencePane;
 
 /**
  * Joins Coverage information for Java Object's with their respective icon.
@@ -19,7 +18,7 @@ public enum CoverageType {
    private ImageIcon img;
 
    private CoverageType() {
-      img = CurrentPreferences.getImage(this, "png");
+      img = PreferenceManager.getImage(this, "png");
    }
 
    public ImageIcon getImage() {

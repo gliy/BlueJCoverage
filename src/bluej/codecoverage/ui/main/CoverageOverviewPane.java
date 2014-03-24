@@ -1,4 +1,4 @@
-package bluej.codecoverage.ui;
+package bluej.codecoverage.ui.main;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -16,7 +16,6 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
-import javax.swing.UIManager;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -25,7 +24,6 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeSelectionModel;
 
-import bluej.codecoverage.pref.PreferenceManager.CurrentPreferences;
 import bluej.codecoverage.utils.join.BCoverage;
 import bluej.codecoverage.utils.join.BCoverageBridge;
 import bluej.codecoverage.utils.join.BCoveragePackage;
@@ -42,7 +40,6 @@ import bluej.codecoverage.utils.serial.CoverageType;
  */
 class CoverageOverviewPane extends JPanel {
 
-   private CurrentPreferences prefs;
    private DefaultTreeModel model;
    private JTree tree;
    private JPanel summary;
@@ -58,10 +55,9 @@ class CoverageOverviewPane extends JPanel {
       }
    };
 
-   public CoverageOverviewPane(List<BCoveragePackage> coverage,
-         CurrentPreferences prefs) {
+   public CoverageOverviewPane(List<BCoveragePackage> coverage) {
       super();
-      this.prefs = prefs;
+
       this.summary = new JPanel();
       summary.setBorder(BorderFactory.createEtchedBorder());
       summary.setLayout(new BoxLayout(summary, BoxLayout.Y_AXIS));

@@ -22,8 +22,8 @@ public class SourceDisplayGUIPrefs {
    private LineToolTip tooltip;
    private SidebarPainter painter;
 
-   public SourceDisplayGUIPrefs() {
-      attributes = new DefaultLineAttributes();
+   public SourceDisplayGUIPrefs(PreferenceManager manager) {
+      attributes = new DefaultLineAttributes(manager.getColorPrefs());
       tooltip = new DefaultLineToolTip();
       painter = new DefaultSidebarPainter();
    }

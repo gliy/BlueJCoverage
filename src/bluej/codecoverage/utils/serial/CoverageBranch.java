@@ -2,7 +2,7 @@ package bluej.codecoverage.utils.serial;
 
 import javax.swing.ImageIcon;
 
-import bluej.codecoverage.pref.PreferenceManager.CurrentPreferences;
+import bluej.codecoverage.pref.PreferenceManager;
 
 /**
  * Joins Coverage information for a branch with icons to indicate coverage.
@@ -19,7 +19,7 @@ public enum CoverageBranch {
    private ImageIcon img;
 
    private CoverageBranch() {
-      this.img = CurrentPreferences.getImage(this, "gif");
+      this.img = PreferenceManager.getImage(this, "gif");
    }
 
    public ImageIcon getImg() {

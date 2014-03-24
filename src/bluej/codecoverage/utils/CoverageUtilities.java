@@ -10,8 +10,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.lang.reflect.Method;
-import java.net.ConnectException;
-import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -27,8 +25,7 @@ import javax.swing.JTextPane;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 
-import bluej.codecoverage.pref.PreferenceManager;
-import bluej.codecoverage.pref.PreferenceManager.CurrentPreferences;
+import bluej.codecoverage.main.CodeCoverageModule;
 import bluej.codecoverage.utils.serial.CoveragePackage;
 import bluej.extensions.BlueJ;
 import bluej.extensions.ExtensionUnloadedException;
@@ -58,7 +55,6 @@ public final class CoverageUtilities {
    /** URL for help dialog */
    private static final String HELP_URL = "https://github.com/gliy/BlueJCoverage/wiki/Help";
    /** Running instance of bluej. */
-   private BlueJ bluej;
    /** VM Args to be appended under {@link #VM_ARG_KEY} */
    private String vmArgsToAdd;
    /** Current port that we use */
@@ -67,7 +63,7 @@ public final class CoverageUtilities {
    /** Single instance of this class */
    private static CoverageUtilities utils;
    /** Single instance of the current preferences */
-   private static CurrentPreferences prefs;
+   private CodeCoverageModule module;
    /**
     * Jacoco Agent {@link CoverageListener}.
     * <p>
@@ -86,17 +82,16 @@ public final class CoverageUtilities {
     * Instantiates a new test attacher utilities, loads any saved preferences,
     * and sets up the required listeners to collect coverage data.
     * 
-    * @param bluej
-    *           BlueJ instance to save and load information from.
+    * @param module
+    *           module instance to save and load information from.
     * 
     * @throws IOException
     *            if any error is encounted while loading saved preferences,
     *            throws an {@link IOException}.
     */
-   private CoverageUtilities(BlueJ bluej) throws IOException {
-      this.bluej = bluej;
-      prefs = PreferenceManager.getPrefs(bluej).get();
-      port = Integer.parseInt(bluej.getExtensionPropertyString(PORT_NUMBER, ""
+   private CoverageUtilities(CodeCoverageModule module) throws IOException {
+      this.module = module;
+      port = Integer.parseInt(module.getPreferenceStore().getPreference(PORT_NUMBER, ""
                + START_PORT));
       port = Math.max(START_PORT, port);
       setup();
@@ -132,18 +127,18 @@ public final class CoverageUtilities {
     * <p>
     * To access an already created instance you must use {@link #get()}
     * 
-    * @param blueJ
-    *           the instance of BlueJ to load data from.
+    * @param module
+    *           the module to load data from.
     * @return A new utility class.
     * @throws IOException
     *            if any error is encounted while loading saved preferences,
     *            throws an {@link IOException}.
     */
-   public static CoverageUtilities create(BlueJ blueJ) throws IOException {
+   public static CoverageUtilities create(CodeCoverageModule module) throws IOException {
       if (utils != null) {
          throw new IllegalStateException("Utils class already created");
       }
-      utils = new CoverageUtilities(blueJ);
+      utils = new CoverageUtilities(module);
       return utils;
    }
 
@@ -157,12 +152,12 @@ public final class CoverageUtilities {
     * 
     * @return Current utility class.
     */
-   public static CoverageUtilities get() {
-      if (utils == null) {
-         throw new IllegalStateException("Utils class not created");
-      }
-      return utils;
-   }
+   //public static CoverageUtilities get() {
+    //  if (utils == null) {
+   //      throw new IllegalStateException("Utils class not created");
+   //   }
+  //    return utils;
+  // }
 
    /**
     * Requests a reset of all collected coverage information so far.
@@ -203,7 +198,7 @@ public final class CoverageUtilities {
             rtn.add((CoveragePackage) readIn);
          }
       } catch (Exception e) {
-         JOptionPane.showMessageDialog(bluej.getCurrentFrame(),
+         JOptionPane.showMessageDialog(module.getBlueJFrame(),
                   buildErrorMessage(getRootCause(e).getMessage()),
                   "Code Coverage Error", JOptionPane.ERROR_MESSAGE);
          return null;
@@ -265,8 +260,9 @@ public final class CoverageUtilities {
     * Locates the jacocoagent.jar and bluej.properties
     */
    private void findFiles() {
-      agentFile = new File(bluej.getUserConfigDir(), AGENT_FILE_NAME);
-      propertyFile = new File(bluej.getUserConfigDir(), PROPERTY_FILE_NAME);
+      String userDir = module.getPreferenceStore().getLocation();
+      agentFile = new File(userDir, AGENT_FILE_NAME);
+      propertyFile = new File(userDir, PROPERTY_FILE_NAME);
    }
 
    /**
@@ -300,7 +296,7 @@ public final class CoverageUtilities {
       if (current == null || !current.toString().contains(buildAgentPath())) {
          JOptionPane
                   .showMessageDialog(
-                           bluej.getCurrentFrame(),
+                           module.getBlueJFrame(),
                            "This looks like a setting changed or it is your first time running"
                                     + " Code Coverage.\nPlease restart bluej for it to take effect.",
                            "Code Coverage", JOptionPane.PLAIN_MESSAGE);
@@ -461,7 +457,7 @@ public final class CoverageUtilities {
             props.store(fos, "Updated port for Coverage");
             System.out.println("Updating Coverage port for next app to "
                      + newPort);
-            bluej.setExtensionPropertyString(PORT_NUMBER, "" + newPort);
+            module.getPreferenceStore().setPreference(PORT_NUMBER, "" + newPort);
 
          }
       } catch (Exception e) {

@@ -1,4 +1,4 @@
-package bluej.codecoverage.ui;
+package bluej.codecoverage.ui.main;
 
 import java.awt.Dimension;
 import java.awt.Frame;
@@ -20,9 +20,9 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import bluej.codecoverage.main.CodeCoverageModule;
 import bluej.codecoverage.pref.PreferenceManager;
-import bluej.codecoverage.pref.PreferenceManager.CurrentPreferences;
-import bluej.codecoverage.pref.FrameGUIPrefs;
+import bluej.codecoverage.pref.option.FramePreferences;
 import bluej.codecoverage.utils.join.BCoverage;
 import bluej.codecoverage.utils.join.BCoverageClass;
 import bluej.codecoverage.utils.join.BCoveragePackage;
@@ -44,16 +44,23 @@ public class CoverageReportFrame extends JFrame {
    /** Map of opened source files */
    private Map<String, CoverageSourceDisplay> classToDisplay;
    /** GUI Preferences */
-   private CurrentPreferences prefs = PreferenceManager.getPrefs().get();
+   private PreferenceManager prefManager;
    /** Preferences for frame location and size */
-   private FrameGUIPrefs framePrefs;
+   private FramePreferences framePrefs;
    /** Singleton for the entire frame */
-   private static CoverageReportFrame instance;
+   private boolean first;
    /** Previous location of this frame */
    private Frame location;
    /** Divider between overview and source code. */
    private JSplitPane split;
 
+   
+   public CoverageReportFrame(CodeCoverageModule module) {
+      prefManager = module.getPreferenceManager();
+      framePrefs = prefManager.getFramePrefs();
+      first = true;
+      
+   }
    /**
     * Creates a coverage frame for the provided coverage information.
     * <p>
@@ -65,21 +72,19 @@ public class CoverageReportFrame extends JFrame {
     * @param location
     *           location and size for the coverage frame if this is the first
     *           time opening it
-    * @return the new coverage frame.
     * @throws Exception
     */
-   public static CoverageReportFrame create(
+   public void create(
          List<BCoveragePackage> classesCovered, Frame location)
          throws Exception {
       // if it is the first time opening actually create the frame.
-      if (instance == null) {
-         instance = new CoverageReportFrame(classesCovered, location);
+      if (first) {
+         first = false;
+         createNewFrame(classesCovered, location);
       } else {
          // otherwise just reset the information and make it visible
-         instance.reset(classesCovered);
+         reset(classesCovered);
       }
-
-      return instance;
    }
 
    /**
@@ -92,19 +97,18 @@ public class CoverageReportFrame extends JFrame {
     *           frame location and size
     * @throws Exception
     */
-   private CoverageReportFrame(List<BCoveragePackage> classesCovered, Frame fr)
+   private void createNewFrame(List<BCoveragePackage> classesCovered, Frame fr)
          throws Exception {
       this.location = fr;
       this.coverage = classesCovered;
-      this.framePrefs = prefs.getFramePrefs();
-      setSize(framePrefs.getFrameWidth(), framePrefs.getFrameHeight());
+      setSize(framePrefs.getWidth(), framePrefs.getHeight());
       addWindowListener(frameSizeSaver);
 
       generateTabs();
       setTitle("Coverage Report");
       setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
-      Point loc = framePrefs.getLocation();
+      Point loc = framePrefs.getFrameLocation();
       if (loc != null) {
          setLocation(loc);
       } else {
@@ -134,14 +138,14 @@ public class CoverageReportFrame extends JFrame {
    private void generateTabs() {
       classToDisplay = new HashMap<String, CoverageSourceDisplay>();
       tabs = new JTabbedPane();
-      overview = new CoverageOverviewPane(coverage, prefs);
+      overview = new CoverageOverviewPane(coverage);
       overview.setPreferredSize(new Dimension(getWidth(), 100));
 
       split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, tabs, overview);
 
       setContentPane(split);
 
-      split.setDividerLocation(framePrefs.getFrameDivider());
+      split.setDividerLocation(framePrefs.getDividerLocation());
       split.setDividerSize(8);
       split.setOneTouchExpandable(true);
       overview.addListener(new TreeListener());
@@ -160,7 +164,7 @@ public class CoverageReportFrame extends JFrame {
          // if the source code is not already open
          if (existingDisplay == null) {
             final CoverageSourceDisplay newDisplay = new CoverageSourceDisplay(
-                  clz);
+                  prefManager, clz);
             classToDisplay.put(newDisplay.getId(), newDisplay);
             // add listener so Ctrl+W will remove the tab for the source code
             newDisplay.getSource().addKeyListener(new KeyAdapter() {
@@ -215,8 +219,8 @@ public class CoverageReportFrame extends JFrame {
          int width = getWidth();
          int height = getHeight();
          int div = split.getDividerLocation();
-         framePrefs.setFramePrefs(width, height, div);
-         framePrefs.setLocation(getLocation());
+         framePrefs.saveFramePrefs(width, height, div, getLocation());
+
          super.windowClosed(e);
       }
    };

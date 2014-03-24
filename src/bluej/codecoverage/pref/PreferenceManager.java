@@ -11,6 +11,11 @@ import java.util.Map.Entry;
 
 import javax.swing.ImageIcon;
 
+import bluej.codecoverage.main.CodeCoverageModule;
+import bluej.codecoverage.pref.option.ColorPreferences;
+import bluej.codecoverage.pref.option.ExcludesPreferences;
+import bluej.codecoverage.pref.option.FramePreferences;
+import bluej.codecoverage.pref.option.PreferenceStore;
 import bluej.codecoverage.utils.serial.CoverageType;
 import bluej.extensions.BlueJ;
 
@@ -23,52 +28,60 @@ import bluej.extensions.BlueJ;
  */
 public class PreferenceManager {
    private static PreferenceManager prefs;
-   private CurrentPreferences currentPrefs;
-   private BlueJ bluej;
-
-   private PreferenceManager(BlueJ bluej) {
-      this.bluej = bluej;
-      currentPrefs = new DefaultPreferences();
-
+ 
+   private PreferenceStore prefStore;
+   private ExcludesPreferences excludesPrefs;
+   private ColorPreferences colorPrefs;
+   private FramePreferences framePrefs;
+   private PreferenceManager(PreferenceStore prefStore) {
+      this.prefStore = prefStore;
+      
    }
 
-   public static PreferenceManager getPrefs(BlueJ bluej) {
+   public static void init(CodeCoverageModule module) {
       if (prefs == null) {
-         prefs = new PreferenceManager(bluej);
+         prefs = new PreferenceManager(module.getPreferenceStore());
          prefs.load();
       }
-      return prefs;
    }
 
-   public static PreferenceManager getPrefs() {
-      return prefs;
-   }
+   public void load() {
 
-   public CurrentPreferences load() {
-
-      for (PrefKey key : PrefKey.values()) {
-         Object loadedValue = key.type.load(key.name());
-         if (loadedValue != null) {
-            currentPrefs.setPref(key, loadedValue);
-         }
-      }
-
-      return currentPrefs;
    }
 
    public void save() {
-      for (Entry<PrefKey, Object> current : currentPrefs.prefs.entrySet()) {
-         bluej.setExtensionPropertyString(current.getKey().name(),
-               current.getKey().type.save(current.getValue()));
+    
+
+   }
+
+   public PreferenceStore getPrefStore() {
+      return prefStore;
+   }
+
+   public ExcludesPreferences getExcludesPrefs() {
+      return excludesPrefs;
+   }
+
+   public ColorPreferences getColorPrefs() {
+      return colorPrefs;
+   }
+
+   public FramePreferences getFramePrefs() {
+      return framePrefs;
+   }
+ 
+   public static ImageIcon getImage(Enum<?> type, String ext) {
+
+      URL imageLoc = PreferenceManager.class.getClassLoader().getResource(
+            type.toString().toLowerCase() +"." +ext);
+      ImageIcon image = null;
+      if (imageLoc != null) {
+         image = new ImageIcon(imageLoc);
       }
-
+      return image;
    }
 
-   public CurrentPreferences get() {
-      return currentPrefs;
-   }
-
-   private static class StaticPreferences {
+  /* private static class StaticPreferences {
       
       public static ImageIcon getImage(Enum<?> type, String ext) {
 
@@ -125,8 +138,6 @@ public class PreferenceManager {
 
    private static class DefaultPreferences extends CurrentPreferences {
       public static final String[] DEFAULT_EXCLUDES = new String[] {
-            "bluej/runtime**/*.class", "**/*__SHELL*" };
-
       private DefaultPreferences() {
          super(loadDefaultPrefs());
       }
@@ -210,5 +221,5 @@ public class PreferenceManager {
          return rtn;
       }
 
-   };
+   };*/
 }

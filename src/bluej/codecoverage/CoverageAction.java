@@ -8,7 +8,8 @@ import java.util.List;
 
 import javax.swing.JFrame;
 
-import bluej.codecoverage.ui.CoverageReportFrame;
+import bluej.codecoverage.main.CodeCoverageModule;
+import bluej.codecoverage.ui.main.CoverageReportFrame;
 import bluej.codecoverage.utils.CoverageUtilities;
 import bluej.codecoverage.utils.join.BCoverageBridge;
 import bluej.codecoverage.utils.join.BCoveragePackage;
@@ -25,30 +26,31 @@ import bluej.extensions.BlueJ;
  */
 public class CoverageAction implements ItemListener {
 
-   private BlueJ bluej;
-   private static CoverageAction action;
+   private CodeCoverageModule module;
 
    /**
     * Creates a new instance of the class.
-    * @param bluej
-    *           the BlueJ instance to use when load preferences, or determining window location
+    * 
+    * @param module
+    *           the module to use when loading preferences, or determining
+    *           window location
     */
-   public CoverageAction(BlueJ bluej) {
+   public CoverageAction(CodeCoverageModule module) {
       super();
-      this.bluej = bluej;
+      this.module = module;
 
    }
 
    private void endCoverage() {
       try {
-         Frame location = bluej.getCurrentFrame();
-         File dir = bluej.getCurrentPackage().getProject().getDir();
-         List<CoveragePackage> coverage = CoverageUtilities.get().getResults(
-                  dir);
+         Frame location = module.getBlueJFrame();
+         File dir = module.getCoverageDirectory();
+         List<CoveragePackage> coverage = module.getCoverageUtilities()
+               .getResults(dir);
          if (coverage != null) {
             List<BCoveragePackage> bcoverage = BCoverageBridge.toBCoverage(
-                     coverage, dir);
-            JFrame report = CoverageReportFrame.create(bcoverage, location);
+                  coverage, dir);
+            JFrame report = module.getReportFrame().create(bcoverage, location);
             report.setVisible(true);
          }
       } catch (Exception e) {
@@ -61,8 +63,8 @@ public class CoverageAction implements ItemListener {
     * Reset the previous coverage information to start over from scratch.
     */
    private void startCoverage() {
-      CoverageUtilities utils = CoverageUtilities.get();
-      utils.clearResults();
+
+      module.getCoverageUtilities().clearResults();
    }
 
    @Override
@@ -75,6 +77,5 @@ public class CoverageAction implements ItemListener {
       }
 
    }
-
 
 }

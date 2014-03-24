@@ -1,48 +1,60 @@
 package bluej.codecoverage.pref.option;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
-import bluej.codecoverage.main.CodeCoverageExtension;
-import bluej.extensions.BlueJ;
 
 public abstract class BasePreferenceOption<E> {
-   protected Map<String, E> options;
-   protected  BlueJ bluej;
-   protected BasePreferenceOption() {
-      options = load();
-      bluej = CodeCoverageExtension.getBlueJ();
+   protected PreferenceStore prefStore;
+   private List<Pref<E>> prefKeys;
+
+   protected BasePreferenceOption(PreferenceStore prefStore,
+         Pref<E>... prefKeys) {
+      this.prefStore = prefStore;
+      this.prefKeys = Arrays.asList(prefKeys);
+
    }
 
-   public abstract Map<String, E> load();
+   protected abstract String save(E value);
 
-   protected abstract void save(Map<String, E> values);
+   protected abstract E load(String value);
 
-   public E getValue(String key) {
-      return options.get(key);
+   public E getValue(Pref<E> key) {
+
+      String unParsedValue = prefStore.getPreference(key.key);
+      E value = null;
+      if (unParsedValue != null) {
+         value = load(unParsedValue);
+      }
+      if (value == null) {
+         value = key.def;
+      }
+      return value;
    }
 
-   public Set<Entry<String, E>> getAllOptions() {
-      return options.entrySet();
+   public final void save(Pref<E> key, E value) {
+      if (value != null && key != null) {
+         prefStore.setPreference(key.key, save(value));
+      }
    }
 
-   public boolean isVisible() {
-      return true;
+   public Collection<Pref<E>> getAllOptions() {
+      return prefKeys;
    }
-   
+
    protected static <E> Pref<E> pref(String key, E defaultValue) {
       return new Pref<E>(key, defaultValue);
    }
-   
+
    @AllArgsConstructor
    @EqualsAndHashCode
    public static class Pref<E> {
-      final String key;
-      final E def;
-      
-      
+      public final String key;
+      public final E def;
+
    }
 }

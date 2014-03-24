@@ -1,4 +1,4 @@
-package bluej.codecoverage.ui;
+package bluej.codecoverage.ui.pref;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -18,21 +18,26 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
+import bluej.codecoverage.main.CodeCoverageModule;
 import bluej.codecoverage.pref.PreferenceManager;
-import bluej.codecoverage.pref.PreferenceManager.CurrentPreferences;
-import bluej.codecoverage.pref.PreferenceManager.PrefKey;
+import bluej.codecoverage.pref.option.BasePreferenceOption.Pref;
+import bluej.codecoverage.pref.option.ColorPreferences;
+import bluej.codecoverage.pref.option.ExcludesPreferences;
 import bluej.codecoverage.utils.CoverageUtilities;
-import bluej.extensions.BlueJ;
 import bluej.extensions.PreferenceGenerator;
 
-public class CoveragePreferences implements PreferenceGenerator {
+public class CoveragePreferencePane implements PreferenceGenerator {
 
-   private BlueJ bluej;
-   private CurrentPreferences prefs;
+   private ExcludesPreferences excludedPrefs;
+   private ColorPreferences colorPrefs;
    private DefaultListModel<String> ignore;
-
-   public CoveragePreferences(BlueJ bluej) {
-      this.bluej = bluej;
+   private PreferenceManager prefManager;
+   private CoverageUtilities utils;
+   public CoveragePreferencePane(CodeCoverageModule module) {
+      this.excludedPrefs = module.getPreferenceManager().getExcludesPrefs();
+      this.colorPrefs = module.getPreferenceManager().getColorPrefs();
+      this.utils = module.getCoverageUtilities();
+      this.prefManager = module.getPreferenceManager();
    }
 
    @Override
@@ -62,12 +67,12 @@ public class CoveragePreferences implements PreferenceGenerator {
 
    @Override
    public void loadValues() {
-      prefs = PreferenceManager.getPrefs().load();
+
    }
 
    @Override
    public void saveValues() {
-      PreferenceManager.getPrefs().save();
+      // PreferenceManager.getPrefs().save();
 
    }
 
@@ -75,23 +80,20 @@ public class CoveragePreferences implements PreferenceGenerator {
 
       ignore = new DefaultListModel<String>() {
          {
-            for (String excluded : prefs.getExcluded()) {
+            for (String excluded : excludedPrefs.getExcludedPrefs()) {
                super.addElement(excluded);
             }
          }
 
          @Override
          public void addElement(String element) {
-            prefs.addExcluded(element.toString());
             super.addElement(element);
-            CoverageUtilities.get().addShutdownHook();
+            utils.addShutdownHook();
          }
 
          @Override
          public String remove(int index) {
-
-            prefs.removeExcluded(index);
-            CoverageUtilities.get().addShutdownHook();
+            utils.addShutdownHook();
             return super.remove(index);
          }
 
@@ -146,40 +148,38 @@ public class CoveragePreferences implements PreferenceGenerator {
       final JPanel main = new JPanel();
       main.setLayout(new BoxLayout(main, BoxLayout.Y_AXIS));
 
-      for (final PrefKey key : PrefKey.values()) {
-         if (key.getDisplay() != null) {
-            JPanel opt = new JPanel(new FlowLayout(FlowLayout.LEFT));
+      for (final Pref<Color> colorPref : colorPrefs.getAllOptions()) {
 
-            final JButton color = new JButton();
+         JPanel opt = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
-            color.setContentAreaFilled(false);
-            color.setBackground((Color) prefs.getPref(key));
-            color.setForeground(color.getBackground());
-            color.setOpaque(true);
-            color.setBorderPainted(true);
-            color.addActionListener(new ActionListener() {
-               @Override
-               public void actionPerformed(ActionEvent e) {
-                  // if (e.getButton() == MouseEvent.BUTTON1)
-                  // {
-                  Color choice = JColorChooser.showDialog(main,
-                        "Choose color for " + key.getDisplay(),
-                        color.getBackground());
-                  if (choice != null) {
-                     prefs.setPref(key, choice);
-                     color.setBackground(choice);
-                  }
-                  // }
+         final JButton color = new JButton();
+
+         color.setContentAreaFilled(false);
+         color.setBackground(colorPrefs.getValue(colorPref));
+         color.setForeground(color.getBackground());
+         color.setOpaque(true);
+         color.setBorderPainted(true);
+         color.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+               Color choice = JColorChooser.showDialog(main,
+                     "Choose color for " + colorPref.key,
+                     color.getBackground());
+               if (choice != null) {
+                  colorPrefs.save(colorPref, choice);
+                  color.setBackground(choice);
                }
-            });
-            color.setPreferredSize(new Dimension(40, 20));
-            opt.add(color);
-            opt.add(new JLabel(key.getDisplay()));
-            main.add(opt);
-         }
+
+            }
+         });
+         color.setPreferredSize(new Dimension(40, 20));
+         opt.add(color);
+         opt.add(new JLabel(colorPref.key));
+         main.add(opt);
+
       }
       return main;
    }
 
 }
-

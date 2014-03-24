@@ -1,4 +1,4 @@
-package bluej.codecoverage.ui;
+package bluej.codecoverage.ui.main;
 
 import java.awt.Color;
 import java.awt.Dimension;

@@ -48,7 +48,7 @@ public class CoverageBridge {
          classes.add(toSerializable(coverage));
       }
       Map<String, ISourceFileCoverage> sourceCoverage = new HashMap<String, ISourceFileCoverage>();
-
+      // build a map of source files
       for (ISourceFileCoverage source : pkg.getSourceFiles()) {
          sourceCoverage.put(source.getPackageName() + source.getName(), source);
       }

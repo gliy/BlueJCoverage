@@ -11,6 +11,7 @@ import java.util.Map.Entry;
 
 import javax.swing.ImageIcon;
 
+import lombok.Getter;
 import bluej.codecoverage.main.CodeCoverageModule;
 import bluej.codecoverage.pref.option.ColorPreferences;
 import bluej.codecoverage.pref.option.ExcludesPreferences;
@@ -25,11 +26,24 @@ import bluej.extensions.BlueJ;
  * @author ikingsbu
  * 
  */
+@Getter
 public class PreferenceManager {
+   /** The underlying storage for preferences */
    private PreferenceStore prefStore;
+   /** List of packages to ignore when gathering coverage information */
    private ExcludesPreferences excludesPrefs;
+   /** Colors to use when displaying coverage results */
    private ColorPreferences colorPrefs;
+   /** Frame size and location to use when displaying the coverage frame */
    private FramePreferences framePrefs;
+
+   /**
+    * Constructs a new PreferenceManager using the PreferenceStore defined in
+    * the specified CodeCoverageModule
+    * 
+    * @param module
+    *           module containing the preference store to use.
+    */
    public PreferenceManager(CodeCoverageModule module) {
       this.prefStore = module.getPreferenceStore();
       this.excludesPrefs = new ExcludesPreferences(prefStore);
@@ -37,26 +51,23 @@ public class PreferenceManager {
       this.framePrefs = new FramePreferences(prefStore);
    }
 
-   public PreferenceStore getPrefStore() {
-      return prefStore;
-   }
-
-   public ExcludesPreferences getExcludesPrefs() {
-      return excludesPrefs;
-   }
-
-   public ColorPreferences getColorPrefs() {
-      return colorPrefs;
-   }
-
-   public FramePreferences getFramePrefs() {
-      return framePrefs;
-   }
- 
+   /**
+    * Loads an image whose name is specified in an enum type.
+    * <p>
+    * The Enum's toString().toLowerCase() must match the image name on the file
+    * system.
+    * 
+    * @param type
+    *           enum representing the name of the image to load.
+    * @param ext
+    *           the file extension (ex png)
+    * @return The image whose name matches the enum, or null if no image is
+    *         found.
+    */
    public static ImageIcon getImage(Enum<?> type, String ext) {
 
       URL imageLoc = PreferenceManager.class.getClassLoader().getResource(
-            type.toString().toLowerCase() +"." +ext);
+            type.toString().toLowerCase() + "." + ext);
       ImageIcon image = null;
       if (imageLoc != null) {
          image = new ImageIcon(imageLoc);

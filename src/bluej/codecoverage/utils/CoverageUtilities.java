@@ -54,15 +54,11 @@ public final class CoverageUtilities {
    private static final String PORT_NUMBER = "port.number";
    /** URL for help dialog */
    private static final String HELP_URL = "https://github.com/gliy/BlueJCoverage/wiki/Help";
-   /** Running instance of bluej. */
    /** VM Args to be appended under {@link #VM_ARG_KEY} */
    private String vmArgsToAdd;
    /** Current port that we use */
    private int port;
-
-   /** Single instance of this class */
-   private static CoverageUtilities utils;
-   /** Single instance of the current preferences */
+   /** Module to load information from. */
    private CodeCoverageModule module;
    /**
     * Jacoco Agent {@link CoverageListener}.
@@ -193,6 +189,7 @@ public final class CoverageUtilities {
       error.addHyperlinkListener(new HyperlinkListener() {
          @Override
          public void hyperlinkUpdate(HyperlinkEvent e) {
+            // open it the URL if it is clicked
             if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
                if (Desktop.isDesktopSupported()) {
                   try {
@@ -251,11 +248,15 @@ public final class CoverageUtilities {
 
       Object current = props.get(VM_ARG_KEY);
       vmArgsToAdd = buildVMArgs();
+      // copy the jar to where we expect it if it doesnt already exist
       if (!agentFile.exists()) {
-         // copy the jar to where we expect it if it doesnt already exist
          copyAgent(getClass().getProtectionDomain().getCodeSource()
                   .getLocation().getFile());
       }
+      /*
+       *  if the VM args are missing or don't contain our javaagent,
+       *  add a shutdown hook and stop our extension.
+       */
       if (current == null || !current.toString().contains(buildAgentPath())) {
          JOptionPane
                   .showMessageDialog(
@@ -273,7 +274,7 @@ public final class CoverageUtilities {
    /**
     * Generates the VM Argument for locating the agent jarfile
     * 
-    * @return javaagent VM flag with the path
+    * @return javaagent VM flag with the path to the javaagent
     */
    private String buildAgentPath() {
       return "-javaagent:" + agentFile.getAbsolutePath();
@@ -302,6 +303,7 @@ public final class CoverageUtilities {
     */
    private String getExcludes() {
       StringBuilder buildExcludes = new StringBuilder();
+      // turn list of excluded packages into a single colon seperated string.
       for (String ex : module.getPreferenceManager().getExcludesPrefs().getExcludedPrefs()) {
          buildExcludes.append(":" + ex);
       }
@@ -331,7 +333,7 @@ public final class CoverageUtilities {
 
                   props.load(new FileInputStream(propertyFile));
                   Object current = props.get(VM_ARG_KEY);
-
+                  // make sure the vm arguments still don't contain our javaagent flag
                   if (current == null
                            || !current.toString().contains(vmArgsToAdd)) {
                      props.put(VM_ARG_KEY,

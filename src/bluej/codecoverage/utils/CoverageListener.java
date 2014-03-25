@@ -183,6 +183,7 @@ public class CoverageListener {
                   trigger.visitDumpCommand(true, false);
                   trigger.sendCmdOk();
                   trigger.flush();
+                  // wait until the agent is done sending data
                   lock.wait();
                }
 

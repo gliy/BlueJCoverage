@@ -197,7 +197,7 @@ public class CoverageBridge {
       // converts all the methods.
       for (IMethodCoverage method : methods) {
          CoverageMethod coverageMethod = new CoverageMethod(
-               method.getFirstLine());
+               method.getFirstLine(), method.getLastLine());
          fillBase(method, coverageMethod);
          rtn.add(coverageMethod);
 

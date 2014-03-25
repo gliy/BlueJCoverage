@@ -49,6 +49,16 @@ public class BCoverageClass extends BCoverage<CoverageClass> implements
    }
 
    @Override
+   public int getLastLine() {
+      return src.getLastLine();
+   }
+
+   @Override
+   public int getFirstLine() {
+      return src.getFirstLine();
+   }
+
+   @Override
    public List<? extends BCoverage<?>> getNodes() {
       List<BCoverage<?>> allNodes = new ArrayList<BCoverage<?>>();
       allNodes.addAll(methods);
@@ -73,10 +83,11 @@ public class BCoverageClass extends BCoverage<CoverageClass> implements
          return src.getStartLine();
       }
 
+      @Override
+      public int getLastLine() {
+         return src.getStartLine();
+      }
+
    }
 
-   @Override
-   public int getFirstLine() {
-      return src.getFirstLine();
-   }
 }

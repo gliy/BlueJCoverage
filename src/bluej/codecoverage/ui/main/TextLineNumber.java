@@ -438,6 +438,7 @@ public class TextLineNumber extends JPanel implements CaretListener,
       }
    }
 
+
    //
    // Implement DocumentListener interface
    //

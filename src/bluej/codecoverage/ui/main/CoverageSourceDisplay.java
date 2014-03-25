@@ -23,6 +23,7 @@ import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
+import javax.swing.text.Utilities;
 
 import bluej.codecoverage.pref.PreferenceManager;
 import bluej.codecoverage.pref.SourceDisplayGUIPrefs;
@@ -50,10 +51,11 @@ class CoverageSourceDisplay extends JScrollPane {
    private LineToolTip tooltip;
    private JTextPane source;
    private SidebarPainter painter;
+   private TextLineNumber textLineNumber;
 
-   public CoverageSourceDisplay(PreferenceManager prefManager, BCoverageClass coverage)
-         throws ProjectNotOpenException, PackageNotFoundException,
-         BadLocationException {
+   public CoverageSourceDisplay(PreferenceManager prefManager,
+         BCoverageClass coverage) throws ProjectNotOpenException,
+         PackageNotFoundException, BadLocationException {
       super();
       SourceDisplayGUIPrefs prefs = new SourceDisplayGUIPrefs(prefManager);
       this.source = new CustomJTextPane();
@@ -82,32 +84,18 @@ class CoverageSourceDisplay extends JScrollPane {
       StyledDocument doc = source.getStyledDocument();
       Map<Integer, AttributeSet> lineToStyle = createStyleMap(clz);
 
-      JPanel lineNumbers = new JPanel();
-      lineNumbers.setLayout(new BoxLayout(lineNumbers, BoxLayout.Y_AXIS));
 
       for (int line = 0; line < sourceFile.getNumberOfLines(); line++) {
 
          String sourceCode = sourceFile.getLine(line);
          AttributeSet style = lineToStyle.get(line);
          doc.insertString(doc.getLength(), sourceCode + "\n", style);
-         JLabel lineLabel = new JLabel("" + (line + 1));
-
-         if (style != null
-               && style.getAttribute(StyleConstants.Background) != null) {
-            Object background = style.getAttribute(StyleConstants.Background);
-
-            lineLabel.setBackground((Color) background);
-            lineLabel.setOpaque(true);
-         }
-
-         lineNumbers.add(lineLabel);
-
       }
       JViewport viewPort = new JViewport();
-      TextLineNumber number = new TextLineNumber(source);
-      number.setPainter(painter);
-      number.setTooltip(tooltip);
-      viewPort.add(number);
+      textLineNumber = new TextLineNumber(source);
+      textLineNumber.setPainter(painter);
+      textLineNumber.setTooltip(tooltip);
+      viewPort.add(textLineNumber);
       setRowHeader(viewPort);
       source.setCaretPosition(0);
       ToolTipManager.sharedInstance().registerComponent(source);
@@ -125,8 +113,8 @@ class CoverageSourceDisplay extends JScrollPane {
                .getStatus());
          if (lineStatus != CoverageCounterValue.EMPTY) {
             rtn.put(base + i - 1, covLine);
-            painter.registerLine(base +i-1, covLine);
-            tooltip.registerLine(base +i-1, covLine);
+            painter.registerLine(base + i - 1, covLine);
+            tooltip.registerLine(base + i - 1, covLine);
          }
       }
       return rtn;
@@ -165,17 +153,29 @@ class CoverageSourceDisplay extends JScrollPane {
          Element map = getDocument().getDefaultRootElement();
          modelPoint = map.getElementIndex(modelPoint);
 
-         return  tooltip.getToolTip(modelPoint);
+         return tooltip.getToolTip(modelPoint);
       }
    }
 
-   public void moveCaret(int firstLine) {
+   public void moveCaret(int firstLine, int lastLine) {
 
       StyledDocument document = source.getStyledDocument();
+      Element root = document.getDefaultRootElement();
+      int visibleLines = source.getVisibleRect().height
+            / source.getFontMetrics(source.getFont()).getHeight();
 
-      int location = document.getDefaultRootElement().getElement(firstLine)
+      int location = root.getElement(firstLine)
             .getStartOffset() - 1;
+      int maxLines = root.getEndOffset();
+      /*
+      int newCaret = maxLines;
+      int additionalLines = firstLine+visibleLines/2;
+      if(root.getElementCount() > additionalLines) {
+         newCaret = root.getElement(additionalLines).getStartOffset();
+      }
+      */
       source.setCaretPosition(location);
+
       source.moveCaretPosition(location);
    }
 }

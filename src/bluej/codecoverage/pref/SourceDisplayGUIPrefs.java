@@ -17,9 +17,14 @@ import bluej.codecoverage.ui.ext.SidebarPainter;
  * 
  */
 public class SourceDisplayGUIPrefs {
-
+   /** Style attribute manager like color for line elements in a source file */
    private LineAttributes attributes;
+   /** Tooltip to show when a line is hovered */
    private LineToolTip tooltip;
+   /**
+    * Sidebar painter for items to show in the gutter where the line numbers are
+    * displayed
+    */
    private SidebarPainter painter;
 
    public SourceDisplayGUIPrefs(PreferenceManager manager) {

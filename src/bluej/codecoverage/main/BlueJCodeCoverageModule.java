@@ -4,6 +4,7 @@ import java.awt.Frame;
 import java.io.File;
 import java.io.IOException;
 
+import lombok.Getter;
 import bluej.codecoverage.pref.AbstractPreferenceStore;
 import bluej.codecoverage.pref.PreferenceManager;
 import bluej.codecoverage.pref.PreferenceStore;
@@ -14,23 +15,39 @@ import bluej.extensions.ProjectNotOpenException;
 
 /**
  * Adapter for BlueJ so that it can be used as a CodeCoverageModule.
- * <p>
- *  
+ * 
  * @author Ian
- *
+ * 
  */
+@Getter
 public class BlueJCodeCoverageModule implements CodeCoverageModule {
-
+   /** BlueJ instance to delegate calls to */
    private BlueJ bluej;
-   private CoverageUtilities utils;
-   private PreferenceManager prefManager;
+   /** Utilites class that will be used */
+   private CoverageUtilities coverageUtilities;
+   /** Class to manage all UI or user chosen preferences */
+   private PreferenceManager preferenceManager;
+   /** Frame to display the coverage information in */
    private CoverageReportFrame reportFrame;
-   private PreferenceStore prefStore;
+   /**
+    * Underlying preference store used by CoverageUtilties and PreferenceManager
+    */
+   private PreferenceStore preferenceStore;
 
+   /**
+    * Constructs a new BlueJCodeCoverageModule and initializes all field
+    * variables.
+    * 
+    * @param bluej
+    *           BlueJ instance to delegate calls to.
+    * @throws IOException
+    *            If an exception is thrown during file I/O
+    */
    public BlueJCodeCoverageModule(final BlueJ bluej) throws IOException {
       this.bluej = bluej;
-    
-      this.prefStore = new AbstractPreferenceStore(bluej.getUserConfigDir()) {
+      // create a preference store that wraps bluej
+      this.preferenceStore = new AbstractPreferenceStore(
+            bluej.getUserConfigDir()) {
 
          @Override
          public void setPreference(String key, String value) {
@@ -42,33 +59,23 @@ public class BlueJCodeCoverageModule implements CodeCoverageModule {
             return bluej.getExtensionPropertyString(key, def);
          }
       };
-      this.prefManager = PreferenceManager.init(this);
-      this.utils = CoverageUtilities.create(this);
-     
+      this.preferenceManager = new PreferenceManager(this);
+      this.coverageUtilities = new CoverageUtilities(this);
       this.reportFrame = new CoverageReportFrame(this);
-     
+
    }
 
-   @Override
-   public PreferenceStore getPreferenceStore() {
-      return prefStore;
-   }
-
-   @Override
-   public PreferenceManager getPreferenceManager() {
-      return prefManager;
-   }
-
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public Frame getBlueJFrame() {
       return bluej.getCurrentFrame();
    }
 
-   @Override
-   public CoverageUtilities getCoverageUtilities() {
-      return utils;
-   }
-
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public File getCoverageDirectory() {
       try {
@@ -79,6 +86,9 @@ public class BlueJCodeCoverageModule implements CodeCoverageModule {
       }
    }
 
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public CoverageReportFrame getReportFrame() {
       return reportFrame;

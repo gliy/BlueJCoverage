@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.util.Collections;
 import java.util.List;
 
@@ -11,6 +12,7 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
@@ -63,11 +65,9 @@ class CoverageOverviewPane extends JPanel {
       summary.setLayout(new BoxLayout(summary, BoxLayout.Y_AXIS));
       model = new DefaultTreeModel(createRootNode(coverage));
       tree = new JTree(model);
-     // UIManager.put("ProgressBar.foreground", new Color(122, 215, 122)); // green
-      //UIManager.put("ProgressBar.selectionForeground", Color.BLACK);
 
       tree.setRootVisible(false);
-      tree.setRowHeight(20);
+      tree.setRowHeight(25);
 
       tree.getSelectionModel().setSelectionMode(
             TreeSelectionModel.SINGLE_TREE_SELECTION);
@@ -161,7 +161,7 @@ class CoverageOverviewPane extends JPanel {
          Component defaultDisplay = super.getTreeCellRendererComponent(tree,
                value, selected, expanded, leaf, row, hasFocus);
          Object treeNode = ((DefaultMutableTreeNode) value).getUserObject();
-
+         // sanity check to prevent any ClassCastException
          if (treeNode instanceof BCoverage<?>) {
 
             JPanel rtn = new JPanel();
@@ -174,14 +174,15 @@ class CoverageOverviewPane extends JPanel {
             setText(info.getName());
             
             CoverageCounter counter = info.getLineCoverage();
-            JProgressBar progress = createJProgressBar((int) (counter.getCoveredRatio() * 100));
+            JComponent progress = createJProgressBar((int) (counter.getCoveredRatio() * 100));
           
             
-            progress.setPreferredSize(new Dimension((int) progress
-                  .getPreferredSize().getWidth(), this.getHeight()));
+           
+            
             rtn.setBackground(Color.WHITE);
             rtn.add(this);
             rtn.add(progress);
+            
             return rtn;
          } else {
             return defaultDisplay;
@@ -190,13 +191,14 @@ class CoverageOverviewPane extends JPanel {
       }
    };
    
-   public static JProgressBar createJProgressBar(int progress) {
+   public static JComponent createJProgressBar(int progress) {
       JProgressBar progressBar = new JProgressBar();
       progressBar.setStringPainted(true);
       progressBar.setBackground(Color.WHITE);
       progressBar.setValue(progress);
       progressBar.setBorderPainted(true);
-      progressBar.setForeground(Color.GREEN);
+      progressBar.setForeground( new Color(74, 196, 74)); 
+      progressBar.setPreferredSize(new Dimension(100, 15));
       return progressBar;
    }
    

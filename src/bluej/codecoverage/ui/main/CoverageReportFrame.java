@@ -205,7 +205,7 @@ public class CoverageReportFrame extends JFrame {
       Locatable selectedCoverage = (Locatable) node.getUserObject();
 
       ((CoverageSourceDisplay) tabs.getSelectedComponent())
-            .moveCaret(selectedCoverage.getFirstLine());
+            .moveCaret(selectedCoverage.getFirstLine(), selectedCoverage.getLastLine());
 
    }
 

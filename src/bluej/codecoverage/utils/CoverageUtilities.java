@@ -86,10 +86,10 @@ public final class CoverageUtilities {
     *           module instance to save and load information from.
     * 
     * @throws IOException
-    *            if any error is encounted while loading saved preferences,
+    *            if any error is encountered while loading saved preferences,
     *            throws an {@link IOException}.
     */
-   private CoverageUtilities(CodeCoverageModule module) throws IOException {
+   public CoverageUtilities(CodeCoverageModule module) throws IOException {
       this.module = module;
       port = Integer.parseInt(module.getPreferenceStore().getPreference(PORT_NUMBER, ""
                + START_PORT));
@@ -119,45 +119,8 @@ public final class CoverageUtilities {
       }
    }
 
-   /**
-    * Creates an instance of CoverageUtilities.
-    * <p>
-    * This call will throw an {@link IllegalStateException} if this class has
-    * already been created.
-    * <p>
-    * To access an already created instance you must use {@link #get()}
-    * 
-    * @param module
-    *           the module to load data from.
-    * @return A new utility class.
-    * @throws IOException
-    *            if any error is encounted while loading saved preferences,
-    *            throws an {@link IOException}.
-    */
-   public static CoverageUtilities create(CodeCoverageModule module) throws IOException {
-      if (utils != null) {
-         throw new IllegalStateException("Utils class already created");
-      }
-      utils = new CoverageUtilities(module);
-      return utils;
-   }
-
-   /**
-    * Returns the current CoverageUtilities instance. *
-    * <p>
-    * This call will throw an {@link IllegalStateException} if this class has
-    * not been created.
-    * <p>
-    * To create a new instance you must use {@link #create(BlueJ)}
-    * 
-    * @return Current utility class.
-    */
-   //public static CoverageUtilities get() {
-    //  if (utils == null) {
-   //      throw new IllegalStateException("Utils class not created");
-   //   }
-  //    return utils;
-  // }
+  
+ 
 
    /**
     * Requests a reset of all collected coverage information so far.

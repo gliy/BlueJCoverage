@@ -33,8 +33,8 @@ public class CodeCoverageExtension extends Extension {
 
    /** The Constant VERSION. */
    private static final String VERSION = "1.0";
-   private static BlueJ bluej;
    private static URL SITE_URL = null;
+
    /**
     * When this method is called, the extension may start its work.
     * 
@@ -47,7 +47,7 @@ public class CodeCoverageExtension extends Extension {
       try {
          SITE_URL = new URL("http://gliy.github.io/BlueJCoverage");
          final CodeCoverageModule module = new BlueJCodeCoverageModule(bluej);
-         
+
          final Map<File, JToggleButton> coverageButtons = new HashMap<File, JToggleButton>();
          bluej.setPreferenceGenerator(new CoveragePreferencePane(module));
          bluej.addPackageListener(new PackageListener() {
@@ -55,8 +55,7 @@ public class CodeCoverageExtension extends Extension {
             @Override
             public void packageOpened(PackageEvent event) {
                try {
-                  CoverageMenuBuilder builder = new CoverageMenuBuilder(module,
-                           event.getPackage());
+                  new CoverageMenuBuilder(module, event.getPackage()).build();
 
                } catch (Exception e) {
                   e.printStackTrace();
@@ -85,10 +84,6 @@ public class CodeCoverageExtension extends Extension {
          ex.printStackTrace();
       }
 
-   }
-   
-   public static BlueJ getBlueJ() {
-    return bluej;  
    }
 
    @Override

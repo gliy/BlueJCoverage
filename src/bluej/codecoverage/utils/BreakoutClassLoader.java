@@ -10,7 +10,7 @@ import java.util.List;
  * Loads the jars of all the files that will need to be accessed when collecting
  * code coverage metrics.
  * 
- * Required due to {@link FirewallLoader}
+ * Required due to FirewallLoader
  * 
  * @author ikingsbu
  * 

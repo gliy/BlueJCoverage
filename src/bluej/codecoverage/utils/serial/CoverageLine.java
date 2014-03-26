@@ -7,9 +7,9 @@ import lombok.Setter;
 
 /**
  * Serializable representation of 
- * {@linkplain http://www.eclemma.org/jacoco/trunk/doc/api/org/jacoco/core/analysis/ILine.html}.
+ * <a href="http://www.eclemma.org/jacoco/trunk/doc/api/org/jacoco/core/analysis/ILine.html">ILine</a>
  * 
- * Can be used by BlueJ extensions that are using the provided ClassLoader.
+ * This class can be used by BlueJ extensions that are using a different ClassLoader through Serialization.
  * 
  * @author Ian
  * 

@@ -1,11 +1,12 @@
 package bluej.codecoverage.utils.serial;
 
 /**
- * Serializable representation of {@linkplain http
- * ://www.eclemma.org/jacoco/trunk/doc/api/
- * org/jacoco/core/analysis/ICounter.CounterValue.html}.
+ * Serializable representation of <a href=
+ * "http://www.eclemma.org/jacoco/trunk/doc/api/org/jacoco/core/analysis/ICounter.CounterValue.html"
+ * >CounterValue</a>.
  * 
- * Can be used by BlueJ extensions that are using the provided ClassLoader.
+ * This class can be used by BlueJ extensions that are using a different
+ * ClassLoader through Serialization.
  * 
  * @author Ian
  * 

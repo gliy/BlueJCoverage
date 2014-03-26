@@ -143,9 +143,9 @@ public class CoverageBridge {
     * classes.
     * 
     * @param clz
-    * @return
+    * @return Serializable form of code coverage information for a class.
     */
-   private static CoverageClass toSerializable(IClassCoverage clz) {
+   static CoverageClass toSerializable(IClassCoverage clz) {
       List<CoverageLine> lines = new ArrayList<CoverageLine>();
       int first = clz.getFirstLine();
       int last = clz.getLastLine();

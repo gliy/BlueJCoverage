@@ -45,7 +45,7 @@ import bluej.codecoverage.utils.serial.CoverageLine;
  * This class was designed to be used as a component added to the row header of
  * a JScrollPane.
  * 
- * This code was found at {@linkplain http
+ * This code was found at http
  * ://www.camick.com/java/source/TextLineNumber.java}
  */
 public class TextLineNumber extends JPanel implements CaretListener,

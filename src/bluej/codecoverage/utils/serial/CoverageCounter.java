@@ -8,11 +8,13 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Serializable representation of {@linkplain http
- * ://www.eclemma.org/jacoco/trunk
- * /doc/api/org/jacoco/core/analysis/ICounter.html}.
+ * Serializable representation of <a href=
+ * "http://www.eclemma.org/jacoco/trunk/doc/api/org/jacoco/core/analysis/ICounter.html"
+ * >ICounter</a>
  * 
- * Can be used by BlueJ extensions that are using the provided ClassLoader.
+ * 
+ * This class can be used by BlueJ extensions that are using a different
+ * ClassLoader through Serialization.
  * 
  * @author Ian
  * 

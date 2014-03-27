@@ -182,7 +182,7 @@ public class CoverageBridge {
     * @param dest
     *           our representation of the jacoco object.
     */
-   private static void fillBase(ICoverageNode src, Coverage dest) {
+   static void fillBase(ICoverageNode src, Coverage dest) {
       dest.setName(src.getName());
       dest.setLineCoverage(new CoverageCounter(src.getLineCounter()));
       dest.setBranchCoverage(new CoverageCounter(src.getBranchCounter()));

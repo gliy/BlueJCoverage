@@ -5,5 +5,4 @@ bin/*
 .project
 .settings/*
 build/*
-*.html
 /bin

@@ -67,7 +67,7 @@ class CoverageOverviewPane extends JPanel {
       tree = new JTree(model);
 
       tree.setRootVisible(false);
-      tree.setRowHeight(25);
+      tree.setRowHeight(20);
 
       tree.getSelectionModel().setSelectionMode(
             TreeSelectionModel.SINGLE_TREE_SELECTION);

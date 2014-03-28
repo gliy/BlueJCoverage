@@ -3,64 +3,66 @@
 	<property file="build.properties" />
 	<property name="bluej.path" value="F:\Users\Ian\Documents\BlueJTest\Bluej" />
 	<property name="bluej.lib" value="${bluej.path}/lib" />
-
 	<property name="blue.extension.dest" value="${bluej.lib}/extensions" />
-
-
-
 	<property name="build.dir" value="build" />
 	<property name="src.dir" value="src" />
+	<property name="lib.dir" value="runtime-jars" />
+	<property name="extension.version" value="1.0" />
+
 	<path id="class.path">
 
 		<pathelement location="bin" />
-		<fileset dir="lib" includes="*.jar" />
-
+		<fileset dir="${lib.dir}" includes="*.jar" />
+		<fileset dir="compile-jars" includes="*.jar" />
 		<pathelement location="${bluej.lib}/bluejext.jar" />
 	</path>
+
 	<taskdef classname="lombok.delombok.ant.DelombokTask"
-		classpath="lib2/lombok.jar" name="delombok" />
+		classpath="compile-jars/lombok.jar" name="delombok" />
 
-	<property name="lib.dir" value="lib" />
 	<target name="-init" depends="clean">
-
 		<mkdir dir="${build.dir}" />
 	</target>
-	<target name="clean" description="Clean up">
 
+	<target name="clean" description="Clean up">
 		<delete dir="${build.dir}" />
 	</target>
+
 	<target name="build" depends="-init" description="Build project">
+		<!-- Delombok the source files -->
 		<delombok verbose="false" encoding="UTF-8" to="${build.dir}"
 			from="${src.dir}">
-
 		</delombok>
+		<!-- Copy all resources like images into the build folder -->
 		<copy todir="${build.dir}">
-
 			<fileset dir="resources" />
 		</copy>
-
+		<!-- Extract all the classes in the runtime jars, so we can use them inside 
+			our jar -->
 		<unzip dest="${build.dir}/lib">
 			<fileset dir="${lib.dir}">
 				<include name="**/*.jar" />
 			</fileset>
 		</unzip>
-
+		<!-- Compile our code -->
 		<javac debug="true" debuglevel="lines,vars,source" destdir="${build.dir}"
 			srcdir="${build.dir}" source="1.6" target="1.6">
 			<classpath refid="class.path" />
 		</javac>
 	</target>
 
+
 	<target name="build-jar" depends="build">
-		<jar destfile="CoverageExtension.jar"
-			basedir="${build.dir}" includes="**" manifest="MANIFEST.MF">
+		<!-- Put everything in the build directory into our jar -->
+		<jar destfile="CoverageExtension-${extension.version}.jar" basedir="${build.dir}"
+			includes="**" manifest="MANIFEST.MF">
 		</jar>
-		<copy todir="${blue.extension.dest}" file="CoverageExtension.jar" />
+		<!-- Copy it to a spot where bluej can find it -->
+		<copy todir="${blue.extension.dest}" file="CoverageExtension-${extension.version}.jar" />
 	</target>
 	<target name="run" depends="build-jar">
 		<!-- jvmargs="-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=4000,suspend=n" -->
 		<java jar="${bluej.lib}/bluej.jar" jvm="F:\Program Files\Java\jdk1.7.0_51\bin\java.exe"
-			jvmargs="-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=4000,suspend=y"
 			fork="true">
 
 		</java>

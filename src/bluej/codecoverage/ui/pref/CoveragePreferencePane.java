@@ -26,6 +26,13 @@ import bluej.codecoverage.pref.option.ExcludesPreferences;
 import bluej.codecoverage.utils.CoverageUtilities;
 import bluej.extensions.PreferenceGenerator;
 
+/**
+ * Represents the GUI panel that BlueJ displays when a user opens the
+ * preferences for the extension.
+ * 
+ * @author Ian
+ * 
+ */
 public class CoveragePreferencePane implements PreferenceGenerator {
 
    private ExcludesPreferences excludedPrefs;
@@ -33,6 +40,7 @@ public class CoveragePreferencePane implements PreferenceGenerator {
    private DefaultListModel<String> ignore;
    private PreferenceManager prefManager;
    private CoverageUtilities utils;
+
    public CoveragePreferencePane(CodeCoverageModule module) {
       this.excludedPrefs = module.getPreferenceManager().getExcludesPrefs();
       this.colorPrefs = module.getPreferenceManager().getColorPrefs();
@@ -164,8 +172,7 @@ public class CoveragePreferencePane implements PreferenceGenerator {
             public void actionPerformed(ActionEvent e) {
 
                Color choice = JColorChooser.showDialog(main,
-                     "Choose color for " + colorPref.key,
-                     color.getBackground());
+                     "Choose color for " + colorPref.key, color.getBackground());
                if (choice != null) {
                   colorPrefs.save(colorPref, choice);
                   color.setBackground(choice);

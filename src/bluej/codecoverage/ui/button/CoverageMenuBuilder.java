@@ -31,6 +31,11 @@ public class CoverageMenuBuilder {
    private CodeCoverageModule module;
    private BPackage pack;
 
+   /**
+    * Adds the Start Coverage/End Coverage button to BlueJ's frame.
+    * @throws PackageNotFoundException
+    * @throws ProjectNotOpenException
+    */
   public void build()  throws PackageNotFoundException, ProjectNotOpenException {
      JFrame frame = (JFrame) pack.getFrame();
      Container content = frame.getContentPane();

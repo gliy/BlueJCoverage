@@ -2,8 +2,6 @@ package bluej.codecoverage.ui.button;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 
 import javax.swing.BoxLayout;
 import javax.swing.JComponent;
@@ -13,10 +11,8 @@ import javax.swing.JSplitPane;
 import javax.swing.JToggleButton;
 
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import bluej.codecoverage.main.CodeCoverageModule;
 import bluej.extensions.BPackage;
-import bluej.extensions.BlueJ;
 import bluej.extensions.PackageNotFoundException;
 import bluej.extensions.ProjectNotOpenException;
 

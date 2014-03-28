@@ -10,6 +10,7 @@ import bluej.codecoverage.pref.PreferenceManager;
 import bluej.codecoverage.pref.PreferenceStore;
 import bluej.codecoverage.ui.main.CoverageReportFrame;
 import bluej.codecoverage.utils.CoverageUtilities;
+import bluej.codecoverage.utils.join.CoverageBundleManager;
 import bluej.extensions.BlueJ;
 import bluej.extensions.ProjectNotOpenException;
 
@@ -29,6 +30,8 @@ public class BlueJCodeCoverageModule implements CodeCoverageModule {
    private PreferenceManager preferenceManager;
    /** Frame to display the coverage information in */
    private CoverageReportFrame reportFrame;
+   /** Previous Coverage runs manager */
+   private CoverageBundleManager bundleManager;
    /**
     * Underlying preference store used by CoverageUtilties and PreferenceManager
     */
@@ -59,8 +62,10 @@ public class BlueJCodeCoverageModule implements CodeCoverageModule {
             return bluej.getExtensionPropertyString(key, def);
          }
       };
+      this.bundleManager = new CoverageBundleManager();
       this.preferenceManager = new PreferenceManager(this);
       this.coverageUtilities = new CoverageUtilities(this);
+
       this.reportFrame = new CoverageReportFrame(this);
 
    }
@@ -92,6 +97,11 @@ public class BlueJCodeCoverageModule implements CodeCoverageModule {
    @Override
    public CoverageReportFrame getReportFrame() {
       return reportFrame;
+   }
+
+   @Override
+   public CoverageBundleManager getBundleManager() {
+      return bundleManager;
    }
 
 }

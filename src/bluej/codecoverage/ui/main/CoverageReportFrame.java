@@ -27,6 +27,8 @@ import bluej.codecoverage.utils.join.BCoverage;
 import bluej.codecoverage.utils.join.BCoverageClass;
 import bluej.codecoverage.utils.join.BCoveragePackage;
 import bluej.codecoverage.utils.join.ClassInfo;
+import bluej.codecoverage.utils.join.CoverageBundleManager;
+import bluej.codecoverage.utils.join.CoverageBundleManager.CoverageBundle;
 import bluej.codecoverage.utils.join.Locatable;
 
 /**
@@ -36,7 +38,7 @@ import bluej.codecoverage.utils.join.Locatable;
  */
 public class CoverageReportFrame extends JFrame {
    /** The coverage information to show in the overview. */
-   private List<BCoveragePackage> coverage;
+   private CoverageBundle bundle;
    /** The open source file tabs */
    private JTabbedPane tabs;
    /** The overview panel */
@@ -53,13 +55,15 @@ public class CoverageReportFrame extends JFrame {
    private Frame location;
    /** Divider between overview and source code. */
    private JSplitPane split;
-
+   /** Previous Coverage run manager */
+   private CoverageBundleManager bundleManager;
+   private CoverageMenuBar menuBar;
    
    public CoverageReportFrame(CodeCoverageModule module) {
       prefManager = module.getPreferenceManager();
       framePrefs = prefManager.getFramePrefs();
       first = true;
-      
+      this.bundleManager = module.getBundleManager();
    }
    /**
     * Creates a coverage frame for the provided coverage information.
@@ -75,15 +79,15 @@ public class CoverageReportFrame extends JFrame {
     * @throws Exception
     */
    public void create(
-         List<BCoveragePackage> classesCovered, Frame location)
+         CoverageBundle bundle, Frame location)
          throws Exception {
       // if it is the first time opening actually create the frame.
       if (first) {
          first = false;
-         createNewFrame(classesCovered, location);
+         createNewFrame(bundle, location);
       } else {
          // otherwise just reset the information and make it visible
-         reset(classesCovered);
+         reset(bundle);
       }
    }
 
@@ -91,23 +95,25 @@ public class CoverageReportFrame extends JFrame {
     * Creates a new coverage frame.
     * 
     * @see #create(List, Frame)
-    * @param classesCovered
+    * @param bundle
     *           coverage information to show
     * @param fr
     *           frame location and size
     * @throws Exception
     */
-   private void createNewFrame(List<BCoveragePackage> classesCovered, Frame fr)
+   private void createNewFrame(CoverageBundle bundle, Frame fr)
          throws Exception {
       this.location = fr;
-      this.coverage = classesCovered;
+      this.bundle = bundle;
+      
       setSize(framePrefs.getWidth(), framePrefs.getHeight());
       addWindowListener(frameSizeSaver);
 
       generateTabs();
       setTitle("Coverage Report");
       setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-
+      menuBar = new CoverageMenuBar(bundleManager, bundle);
+      setJMenuBar(menuBar);
       Point loc = framePrefs.getFrameLocation();
       if (loc != null) {
          setLocation(loc);
@@ -120,15 +126,16 @@ public class CoverageReportFrame extends JFrame {
    /**
     * Resets the frame to show the new coverage information.
     * 
-    * @param newInfo
+    * @param bundle
     *           new information to show.
     */
-   private void reset(List<BCoveragePackage> newInfo) {
-      this.coverage = newInfo;
+   private void reset(CoverageBundle bundle) {
+      this.bundle = bundle;
       classToDisplay.clear();
       tabs.removeAll();
 
-      overview.reset(newInfo);
+      overview.reset(bundle.getAllPackages());
+      menuBar.reset(bundle);
    }
 
    /**
@@ -138,7 +145,7 @@ public class CoverageReportFrame extends JFrame {
    private void generateTabs() {
       classToDisplay = new HashMap<String, CoverageSourceDisplay>();
       tabs = new JTabbedPane();
-      overview = new CoverageOverviewPane(coverage);
+      overview = new CoverageOverviewPane(bundle.getAllPackages());
       overview.setPreferredSize(new Dimension(getWidth(), 100));
 
       split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, tabs, overview);

@@ -13,11 +13,12 @@ import bluej.codecoverage.ui.main.CoverageReportFrame;
 import bluej.codecoverage.utils.CoverageUtilities;
 import bluej.codecoverage.utils.join.BCoverageBridge;
 import bluej.codecoverage.utils.join.BCoveragePackage;
+import bluej.codecoverage.utils.join.CoverageBundleManager.CoverageBundle;
 import bluej.codecoverage.utils.serial.CoveragePackage;
 import bluej.extensions.BlueJ;
 
 /**
- * Starts and Ends a Coverage Sessions trigged by button presses.
+ * Starts and Ends a Coverage Sessions triggered by button presses.
  * <p>
  * Only a single instance of this class may exist at one time.
  * 
@@ -51,7 +52,8 @@ public class CoverageAction implements ItemListener {
             List<BCoveragePackage> bcoverage = BCoverageBridge.toBCoverage(
                   coverage, dir);
             CoverageReportFrame report = module.getReportFrame();
-            report.create(bcoverage, location);
+            CoverageBundle bundle = module.getBundleManager().createBundle(bcoverage);
+            report.create(bundle, location);
             report.setVisible(true);
          }
       } catch (Exception e) {

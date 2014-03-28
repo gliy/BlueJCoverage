@@ -7,6 +7,7 @@ import bluej.codecoverage.pref.PreferenceManager;
 import bluej.codecoverage.pref.PreferenceStore;
 import bluej.codecoverage.ui.main.CoverageReportFrame;
 import bluej.codecoverage.utils.CoverageUtilities;
+import bluej.codecoverage.utils.join.CoverageBundleManager;
 
 /**
  * Represents the information controller for any data needed from an BlueJ.
@@ -69,4 +70,9 @@ public interface CodeCoverageModule {
     * @return coverage JFrame.
     */
    public CoverageReportFrame getReportFrame();
+   /**
+    * Manager for keeping track of previous coverage sessions.
+    * @return coverage history manager
+    */
+   public CoverageBundleManager getBundleManager();
 }

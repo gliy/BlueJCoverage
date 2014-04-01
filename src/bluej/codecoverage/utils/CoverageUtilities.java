@@ -26,6 +26,7 @@ import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 
 import bluej.codecoverage.main.CodeCoverageModule;
+import bluej.codecoverage.utils.listener.CoverageAgent;
 import bluej.codecoverage.utils.serial.CoveragePackage;
 import bluej.extensions.BlueJ;
 import bluej.extensions.ExtensionUnloadedException;
@@ -61,7 +62,7 @@ public final class CoverageUtilities {
    /** Module to load information from. */
    private CodeCoverageModule module;
    /**
-    * Jacoco Agent {@link CoverageListener}.
+    * Jacoco Agent {@link CoverageAgent}.
     * <p>
     * Created by a different ClassLoader, so must be Object.
     */
@@ -107,7 +108,7 @@ public final class CoverageUtilities {
    private void setupListener() {
       try {
          coverageListener = new BreakoutClassLoader()
-                  .loadClass(CoverageListener.class.getName())
+                  .loadClass(CoverageAgent.class.getName())
                   .getConstructor(Integer.TYPE).newInstance(port);
       } catch (Exception e) {
          addShutdownHook();

@@ -36,7 +36,7 @@ public abstract class Coverage implements Serializable {
    /** Counter with the coverage metrics for classes in a class file */
    private CoverageCounter classCoverage;
    /** Enum representing what Java Object Type this information is for. */
-   private CoverageType type;
+  // private CoverageType type;
 
    /**
     * Fills in all the coverage information that is shared between the different

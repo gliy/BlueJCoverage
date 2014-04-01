@@ -74,7 +74,7 @@ public class CoverageBridge {
     *           file.
     * @return reduced list of CoverageClasses, with 1 per source file.
     */
-   private static List<CoverageClass> merge(List<CoverageClass> classes,
+   static List<CoverageClass> merge(List<CoverageClass> classes,
          Map<String, ISourceFileCoverage> sourceCoverage) {
       List<CoverageClass> innerClasses = new ArrayList<CoverageClass>();
       Map<String, CoverageClass> byFileName = new HashMap<String, CoverageClass>();
@@ -190,7 +190,7 @@ public class CoverageBridge {
       dest.setClassCoverage(new CoverageCounter(src.getClassCounter()));
    }
 
-   private static List<CoverageMethod> toMethods(
+   static List<CoverageMethod> toMethods(
          Collection<IMethodCoverage> methods) {
       ArrayList<CoverageMethod> rtn = new ArrayList<CoverageMethod>();
       

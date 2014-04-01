@@ -3,13 +3,23 @@ package bluej.codecoverage.utils.serial;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.lang.annotation.ElementType;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
-
-import org.jacoco.core.analysis.ICounter;
-import org.jacoco.core.analysis.ICoverageNode;
-import org.jacoco.core.analysis.ISourceNode;
+import java.util.UUID;
 
 import junit.framework.TestCase;
+
+import org.jacoco.core.analysis.IClassCoverage;
+import org.jacoco.core.analysis.ICounter;
+import org.jacoco.core.analysis.ICoverageNode;
+import org.jacoco.core.analysis.ILine;
+import org.jacoco.core.analysis.IMethodCoverage;
+import org.jacoco.core.analysis.ISourceNode;
+import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 public class CoverageTestCase extends TestCase {
    private static final Random RANDOM = new Random();
@@ -20,8 +30,10 @@ public class CoverageTestCase extends TestCase {
    }
    
    public static class TestBuilder{
-      private TestBuilder() {
-         
+	 
+      private Validator validator;
+	  private TestBuilder() {
+         validator = new Validator();
       }
       public ICounter counter() {
          ICounter counter = mock(ICounter.class);
@@ -38,5 +50,90 @@ public class CoverageTestCase extends TestCase {
          when(counter.getStatus()).thenReturn(ICounter.PARTLY_COVERED);
          return counter;
       }
+      public ILine line() {
+    	  ICounter branch = counter();
+    	  ILine line = mock(ILine.class);
+    	  when(line.getBranchCounter()).thenReturn(branch);
+    	  when(line.getStatus()).thenReturn(branch.getStatus());
+    	  return line;
+      }
+      private void setupSourceNode(ISourceNode node) {
+    	  int firstLine = 1;
+    	  int lastLine = 50;
+    	  final ILine[] lines = new ILine[lastLine-firstLine];
+    	  for(int lineNum = firstLine; lineNum < lastLine; lineNum++) {
+    		  lines[lineNum] = line();
+    	  }
+    	  when(node.getLine(Mockito.anyInt())).then(new Answer<ILine>() {
+
+			@Override
+			public ILine answer(InvocationOnMock invocation) throws Throwable {
+				return lines[(int)invocation.getArguments()[1]];
+			}
+		});
+    	  when(node.getFirstLine()).thenReturn(firstLine);
+    	  when(node.getLastLine()).thenReturn(lastLine);
+      }
+      private void setupCoverageNode(ICoverageNode node) {
+    	  String name = UUID.randomUUID().toString();
+    	  ICounter line = counter();
+    	  ICounter method = counter();
+    	  ICounter clazz = counter();
+    	  ICounter branch = counter();
+    	  when(node.getBranchCounter()).thenReturn(branch);
+    	  when(node.getClassCounter()).thenReturn(clazz);
+    	  when(node.getLineCounter()).thenReturn(line);
+    	  when(node.getMethodCounter()).thenReturn(method);
+    	  when(node.getName()).thenReturn(name);
+      }
+    //  private void setupSourceNode(ILine)
+      public IClassCoverage classCoverage() {
+    	  return null;
+      }
+      public IMethodCoverage methodCoverage() {
+    	  IMethodCoverage method = mock(IMethodCoverage.class);
+    	  setupSourceNode(method);
+    	  validator.add(method);
+    	  return method;
+      }
+      public Validator validator() {
+    	  return validator;
+      }
+      
+         
    }
+   public static class Validator {
+		 private Map<String, IMethodCoverage> nameToMethod = new HashMap<String, IMethodCoverage>();
+		 public void add(IMethodCoverage method) {
+			 nameToMethod.put(method.getName(), method);
+		 }
+		 public void validate(CoverageMethod ... methods) {
+	   	  for (CoverageMethod method : methods) {
+				IMethodCoverage expected = nameToMethod.get(method.getName());
+				assertNotNull(expected);
+				compareCounters(expected.getBranchCounter(), method.getBranchCoverage());
+				compareCounters(expected.getClassCounter(), method.getClassCoverage());
+				compareCounters(expected.getLineCounter(), method.getLineCoverage());
+				compareCounters(expected.getMethodCounter(), method.getMethodCoverage());
+				assertEquals(expected.getFirstLine(), method.getStartLine());
+				assertEquals(CoverageType.METHOD, method.getType());
+				assertEquals(expected.getLastLine(), method.getLastLine());
+				for (int i = expected.getFirstLine(); i < expected.getLastLine(); i++) {
+					int ourLine = i - expected.getFirstLine();
+					ILine expectedLine = expected.getLine(i);
+					
+				}
+			}
+	     }  
+		 private void compareCounters(ICounter expected, CoverageCounter actual) {
+			 assertEquals(expected.getCoveredCount(), actual.getCovered());
+			 assertEquals(expected.getCoveredRatio(), actual.getCoveredRatio());
+			 assertEquals(expected.getMissedCount(), actual.getMissed());
+			 assertEquals(expected.getMissedRatio(), actual.getMissedRatio());
+			 assertEquals(expected.getTotalCount(), actual.getTotal());
+			 assertEquals(expected.getStatus(), actual.getStatus());
+			 
+		 }
+	}
 }
+

@@ -45,7 +45,7 @@ public class CoverageBridge {
       List<CoverageClass> classes = new ArrayList<CoverageClass>();
       // first convert all of the code coverage for classes
       for (IClassCoverage coverage : pkg.getClasses()) {
-         classes.add(toSerializable(coverage));
+         classes.add(toClass(coverage));
       }
       Map<String, ISourceFileCoverage> sourceCoverage = new HashMap<String, ISourceFileCoverage>();
       // build a map of source files
@@ -126,7 +126,7 @@ public class CoverageBridge {
     *           the class to find the name for
     * @return the correct name.
     */
-   private static String findName(CoverageClass inner) {
+   static String findName(CoverageClass inner) {
       String name = new JavaNames().getClassName(inner.getName(), null,
             inner.getSuperClass(), inner.getInterfaces());
       if (name.contains(".")) {
@@ -142,10 +142,10 @@ public class CoverageBridge {
     * list of methods, and a list of CoverageClasses, in the case of nested
     * classes.
     * 
-    * @param clz
+    * @param clz class to find the name of
     * @return Serializable form of code coverage information for a class.
     */
-   static CoverageClass toSerializable(IClassCoverage clz) {
+   static CoverageClass toClass(IClassCoverage clz) {
       List<CoverageLine> lines = new ArrayList<CoverageLine>();
       int first = clz.getFirstLine();
       int last = clz.getLastLine();

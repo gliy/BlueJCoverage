@@ -80,12 +80,12 @@ public class BCoverageClass extends BCoverage<CoverageClass> implements
 
       @Override
       public int getFirstLine() {
-         return src.getStartLine();
+         return src.getFirstLine();
       }
 
       @Override
       public int getLastLine() {
-         return src.getStartLine();
+         return src.getLastLine();
       }
 
    }

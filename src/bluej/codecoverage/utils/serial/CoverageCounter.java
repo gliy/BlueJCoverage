@@ -32,7 +32,7 @@ public class CoverageCounter implements Serializable {
    private double coveredRatio;
    private double missedRatio;
 
-   public CoverageCounter() {
+   protected CoverageCounter() {
 
    }
    

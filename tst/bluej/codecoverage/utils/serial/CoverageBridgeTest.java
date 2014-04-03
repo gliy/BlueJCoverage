@@ -53,5 +53,10 @@ public class CoverageBridgeTest extends CoverageTestCase {
       CoveragePackage actual = CoverageBridge.toSerializable(expected);
       tester.validator().validate(actual);
    }
+   public void testComplexToSerializable() throws Exception {
+      IPackageCoverage expected = tester.packageCoverage(4, 2);
+      CoveragePackage actual = CoverageBridge.toSerializable(expected);
+      tester.validator().validate(actual);
+   }
 
 }

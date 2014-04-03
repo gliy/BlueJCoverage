@@ -87,10 +87,10 @@ public class CoverageTestCase extends TestCase {
       // private void setupSourceNode(ILine)
       public IClassCoverage classCoverage() {
          String name = getRandomString();
-         return classCoverage(name, name + ".java");
+         return classCoverage(name, name,name + ".java");
       }
 
-      private IClassCoverage classCoverage(String name, String packageName) {
+      private IClassCoverage classCoverage(String name, String packageName, String sourceFile) {
          // class name must have no periods for lookup to work
          IClassCoverage clz = mock(IClassCoverage.class);
          String interfaceName = getRandomString();
@@ -108,7 +108,9 @@ public class CoverageTestCase extends TestCase {
 
          when(clz.getSuperName()).thenReturn(superName);
          when(clz.getPackageName()).thenReturn(packageName);
-         when(clz.getSourceFileName()).thenReturn(name + ".java");
+         
+         String fileType = sourceFile.endsWith(".java") ? "" :  ".java";
+         when(clz.getSourceFileName()).thenReturn(sourceFile + fileType);
          when(clz.getName()).thenReturn(name);
 
          validator.add(clz);
@@ -122,14 +124,12 @@ public class CoverageTestCase extends TestCase {
          for (int i = 0; i < numClasses; i++) {
             String name = getRandomString();
             String pkg = getRandomString();
-            IClassCoverage clz = classCoverage(name, pkg);
+            IClassCoverage clz = classCoverage(name, pkg,name);
             allClasses.add(clz);
-
+            sourceClasses.add(sourceFile(name, pkg));
             if (i < numInnerClasses) {
-               allClasses.add(classCoverage(getRandomString(),
+               allClasses.add(classCoverage(getRandomString(),clz.getPackageName(),
                      clz.getSourceFileName()));
-            } else {
-               sourceClasses.add(sourceFile(name, pkg));
             }
 
          }

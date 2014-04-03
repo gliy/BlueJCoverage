@@ -27,7 +27,7 @@ import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-public class CoverageTestCase extends TestCase {
+public abstract class CoverageTestCase extends TestCase {
    private static final Random RANDOM = new Random();
 
    protected static int getRandomInt() {

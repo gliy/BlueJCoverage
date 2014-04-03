@@ -19,9 +19,7 @@ public class FramePreferences extends BasePreferenceOption<Integer> {
             FRAME_LOCATION_Y, FRAME_WIDTH);
 
    }
-
-
-
+   
    public Integer getWidth() {
       return getValue(FRAME_WIDTH);
    }

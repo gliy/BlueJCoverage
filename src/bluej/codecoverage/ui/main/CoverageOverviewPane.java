@@ -59,7 +59,6 @@ class CoverageOverviewPane extends JPanel {
 
    public CoverageOverviewPane(List<BCoveragePackage> coverage) {
       super();
-
       this.summary = new JPanel();
       summary.setBorder(BorderFactory.createEtchedBorder());
       summary.setLayout(new BoxLayout(summary, BoxLayout.Y_AXIS));
@@ -68,7 +67,7 @@ class CoverageOverviewPane extends JPanel {
 
       tree.setRootVisible(false);
       tree.setRowHeight(20);
-
+      
       tree.getSelectionModel().setSelectionMode(
             TreeSelectionModel.SINGLE_TREE_SELECTION);
       tree.setToggleClickCount(1);
@@ -174,10 +173,7 @@ class CoverageOverviewPane extends JPanel {
             setText(info.getName());
             
             CoverageCounter counter = info.getLineCoverage();
-            JComponent progress = createJProgressBar((int) (counter.getCoveredRatio() * 100));
-          
-            
-           
+            JComponent progress = createJProgressBar((int) (counter.getCoveredRatio() * 100));    
             
             rtn.setBackground(Color.WHITE);
             rtn.add(this);

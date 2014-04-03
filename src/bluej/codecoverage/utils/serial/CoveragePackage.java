@@ -3,6 +3,7 @@ package bluej.codecoverage.utils.serial;
 import java.io.Serializable;
 import java.util.List;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 /**
@@ -14,6 +15,7 @@ import lombok.Getter;
  * 
  */
 @Getter
+@EqualsAndHashCode(callSuper=true)
 public class CoveragePackage extends Coverage implements Serializable {
 
    private static final long serialVersionUID = 8070078380080374190L;

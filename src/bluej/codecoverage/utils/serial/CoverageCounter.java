@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import org.jacoco.core.analysis.ICounter;
 
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,8 +20,7 @@ import lombok.Setter;
  * @author Ian
  * 
  */
-@Getter
-@Setter
+@Data
 public class CoverageCounter implements Serializable {
 
    private static final long serialVersionUID = 8372346998202557372L;

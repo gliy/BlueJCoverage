@@ -90,7 +90,7 @@ public abstract class CoverageTestCase extends TestCase {
          return classCoverage(name, name,name + ".java");
       }
 
-      private IClassCoverage classCoverage(String name, String packageName, String sourceFile) {
+      public IClassCoverage classCoverage(String name, String packageName, String sourceFile) {
          // class name must have no periods for lookup to work
          IClassCoverage clz = mock(IClassCoverage.class);
          String interfaceName = getRandomString();
@@ -133,13 +133,17 @@ public abstract class CoverageTestCase extends TestCase {
             }
 
          }
+         return packageCoverage(sourceClasses, allClasses);
+      }
+      public IPackageCoverage packageCoverage(List<ISourceFileCoverage> sourceFileCoverage, List<IClassCoverage> classCoverage) {
+        
 
          IPackageCoverage pkg = mock(IPackageCoverage.class);
          setupCoverageNode(pkg);
          String name = getRandomString();
          when(pkg.getName()).thenReturn(name);
-         when(pkg.getClasses()).thenReturn(allClasses);
-         when(pkg.getSourceFiles()).thenReturn(sourceClasses);
+         when(pkg.getClasses()).thenReturn(classCoverage);
+         when(pkg.getSourceFiles()).thenReturn(sourceFileCoverage);
          validator.add(pkg);
          return pkg;
       }

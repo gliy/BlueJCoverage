@@ -2,6 +2,7 @@ package bluej.codecoverage.utils.serial;
 
 import java.io.Serializable;
 
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,8 +15,7 @@ import lombok.Setter;
  * @author Ian
  * 
  */
-@Getter
-@Setter
+@Data
 public abstract class Coverage implements Serializable {
 
    private static final long serialVersionUID = 8636473635240557385L;

@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,6 +20,7 @@ import lombok.Setter;
  * @author Ian
  * 
  */
+@EqualsAndHashCode(callSuper=true)
 @Getter
 @Setter
 public class CoverageClass extends Coverage implements Serializable {

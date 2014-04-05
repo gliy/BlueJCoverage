@@ -1,0 +1,87 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<title>BlueJCoverage</title>
+
+<link rel="stylesheet" href="stylesheets/styles.css">
+<link rel="stylesheet" href="stylesheets/pygment_trac.css">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, user-scalable=no">
+<!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+</head>
+<body>
+	<div class="wrapper">
+		<header>
+			<h1>BlueJCoverage</h1>
+			<p>Code Coverage for BlueJ</p>
+			<ul>
+				<li><a
+					href="https://github.com/gliy/BlueJCoverage/blob/master/CoverageExtension-1.0.jar?raw=true">Download
+						<strong>v1.0</strong>
+				</a></li>
+				<li><a href="changes.html">Previous <strong>Versions</strong></a></li>
+				<li><a href="faq.html">Problems<strong>FAQ</strong></a></li>
+				<li><a href="https://github.com/gliy/BlueJCoverage">View On
+						<strong>GitHub</strong>
+				</a></li>
+			</ul>
+		</header>
+		<section>
+
+			<h2>
+				<a class="anchor" href="#Installation"><span
+					class="octicon octicon-link"></span></a>How do I install the extension?
+			</h2>
+
+
+			<p>
+				A Installation guide can be found on the <a
+					href="https://github.com/gliy/BlueJCoverage/wiki/Setup-&-Usage">GitHub
+					wiki</a>
+			</p>
+
+			<h2>
+				<a class="anchor" href="#Samename"><span
+					class="octicon octicon-link"></span></a>Why am I getting the error
+				Can't add different class with same name?
+			</h2>
+			<p>You most likely have an archive file(zip/jar/gzip) in your
+				project's directory that has a different version of the source code.
+				A common example is exporting your project as a jar, and putting
+				that in the project directory, then updating your source code.</p>
+			<p>
+				<strong>To fix this issue, move the archive file that
+					contains the class file specified in the exception outside of the
+					project directory</strong>
+			</p>
+
+			<h2>
+				<a class="anchor" href="#Samename"><span
+					class="octicon octicon-link"></span></a>Why do I see $jacocoData when I
+				add an item to the object bench?
+			</h2>
+			<p>Jacoco performs Code Coverage by injecting fields into your
+				class to collect coverage information. The $jacocoData on the object
+				bench will not affect anything you are doing with the object bench,
+				and should be ignored.</p>
+			<p>
+				<strong>Currently there is no fix for this issue.</strong>
+
+			</p>
+
+
+		</section>
+		<footer>
+			<p>
+				This project is maintained by <a href="https://github.com/gliy">gliy</a>
+			</p>
+		</footer>
+	</div>
+	<script src="javascripts/scale.fix.js"></script>
+
+</body>
+</html>

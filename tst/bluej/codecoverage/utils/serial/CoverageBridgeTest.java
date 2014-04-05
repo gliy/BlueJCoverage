@@ -9,11 +9,13 @@ import org.jacoco.core.analysis.IClassCoverage;
 import org.jacoco.core.analysis.IMethodCoverage;
 import org.jacoco.core.analysis.IPackageCoverage;
 
+import base.CoverageTestBase;
+import base.CoverageTestBuilder;
 import junit.framework.TestCase;
 
-public class CoverageBridgeTest extends CoverageTestCase {
+public class CoverageBridgeTest extends CoverageTestBase {
 
-   private TestBuilder tester;
+   private CoverageTestBuilder tester;
 
    @Override
    protected void setUp() throws Exception {

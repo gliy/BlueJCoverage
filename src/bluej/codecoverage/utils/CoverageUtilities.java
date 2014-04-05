@@ -38,7 +38,7 @@ import bluej.extensions.ExtensionUnloadedException;
  * 
  * @author Ian
  */
-public final class CoverageUtilities {
+public class CoverageUtilities {
 
    private static final int START_PORT = 6000;
 

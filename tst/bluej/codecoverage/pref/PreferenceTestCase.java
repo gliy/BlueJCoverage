@@ -5,7 +5,7 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
-public class PreferenceTestCase extends TestCase {
+public abstract class PreferenceTestCase extends TestCase {
    protected MockPreferenceStore createMockStore() {
       return new MockPreferenceStore();
    }

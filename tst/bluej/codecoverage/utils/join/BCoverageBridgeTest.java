@@ -9,13 +9,14 @@ import org.jacoco.core.analysis.IClassCoverage;
 import org.jacoco.core.analysis.IPackageCoverage;
 import org.jacoco.core.analysis.ISourceFileCoverage;
 
+import base.CoverageTestBase;
+import base.CoverageTestBuilder;
 import bluej.codecoverage.utils.serial.CoverageBridge;
 import bluej.codecoverage.utils.serial.CoverageClass;
 import bluej.codecoverage.utils.serial.CoveragePackage;
-import bluej.codecoverage.utils.serial.CoverageTestCase;
 
-public class BCoverageBridgeTest extends CoverageTestCase {
-   private TestBuilder tester;
+public class BCoverageBridgeTest extends CoverageTestBase {
+   private CoverageTestBuilder tester;
    @Override
    protected void setUp() throws Exception {
       tester = create();
@@ -46,6 +47,6 @@ public class BCoverageBridgeTest extends CoverageTestCase {
       assertEquals(1, result.getNodes().size());
       BCoverage<CoverageClass> actual = result.getNodes().get(0);
       
-      assertEquals(expected, actual.getSource());
+      tester.bValidator().validate(actual);
    }
 }

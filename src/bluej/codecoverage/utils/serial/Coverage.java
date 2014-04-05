@@ -38,28 +38,6 @@ public abstract class Coverage implements Serializable {
    /** Enum representing what Java Object Type this information is for. */
   // private CoverageType type;
 
-   /**
-    * Fills in all the coverage information that is shared between the different
-    * types.
-    * 
-    * @param name name associated with the coverage information.
-    * @param lineCoverage code coverage results for individual lines
-    * @param methodCoverage code coverage results for all methods enclosed by this Coverage object.
-    * @param branchCoverage code coverage results for all branches enclosed by this Coverage object.
-    * @param classCoverage code coverage results for all classes enclosed by this Coverage object.
-    */
-   protected Coverage(String name, CoverageCounter lineCoverage,
-         CoverageCounter methodCoverage, CoverageCounter branchCoverage,
-         CoverageCounter classCoverage) {
-      super();
-      this.name = name;
-      this.lineCoverage = lineCoverage;
-      this.methodCoverage = methodCoverage;
-      this.branchCoverage = branchCoverage;
-      this.classCoverage = classCoverage;
-
-   }
-
    protected Coverage() {
 
    }

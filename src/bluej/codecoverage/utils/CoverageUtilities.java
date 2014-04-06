@@ -69,9 +69,9 @@ public class CoverageUtilities {
    private Object coverageListener;
 
    /** File to write our properties to on shutdown */
-   private File propertyFile;
+   File propertyFile;
    /** Location of the Jacocoagent.jar file */
-   private File agentFile;
+   File agentFile;
    /** Boolean if we have already registered a shutdown hook */
    private static boolean hooked = false;
 
@@ -86,15 +86,23 @@ public class CoverageUtilities {
     *            if any error is encountered while loading saved preferences,
     *            throws an {@link IOException}.
     */
-   public CoverageUtilities(CodeCoverageModule module) throws IOException {
+   public CoverageUtilities(CodeCoverageModule module) {
       this.module = module;
       port = Integer.parseInt(module.getPreferenceStore().getPreference(PORT_NUMBER, ""
                + START_PORT));
-      port = Math.max(START_PORT, port);
+      
+   }
+   
+   public void configure() throws IOException {
       setup();
-
       setupListener();
+   }
 
+   /**
+    * Testing Constructor
+    */
+   public CoverageUtilities(int port) {
+      this.port = port;
    }
 
    /**
@@ -105,7 +113,7 @@ public class CoverageUtilities {
     * to load any classes outside of your extension by BlueJ's
     * {@link BreakoutClassLoader}.
     */
-   private void setupListener() {
+   void setupListener() {
       try {
          coverageListener = new BreakoutClassLoader()
                   .loadClass(CoverageAgent.class.getName())
@@ -291,7 +299,7 @@ public class CoverageUtilities {
     * 
     * @return Complete VM Argument for the extension to properly function.
     */
-   private String buildVMArgs() {
+   String buildVMArgs() {
       String arg = buildAgentPath() + "=output=tcpclient,port=" + port
                + getExcludes();
       return arg;
@@ -302,7 +310,7 @@ public class CoverageUtilities {
     * 
     * @return Single comma seperated String for classes to ignore.
     */
-   private String getExcludes() {
+   String getExcludes() {
       StringBuilder buildExcludes = new StringBuilder();
       // turn list of excluded packages into a single colon seperated string.
       for (String ex : module.getPreferenceManager().getExcludesPrefs().getExcludedPrefs()) {
@@ -365,7 +373,7 @@ public class CoverageUtilities {
     *           the VM Args we want to add to the properties file.
     * @return The VMArg to add
     */
-   private static String replaceVmArgs(String currentArgs, String newArgs) {
+   static String replaceVmArgs(String currentArgs, String newArgs) {
       int javaagent = currentArgs.indexOf("-javaagent");
       StringBuilder builder = new StringBuilder(currentArgs);
       // if our vm arg is present
@@ -390,7 +398,7 @@ public class CoverageUtilities {
     * instance is open, it will attempt to use a different port to collect
     * coverage information.
     */
-   private void updateVmArguments() {
+   void updateVmArguments() {
       final Properties props = new Properties();
 
       FileInputStream fis = null;
@@ -445,7 +453,7 @@ public class CoverageUtilities {
     *            If any error is encountered while reading or writing the jar
     *            file, throws an {@link IOException}
     */
-   private void copyAgent(String jarFile) throws IOException {
+   void copyAgent(String jarFile) throws IOException {
       JarFile jar = new JarFile(jarFile);
       Enumeration<JarEntry> jarEnum = jar.entries();
       while (jarEnum.hasMoreElements()) {
@@ -488,7 +496,7 @@ public class CoverageUtilities {
     *           exception to trace.
     * @return the Actual exception at the root.
     */
-   private static Throwable getRootCause(Throwable e) {
+   static Throwable getRootCause(Throwable e) {
       Throwable root = e;
       while (root.getCause() != null) {
          root = root.getCause();

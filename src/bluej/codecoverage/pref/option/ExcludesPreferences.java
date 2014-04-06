@@ -1,5 +1,6 @@
 package bluej.codecoverage.pref.option;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -35,6 +36,9 @@ public class ExcludesPreferences extends BasePreferenceOption<List<String>> {
 
    @Override
    protected List<String> load(String value) {
+      if(value == null || value.trim().isEmpty()) {
+         return new ArrayList<String>();
+      }
       return Arrays.asList(value.split(","));
    }
 

@@ -61,6 +61,7 @@ public class BlueJCodeCoverageModule implements CodeCoverageModule {
       };
       this.preferenceManager = new PreferenceManager(this);
       this.coverageUtilities = new CoverageUtilities(this);
+      this.coverageUtilities.configure();
       this.reportFrame = new CoverageReportFrame(this);
 
    }

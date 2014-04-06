@@ -476,7 +476,7 @@ public final class CoverageUtilities {
          if (stream != null) {
             stream.close();
          }
-      } catch (IOException ex) {
+      } catch (Throwable ex) {
 
       }
    }

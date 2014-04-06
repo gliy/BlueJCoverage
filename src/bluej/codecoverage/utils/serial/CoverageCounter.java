@@ -20,7 +20,7 @@ import lombok.Setter;
  * @author Ian
  * 
  */
-@Data
+@Getter
 public class CoverageCounter implements Serializable {
 
    private static final long serialVersionUID = 8372346998202557372L;
@@ -31,10 +31,6 @@ public class CoverageCounter implements Serializable {
 
    private double coveredRatio;
    private double missedRatio;
-
-   protected CoverageCounter() {
-
-   }
    
    public CoverageCounter(ICounter line) {
       this(line.getCoveredCount(), line.getMissedCount(),

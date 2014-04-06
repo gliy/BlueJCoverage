@@ -15,7 +15,6 @@ import lombok.Setter;
  * @author Ian
  * 
  */
-@Setter
 @Getter
 @EqualsAndHashCode(callSuper=true)
 public class CoverageMethod extends Coverage implements Serializable {

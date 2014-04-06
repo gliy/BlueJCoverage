@@ -10,7 +10,7 @@
 	<property name="src.dir" value="src" />
 	<property name="lib.dir" value="runtime-jars" />
 	<property name="extension.version" value="1.0" />
-   <property name="jar.release" value="tmp" />
+   <property name="jar.release" value="-tmp" />
 	<path id="class.path">
 
 		<pathelement location="bin" />
@@ -56,18 +56,17 @@
 
 	<target name="build-jar" depends="build">
 		<!-- Put everything in the build directory into our jar -->
-		<jar destfile="CoverageExtension-${extension.version}-${jar.release}.jar" basedir="${build.dir}"
+		<jar destfile="CoverageExtension-${extension.version}${jar.release}.jar" basedir="${build.dir}"
 			includes="**" manifest="MANIFEST.MF">
 		</jar>
-		
-		
 	</target>
+	
 	<target name="release" depends="build-jar">
 		<property name="jar.release" value="" />
 	</target>
 	<target name="run" depends="build-jar">
 		<!-- Copy it to a spot where bluej can find it -->	
-		<copy todir="${blue.extension.dest}" file="CoverageExtension-${extension.version}-${jar.release}.jar" />
+		<copy todir="${blue.extension.dest}" file="CoverageExtension-${extension.version}${jar.release}.jar" />
 		<java jar="${bluej.lib}/bluej.jar"
 			jvmargs="-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=4000,suspend=n"
 			fork="true">

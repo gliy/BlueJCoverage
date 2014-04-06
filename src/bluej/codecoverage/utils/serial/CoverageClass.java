@@ -36,16 +36,7 @@ public class CoverageClass extends Coverage implements Serializable {
 
    private String[] interfaces;
    private String superClass;
-
-   public CoverageClass(String packageName, String name,
-         List<CoverageLine> lineCounter, int firstLine, int lastLine) {
-      this();
-      this.packageName = packageName;
-      this.lineCounter = lineCounter;
-      this.firstLine = firstLine;
-      this.lastLine = lastLine;
-      setName(name);
-   }
+  
 
    public CoverageClass() {
       this.interfaces = new String[0];

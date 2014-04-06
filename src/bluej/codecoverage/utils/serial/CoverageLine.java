@@ -15,7 +15,6 @@ import lombok.Setter;
  * 
  */
 @Getter
-@Setter
 public class CoverageLine implements Serializable {
 
    private static final long serialVersionUID = -3807095603496099416L;

@@ -26,11 +26,11 @@ import bluej.extensions.ProjectNotOpenException;
  * @author Ian
  * 
  */
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class CoverageMenuBuilder {
-   private CodeCoverageModule module;
-   private BPackage pack;
-
+   private final CodeCoverageModule module;
+   private final BPackage pack;
+   private JToggleButton coverageButton;
    /**
     * Adds the Start Coverage/End Coverage button to BlueJ's frame.
     * @throws PackageNotFoundException
@@ -48,7 +48,7 @@ public class CoverageMenuBuilder {
 
      JPanel coverage = new JPanel();
 
-     JToggleButton coverageButton = CoverageButtonFactory.get(module).createButton();
+     coverageButton = CoverageButtonFactory.get(module).createButton();
 
      coverage.setLayout(new BoxLayout(coverage, BoxLayout.Y_AXIS));
      coverage.setAlignmentX(0.5f);
@@ -56,6 +56,10 @@ public class CoverageMenuBuilder {
      coverageButton.setFont(coverageButton.getFont().deriveFont(0, 10f));
      leftBar.add(coverage, 1);
   }
+
+   public void remove() {
+      coverageButton.getParent().remove(coverageButton);
+   }
 
   
 }

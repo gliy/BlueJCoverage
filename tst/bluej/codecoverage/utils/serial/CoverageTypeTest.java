@@ -6,8 +6,9 @@ import static bluej.codecoverage.utils.serial.CoverageType.PACKAGE;
 import static bluej.codecoverage.utils.serial.CoverageType.findType;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import base.CoverageTestBase;
 
-public class CoverageTypeTest extends CoverageTestCase {
+public class CoverageTypeTest extends CoverageTestBase {
    public void testFindType() throws Exception {
       assertEquals(PACKAGE, findType(new CoveragePackage(null)));
       assertEquals(METHOD, findType(new CoverageMethod(1, 1)));

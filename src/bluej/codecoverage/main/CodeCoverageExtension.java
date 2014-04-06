@@ -15,6 +15,7 @@ import bluej.codecoverage.pref.PreferenceManager;
 import bluej.codecoverage.ui.button.CoverageMenuBuilder;
 import bluej.codecoverage.ui.pref.CoveragePreferencePane;
 import bluej.codecoverage.utils.CoverageUtilities;
+import bluej.extensions.BPackage;
 import bluej.extensions.BlueJ;
 import bluej.extensions.Extension;
 import bluej.extensions.event.PackageEvent;
@@ -48,14 +49,16 @@ public class CodeCoverageExtension extends Extension {
          SITE_URL = new URL("http://gliy.github.io/BlueJCoverage");
          final CodeCoverageModule module = new BlueJCodeCoverageModule(bluej);
 
-         final Map<File, JToggleButton> coverageButtons = new HashMap<File, JToggleButton>();
+         final Map<BPackage, CoverageMenuBuilder> coverageButtons = new HashMap<BPackage, CoverageMenuBuilder>();
          bluej.setPreferenceGenerator(new CoveragePreferencePane(module));
          bluej.addPackageListener(new PackageListener() {
 
             @Override
             public void packageOpened(PackageEvent event) {
                try {
-                  new CoverageMenuBuilder(module, event.getPackage()).build();
+                  CoverageMenuBuilder menuBuilder = new CoverageMenuBuilder(module, event.getPackage());
+                  coverageButtons.put(event.getPackage(), menuBuilder);
+                  menuBuilder.build();
 
                } catch (Exception e) {
                   e.printStackTrace();
@@ -65,13 +68,11 @@ public class CodeCoverageExtension extends Extension {
             @Override
             public void packageClosing(PackageEvent event) {
                try {
-                  File dir = event.getPackage().getDir();
-                  JToggleButton button = coverageButtons.remove(dir);
-                  if (button != null) {
-                     for (ItemListener listener : button.getItemListeners()) {
-                        button.removeItemListener(listener);
-                     }
-                     button.getParent().remove(button);
+                  System.out.println("Closing");
+                  CoverageMenuBuilder menuBuilder = coverageButtons.get(event.getPackage());
+                  
+                  if (menuBuilder != null) {
+                     menuBuilder.remove();
                   }
                } catch (Exception e) {
                   e.printStackTrace();

@@ -92,7 +92,10 @@ public class CoverageUtilities {
                + START_PORT));
       
    }
-   
+   /**
+    * Configures the Coverage Listener so information can be gathered.
+    * @throws IOException
+    */
    public void configure() throws IOException {
       setup();
       setupListener();
@@ -183,7 +186,7 @@ public class CoverageUtilities {
     *           the error to show.
     * @return a TextPane that can be added to a dialog for error reporting.
     */
-   private JComponent buildErrorMessage(String ex) {
+   JComponent buildErrorMessage(String ex) {
       // "An error was encountered while gathering coverage data\n"
       // getRootCause(e).getMessage()
       JTextPane error = new JTextPane();

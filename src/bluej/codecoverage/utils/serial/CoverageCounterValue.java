@@ -1,5 +1,7 @@
 package bluej.codecoverage.utils.serial;
 
+import lombok.Getter;
+
 /**
  * Serializable representation of <a href=
  * "http://www.eclemma.org/jacoco/trunk/doc/api/org/jacoco/core/analysis/ICounter.CounterValue.html"
@@ -11,6 +13,7 @@ package bluej.codecoverage.utils.serial;
  * @author Ian
  * 
  */
+@Getter
 public enum CoverageCounterValue {
    FULLY_COVERED(2), NOT_COVERED(1), EMPTY(0), PARTLY_COVERED(1 | 2), UNKNOWN(
          -1);

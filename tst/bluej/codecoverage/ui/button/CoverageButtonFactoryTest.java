@@ -30,6 +30,7 @@ public class CoverageButtonFactoryTest extends TestCase {
       assertEquals("End Coverage", button3.getText().trim());
       verify(module.getCoverageUtilities(), only()).clearResults();
       
+      assertEquals(button1.getModel(), button2.getModel());
       
    }
 }

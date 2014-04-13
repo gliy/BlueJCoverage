@@ -1,6 +1,5 @@
 package bluej.codecoverage.ui.main;
 
-import java.awt.Color;
 import java.awt.Font;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
@@ -9,9 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.swing.BoxLayout;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.JViewport;
@@ -21,9 +17,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Element;
 import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
-import javax.swing.text.Utilities;
 
 import bluej.codecoverage.pref.PreferenceManager;
 import bluej.codecoverage.pref.SourceDisplayGUIPrefs;
@@ -104,7 +98,7 @@ class CoverageSourceDisplay extends JScrollPane {
 
    }
 
-   private Map<Integer, CoverageLine> mapLineToCoverage(CoverageClass clz) {
+   Map<Integer, CoverageLine> mapLineToCoverage(CoverageClass clz) {
       int base = clz.getFirstLine();
       Map<Integer, CoverageLine> rtn = new HashMap<Integer, CoverageLine>();
       for (int i = 0; i <= (clz.getLastLine() - base); i++) {
@@ -120,7 +114,7 @@ class CoverageSourceDisplay extends JScrollPane {
       return rtn;
    }
 
-   private Map<Integer, AttributeSet> createStyleMap(CoverageClass clz) {
+   Map<Integer, AttributeSet> createStyleMap(CoverageClass clz) {
       Map<CoverageCounterValue, MutableAttributeSet> cache = new HashMap<CoverageCounterValue, MutableAttributeSet>();
       Map<Integer, AttributeSet> lineToStyle = new HashMap<Integer, AttributeSet>();
       for (Entry<Integer, CoverageLine> lineStat : lineStats.entrySet()) {

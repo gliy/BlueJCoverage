@@ -1,13 +1,17 @@
 package base;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import java.awt.Color;
 import java.awt.Frame;
 import java.io.File;
 
 import bluej.codecoverage.main.CodeCoverageModule;
 import bluej.codecoverage.pref.PreferenceManager;
 import bluej.codecoverage.pref.PreferenceStore;
+import bluej.codecoverage.pref.option.ColorPreferences;
+import bluej.codecoverage.ui.ext.LineAttributes;
 import bluej.codecoverage.ui.main.CoverageReportFrame;
 import bluej.codecoverage.utils.CoverageUtilities;
 
@@ -55,6 +59,15 @@ public class MockCodeCoverageModule implements CodeCoverageModule {
    @Override
    public CoverageReportFrame getReportFrame() {
       return reportFrame;
+   }
+   
+   public void setupManager() {
+     // ColorPreferences colorPrefs = mock(ColorPreferences.class);
+     // when(preferenceManager.getColorPrefs()).thenReturn(colorPrefs);
+     // when(colorPrefs.getFullyCovered()).thenReturn(Color.GREEN);
+     // when(colorPrefs.getNotCovered()).thenReturn(Color.red);
+     // when(colorPrefs.getPartiallyCovered()).thenReturn(Color.YELLOW);
+      
    }
 
 }

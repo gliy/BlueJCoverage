@@ -4,7 +4,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.PriorityQueue;
 
 import lombok.Getter;
@@ -59,6 +61,16 @@ public class CoverageBundleManager {
          return recorded.compareTo(other.recorded);
       }
 
+   }
+   
+   public static class BundleState {
+      private Map<String, Object> state = new HashMap<String, Object>();
+      public void save(String key, Object val) {
+         state.put(key, val);
+      }
+      public <E> E load(String key) {
+         return (E)state.get(key);
+      }
    }
 
 }

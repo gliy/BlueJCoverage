@@ -4,6 +4,6 @@ import java.util.Map;
 
 
 public interface Saveable {
-   Map<String, String> save();
-   void load(Map<String, String> info);
+   void save(BundleState state)
+   void load(BundleState state);
 }

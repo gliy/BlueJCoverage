@@ -4,7 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -24,6 +24,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
+import javax.swing.tree.TreeNode;
+import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import bluej.codecoverage.utils.join.BCoverage;
@@ -150,8 +152,37 @@ class CoverageOverviewPane extends JPanel {
       return selectedNode;
    }
    
-   
+   public void save() {
+      
+   }
 
+   private void expand(List<String> ids) {
+      for (int i = 0; i < tree.getRowCount(); i++) {
+
+         TreePath path = tree.getPathForRow(i);
+         DefaultMutableTreeNode node = (DefaultMutableTreeNode) path
+                  .getLastPathComponent();
+         if (node.getUserObject() instanceof BCoverage<?>
+                  && ids.contains(((BCoverage<?>) node.getUserObject()).getId())) {
+            tree.expandPath(path);
+         }
+      }
+
+   }
+   private List<String> findExpanded() {
+      List<String> expandedNodes = new ArrayList<String>();
+      for (int i = 0; i < tree.getRowCount(); i++) {
+         if (tree.isExpanded(i)) {
+            TreePath path = tree.getPathForRow(i);
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) path
+                     .getLastPathComponent();
+            if (node.getUserObject() instanceof BCoverage<?>) {
+               expandedNodes.add(((BCoverage<?>) node.getUserObject()).getId());
+            }
+         }
+      }
+      return expandedNodes;
+   }
    DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer() {
       @Override
       public Component getTreeCellRendererComponent(JTree tree, Object value,

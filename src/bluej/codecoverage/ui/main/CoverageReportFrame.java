@@ -8,6 +8,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -133,8 +135,8 @@ public class CoverageReportFrame extends JFrame implements Saveable {
       this.bundle = bundle;
       classToDisplay.clear();
       tabs.removeAll();
-      
-      overview.reset(bundle.getAllPackages());
+      List<BCoveragePackage> allPackages = bundle.getAllPackages();
+      overview.reset(allPackages);
       menuBar.reset(bundle);
    }
 
@@ -145,8 +147,10 @@ public class CoverageReportFrame extends JFrame implements Saveable {
    private void generateTabs() {
       classToDisplay = new HashMap<String, CoverageSourceDisplay>();
       tabs = new JTabbedPane();
-      overview = new CoverageOverviewPane(bundle.getAllPackages());
+      List<BCoveragePackage> allPackages = bundle.getAllPackages();
+      overview = new CoverageOverviewPane(allPackages);
       bundleManager.addSaver(overview);
+      bundleManager.addSaver(this);
       overview.setPreferredSize(new Dimension(getWidth(), 100));
 
       split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, tabs, overview);
@@ -256,13 +260,34 @@ public class CoverageReportFrame extends JFrame implements Saveable {
       }
    }
 
+   private static final String OPEN_TABS = "tabs.open";
+   
    @Override
    public void save(CoverageBundle state) {
-      tabs
+      state.getBundleState().save(OPEN_TABS, new ArrayList<String>(classToDisplay.keySet()));
+      classToDisplay.clear();
+      tabs.removeAll();
+      
    }
    @Override
    public void load(CoverageBundle state) {
+      List<String> openTabs = (List<String>) state.getBundleState().load(OPEN_TABS);
+      Map<String, BCoverageClass> tabsToOpen = new HashMap<String, BCoverageClass>();
       
+      for (BCoveragePackage pkg : state.getAllPackages()) {
+         findTabs(tabsToOpen, openTabs, pkg);
+      }
+      for (String tabId : openTabs) {
+         bringUpTab(tabsToOpen.get(tabId));
+      }
+   }
+   private void findTabs(Map<String, BCoverageClass> into, List<String> open, BCoverage<?> node) {
+      if(open.contains(node.getId()) && node instanceof BCoverageClass) {
+         into.put(node.getId(), (BCoverageClass)node);
+      }
+      for (BCoverage<?> child : node.getNodes()) {
+         findTabs(into, open, child);
+      }
    }
 
 }

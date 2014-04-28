@@ -1,9 +1,12 @@
 package bluej.codecoverage.ui.main;
 
-import java.util.Map;
+import bluej.codecoverage.utils.join.CoverageBundleManager.CoverageBundle;
+
 
 
 public interface Saveable {
-   void save(BundleState state)
-   void load(BundleState state);
+   void save(CoverageBundle state);
+   
+   
+   void load(CoverageBundle state);
 }

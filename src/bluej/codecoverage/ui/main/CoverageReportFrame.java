@@ -36,7 +36,7 @@ import bluej.codecoverage.utils.join.Locatable;
  * 
  * @author Ian
  */
-public class CoverageReportFrame extends JFrame {
+public class CoverageReportFrame extends JFrame implements Saveable {
    /** The coverage information to show in the overview. */
    private CoverageBundle bundle;
    /** The open source file tabs */
@@ -133,7 +133,7 @@ public class CoverageReportFrame extends JFrame {
       this.bundle = bundle;
       classToDisplay.clear();
       tabs.removeAll();
-
+      
       overview.reset(bundle.getAllPackages());
       menuBar.reset(bundle);
    }
@@ -146,6 +146,7 @@ public class CoverageReportFrame extends JFrame {
       classToDisplay = new HashMap<String, CoverageSourceDisplay>();
       tabs = new JTabbedPane();
       overview = new CoverageOverviewPane(bundle.getAllPackages());
+      bundleManager.addSaver(overview);
       overview.setPreferredSize(new Dimension(getWidth(), 100));
 
       split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, tabs, overview);
@@ -192,7 +193,6 @@ public class CoverageReportFrame extends JFrame {
          tabs.setSelectedComponent(existingDisplay);
 
       } catch (Exception e) {
-         // TODO Auto-generated catch block
          e.printStackTrace();
       }
 
@@ -254,6 +254,15 @@ public class CoverageReportFrame extends JFrame {
          }
 
       }
+   }
+
+   @Override
+   public void save(CoverageBundle state) {
+      tabs
+   }
+   @Override
+   public void load(CoverageBundle state) {
+      
    }
 
 }

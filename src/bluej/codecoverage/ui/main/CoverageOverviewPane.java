@@ -6,6 +6,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -24,13 +25,14 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
-import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import bluej.codecoverage.utils.join.BCoverage;
 import bluej.codecoverage.utils.join.BCoverageBridge;
 import bluej.codecoverage.utils.join.BCoveragePackage;
+import bluej.codecoverage.utils.join.CoverageBundleManager.BundleState;
+import bluej.codecoverage.utils.join.CoverageBundleManager.CoverageBundle;
 import bluej.codecoverage.utils.serial.CoverageCounter;
 import bluej.codecoverage.utils.serial.CoverageType;
 
@@ -42,7 +44,7 @@ import bluej.codecoverage.utils.serial.CoverageType;
  * @author ikingsbu
  * 
  */
-class CoverageOverviewPane extends JPanel {
+public class CoverageOverviewPane extends JPanel implements Saveable {
 
    private DefaultTreeModel model;
    private JTree tree;
@@ -52,7 +54,7 @@ class CoverageOverviewPane extends JPanel {
       @Override
       public void valueChanged(TreeSelectionEvent e) {
          DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree
-               .getLastSelectedPathComponent();
+                  .getLastSelectedPathComponent();
          if (node != null) {
             buildSummary((BCoverage<?>) node.getUserObject());
          }
@@ -69,9 +71,9 @@ class CoverageOverviewPane extends JPanel {
 
       tree.setRootVisible(false);
       tree.setRowHeight(20);
-      
+
       tree.getSelectionModel().setSelectionMode(
-            TreeSelectionModel.SINGLE_TREE_SELECTION);
+               TreeSelectionModel.SINGLE_TREE_SELECTION);
       tree.setToggleClickCount(1);
       tree.setCellRenderer(renderer);
       tree.addTreeSelectionListener(summarySelection);
@@ -83,7 +85,7 @@ class CoverageOverviewPane extends JPanel {
 
    public void reset(List<BCoveragePackage> coverage) {
       TreeSelectionListener[] listeners = tree
-            .getListeners(TreeSelectionListener.class);
+               .getListeners(TreeSelectionListener.class);
       for (TreeSelectionListener listener : listeners) {
          tree.removeTreeSelectionListener(listener);
       }
@@ -98,11 +100,11 @@ class CoverageOverviewPane extends JPanel {
    private void buildSummary(BCoverage<?> selected) {
       JLabel[] summaryLabels = new JLabel[3];
       summaryLabels[0] = new JLabel(printCoverage("Class Coverage: ",
-            selected.getClassCoverage()));
+               selected.getClassCoverage()));
       summaryLabels[1] = new JLabel(printCoverage("Branch Coverage: ",
-            selected.getBranchCoverage()));
+               selected.getBranchCoverage()));
       summaryLabels[2] = new JLabel(printCoverage("Line Coverage: ",
-            selected.getLineCoverage()));
+               selected.getLineCoverage()));
       summary.removeAll();
       for (JLabel summaryLabel : summaryLabels) {
          summaryLabel.setFont(summaryLabel.getFont().deriveFont(13f));
@@ -116,7 +118,7 @@ class CoverageOverviewPane extends JPanel {
    private String printCoverage(String base, CoverageCounter counter) {
 
       return base + counter.getCovered() + "/"
-            + (counter.getCovered() + counter.getMissed());
+               + (counter.getCovered() + counter.getMissed());
    }
 
    private static MutableTreeNode createRootNode(List<BCoveragePackage> coverage) {
@@ -139,7 +141,7 @@ class CoverageOverviewPane extends JPanel {
    }
 
    private ImageIcon getDisplayIcon(BCoverage<?> coverage) {
-      return  CoverageType.findType(coverage.getSource()).getImage();
+      return CoverageType.findType(coverage.getSource()).getImage();
    }
 
    public void addListener(TreeSelectionListener listen) {
@@ -148,12 +150,24 @@ class CoverageOverviewPane extends JPanel {
 
    public DefaultMutableTreeNode getSelectedNode() {
       DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) tree
-            .getLastSelectedPathComponent();
+               .getLastSelectedPathComponent();
       return selectedNode;
    }
-   
-   public void save() {
-      
+
+   public void save(CoverageBundle state) {
+      new OverviewSaver().handle(state, true);
+   }
+
+   public void load(CoverageBundle state) {
+      TreeSelectionListener[] listeners = tree.getTreeSelectionListeners();
+      for (TreeSelectionListener treeSelectionListener : listeners) {
+         tree.removeTreeSelectionListener(treeSelectionListener);
+      }
+      model.setRoot(createRootNode(state.getAllPackages()));
+      for (TreeSelectionListener treeSelectionListener : listeners) {
+         tree.addTreeSelectionListener(treeSelectionListener);
+      }
+      new OverviewSaver().handle(state, false);
    }
 
    private void expand(List<String> ids) {
@@ -169,6 +183,7 @@ class CoverageOverviewPane extends JPanel {
       }
 
    }
+
    private List<String> findExpanded() {
       List<String> expandedNodes = new ArrayList<String>();
       for (int i = 0; i < tree.getRowCount(); i++) {
@@ -183,13 +198,14 @@ class CoverageOverviewPane extends JPanel {
       }
       return expandedNodes;
    }
+
    DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer() {
       @Override
       public Component getTreeCellRendererComponent(JTree tree, Object value,
-            boolean selected, boolean expanded, boolean leaf, int row,
-            boolean hasFocus) {
+               boolean selected, boolean expanded, boolean leaf, int row,
+               boolean hasFocus) {
          Component defaultDisplay = super.getTreeCellRendererComponent(tree,
-               value, selected, expanded, leaf, row, hasFocus);
+                  value, selected, expanded, leaf, row, hasFocus);
          Object treeNode = ((DefaultMutableTreeNode) value).getUserObject();
          // sanity check to prevent any ClassCastException
          if (treeNode instanceof BCoverage<?>) {
@@ -202,14 +218,15 @@ class CoverageOverviewPane extends JPanel {
                setIcon(iconToUse);
             }
             setText(info.getName());
-            
+
             CoverageCounter counter = info.getLineCoverage();
-            JComponent progress = createJProgressBar((int) (counter.getCoveredRatio() * 100));    
-            
+            JComponent progress = createJProgressBar((int) (counter
+                     .getCoveredRatio() * 100));
+
             rtn.setBackground(Color.WHITE);
             rtn.add(this);
             rtn.add(progress);
-            
+
             return rtn;
          } else {
             return defaultDisplay;
@@ -217,16 +234,53 @@ class CoverageOverviewPane extends JPanel {
 
       }
    };
-   
+
+   private class OverviewSaver {
+      private static final String SELECTED_NODE = "overview.open";
+      private static final String EXPANDED_NODES = "overview.expanded";
+
+      public void handle(CoverageBundle bundle, boolean save) {
+         BundleState state = bundle.getState();
+         if (save) {
+            state.save(EXPANDED_NODES, findExpanded());
+            if (tree.getSelectionRows().length != 0) {
+               state.save(SELECTED_NODE,
+                        new Integer(tree.getSelectionRows()[0]));
+            }
+         } else {
+            DefaultMutableTreeNode root = (DefaultMutableTreeNode) tree
+                     .getModel().getRoot();
+            expand((List<String>) state.load(EXPANDED_NODES), root);
+            tree.setSelectionRow((Integer) state.load(SELECTED_NODE, 0));
+         }
+      }
+
+      private void expand(List<String> toExpand, DefaultMutableTreeNode cur) {
+         Enumeration children = cur.children();
+         while (children.hasMoreElements()) {
+            DefaultMutableTreeNode child = (DefaultMutableTreeNode) children
+                     .nextElement();
+            BCoverage<?> coverage = (BCoverage<?>) child.getUserObject();
+            if (toExpand.contains(coverage.getId())) {
+               tree.expandPath(new TreePath(child.getPath()));
+            }
+            if (!child.isLeaf()) {
+               expand(toExpand, child);
+            }
+         }
+      }
+
+   }
+
    public static JComponent createJProgressBar(int progress) {
       JProgressBar progressBar = new JProgressBar();
       progressBar.setStringPainted(true);
       progressBar.setBackground(Color.WHITE);
       progressBar.setValue(progress);
       progressBar.setBorderPainted(true);
-      progressBar.setForeground( new Color(74, 196, 74)); 
+      progressBar.setForeground(new Color(74, 196, 74));
       progressBar.setPreferredSize(new Dimension(100, 15));
       return progressBar;
    }
-   
+
 }

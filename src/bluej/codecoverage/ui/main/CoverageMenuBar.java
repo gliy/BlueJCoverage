@@ -1,10 +1,10 @@
 package bluej.codecoverage.ui.main;
 
-import java.awt.Component;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.Vector;
 
 import javax.swing.BoxLayout;
-import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -40,8 +40,21 @@ public class CoverageMenuBar extends JMenuBar {
       add(previous);
       add(search);
       add(sort);
+      previous.addItemListener(sessionSelected);
    }
 
+   private ItemListener sessionSelected = new ItemListener() {
+
+      @Override
+      public void itemStateChanged(ItemEvent e) {
+         if(e.getStateChange() == ItemEvent.DESELECTED) {
+            bundleManager.save((CoverageBundle)previous.getSelectedItem());
+         } else {
+            bundleManager.load((CoverageBundle)previous.getSelectedItem());
+         }
+      }
+      
+   };
    private static final BasicComboBoxRenderer BUNDLE_RENDERER = new BasicComboBoxRenderer() {
       public java.awt.Component getListCellRendererComponent(
             @SuppressWarnings("rawtypes") javax.swing.JList list, Object value, int index,
@@ -55,5 +68,7 @@ public class CoverageMenuBar extends JMenuBar {
 
    public void reset(CoverageBundle activeBundle) {
       previousModel.insertElementAt(activeBundle, 0);
+      previous.setSelectedIndex(0);
    }
+
 }

@@ -33,7 +33,7 @@ public class CodeCoverageExtension extends Extension {
    private static final String NAME = "Code Coverage";
 
    /** The Constant VERSION. */
-   private static final String VERSION = "1.0";
+   private static final String VERSION = "1.1";
    private static URL SITE_URL = null;
 
    /**

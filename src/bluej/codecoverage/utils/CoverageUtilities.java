@@ -345,11 +345,11 @@ public class CoverageUtilities {
 
                   props.load(new FileInputStream(propertyFile));
                   Object current = props.get(VM_ARG_KEY);
+                  String currentVm = current == null ? "" : current.toString();
                   // make sure the vm arguments still don't contain our javaagent flag
-                  if (current == null
-                           || !current.toString().contains(vmArgsToAdd)) {
+                  if (!currentVm.contains(vmArgsToAdd)) {
                      props.put(VM_ARG_KEY,
-                              replaceVmArgs(current.toString(), buildVMArgs()));
+                              replaceVmArgs(currentVm, buildVMArgs()));
                      props.store(new FileOutputStream(propertyFile), "");
 
                   }

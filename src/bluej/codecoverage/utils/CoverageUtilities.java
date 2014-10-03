@@ -337,20 +337,24 @@ public class CoverageUtilities {
       if (!hooked) {
          hooked = true;
          final Properties props = new Properties();
-         final String vmArgs = buildVMArgs();
          Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 
             @Override
             public void run() {
                try {
-
+                  String vmArgsToUse;
+                  try {
+                     vmArgsToUse = buildVMArgs();
+                  }catch(ExtensionUnloadedException ex) {
+                     vmArgsToUse = vmArgsToAdd;
+                  }
                   props.load(new FileInputStream(propertyFile));
                   Object current = props.get(VM_ARG_KEY);
                   String currentVm = current == null ? "" : current.toString();
                   // make sure the vm arguments still don't contain our javaagent flag
-                  if (!currentVm.contains(vmArgsToAdd)) {
+                  if (!currentVm.contains(vmArgsToUse)) {
                      props.put(VM_ARG_KEY,
-                              replaceVmArgs(currentVm, vmArgs));
+                              replaceVmArgs(currentVm, vmArgsToUse));
                      props.store(new FileOutputStream(propertyFile), "");
 
                   }

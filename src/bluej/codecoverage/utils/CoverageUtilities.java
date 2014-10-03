@@ -337,6 +337,7 @@ public class CoverageUtilities {
       if (!hooked) {
          hooked = true;
          final Properties props = new Properties();
+         final String vmArgs = buildVMArgs();
          Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 
             @Override
@@ -349,7 +350,7 @@ public class CoverageUtilities {
                   // make sure the vm arguments still don't contain our javaagent flag
                   if (!currentVm.contains(vmArgsToAdd)) {
                      props.put(VM_ARG_KEY,
-                              replaceVmArgs(currentVm, buildVMArgs()));
+                              replaceVmArgs(currentVm, vmArgs));
                      props.store(new FileOutputStream(propertyFile), "");
 
                   }
